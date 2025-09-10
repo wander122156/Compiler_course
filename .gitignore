@@ -4,8 +4,11 @@
 /.idea/
 *.sln.DotSettings.user
 
-# Sandbox directory
-sandbox/
+# Build results
+/src/*/bin/
+/src/*/obj/
+/tests/*/bin/
+/tests/*/obj/
 
 # Build results
 [Dd]ebug/
@@ -52,3 +55,5 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+# Sandbox directory
+sandbox/
