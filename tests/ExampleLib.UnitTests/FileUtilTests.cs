@@ -74,19 +74,16 @@ public class FileUtilTests
 
         string actual = File.ReadAllText(file.Path);
         Assert.Equal(numbered.Replace("\r\n", "\n"), actual);
-
     }
 
     [Fact]
     public void CanLineNumberOneLineFile()
     {
-
         using TempFile file = TempFile.Create("Играют волны — ветер свищет,");
         FileUtil.AddLineNumbers(file.Path);
 
         string actual = File.ReadAllText(file.Path);
         Assert.Equal("1. Играют волны — ветер свищет,", actual);
-
     }
 
     [Fact]
