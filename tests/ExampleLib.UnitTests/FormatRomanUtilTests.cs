@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-using Xunit;
+﻿using Xunit;
 
 namespace ExampleLib.UnitTests;
 
@@ -11,17 +9,11 @@ public class FormatRomanUtilTests
         return new TheoryData<int, string>
         {
             { 1, "I" },
-            { 4, "IV" },
             { 5, "V" },
-            { 9, "IX" },
             { 10, "X" },
-            { 40, "XL" },
             { 50, "L" },
-            { 90, "XC" },
             { 100, "C" },
-            { 400, "CD" },
             { 500, "D" },
-            { 900, "CM" },
             { 1000, "M" },
         };
     }
@@ -33,15 +25,21 @@ public class FormatRomanUtilTests
             { 1, "I" },
             { 2, "II" },
             { 3, "III" },
+            { 4, "IV" },
             { 6, "VI" },
             { 8, "VIII" },
             { 9, "IX" },
             { 14, "XIV" },
             { 19, "XIX" },
+            { 40, "XL" },
             { 49, "XLIX" },
+            { 90, "XC" },
             { 99, "XCIX" },
+            { 400, "CD" },
+            { 900, "CM" },
             { 1999, "MCMXCIX" },
             { 2023, "MMXXIII" },
+            { 2999, "MMCMXCIX" },
             { 3000, "MMM" },
         };
     }
@@ -59,10 +57,9 @@ public class FormatRomanUtilTests
 
     [Theory]
     [MemberData(nameof(SimpleValidDataTest))]
-    public void CanFormatAllSimpleValidArabicIntoRoman(int arabic, string expectedRoman)
+    public void CanFormatSimpleValidArabicIntoRoman(int arabic, string expectedRoman)
     {
         // Arrange
-        // (данные подготовлены в MemberData)
 
         // Act
         string actual = FormatRomanUtil.FormatRoman(arabic);
@@ -81,7 +78,7 @@ public class FormatRomanUtilTests
 
     [Theory]
     [MemberData(nameof(InvalidInputDataTest))]
-    public void CanFormatAllInvalidArabicIntoRoman(int arabic)
+    public void CanFormatInvalidArabicIntoRoman(int arabic)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => FormatRomanUtil.FormatRoman(arabic));
     }

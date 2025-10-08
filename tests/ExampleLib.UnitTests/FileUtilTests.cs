@@ -50,9 +50,9 @@ public class FileUtilTests
         Assert.Equal("", actual);
     }
 
-    /// <summary>
-    /// 1-лаба AddLineNumbers тесты.
-    /// </summary>
+    // <summary>
+    // 1-лаба AddLineNumbers тесты.
+    // </summary>
     [Fact]
     public void CanAddLineNumber()
     {

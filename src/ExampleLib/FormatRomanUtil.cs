@@ -8,10 +8,10 @@ public static class FormatRomanUtil
     {
         if (value < 1 || value > 3000)
         {
-            throw new ArgumentOutOfRangeException(nameof(value));
+            throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(value)} out of range");
         }
 
-        StringBuilder result = new ();
+        StringBuilder result = new();
         int remaining = value;
         while (remaining > 0)
         {
