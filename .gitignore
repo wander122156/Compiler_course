@@ -34,11 +34,18 @@ artifacts/
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 
+# Игнорировать сгенерированные CMake файлы
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+!CMakeLists.txt
 # NuGet Packages
 *.nupkg
 # NuGet Symbol Packages
 *.snupkg
 
+# Исполняемые файлы
+*.exe
 # Others
 ~$*
 *~
