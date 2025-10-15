@@ -195,7 +195,7 @@ public class LexerTest
                 ]
             },
             {
-                "if (x = 3 or y = 4)",
+                "If (x = 3 oR y = 4)",
                 [
                     new Token(TokenType.If),
                     new Token(TokenType.OpenParenthesis),
@@ -259,7 +259,6 @@ public class LexerTest
                     new Token(TokenType.NumericLiteral, new TokenValue(2)),
                 ]
             },
-
             {
                 "2 = 2",
                 [

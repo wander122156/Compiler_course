@@ -28,7 +28,7 @@
 - [x] Разбор writeln: `writeln ("hello world")`
 - [x] Разбор read: `read (a)`
 - [x] Разбор and: `if (x = 1 and y = 2) `
-- [x] Разбор or: `if (x = 3 or x = 4) `
+- [x] Разбор or + регистр: `if (x = 3 or x = 4) `
 
 ### Арифметические операторы
 - [x] Оператор `2 + 2`

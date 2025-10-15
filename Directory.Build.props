@@ -1,5 +1,6 @@
 <Project>
     <PropertyGroup>
+        <_SkipUpgradeNetAnalyzersNuGetWarning>true</_SkipUpgradeNetAnalyzersNuGetWarning>
         <NuGetAudit>false</NuGetAudit>
         <WarningsAsErrors>true</WarningsAsErrors>
     </PropertyGroup>

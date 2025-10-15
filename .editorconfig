@@ -375,3 +375,6 @@ dotnet_diagnostic.RCS1012.severity = error
 
 # Отключаем излишние правила Roslynator
 dotnet_diagnostic.RCS1123.severity = none
+
+# Отключаю правило на запрет _
+dotnet_diagnostic.SA1309.severity = none

@@ -242,50 +242,13 @@ public class Lexer(string code)
                 return new Token(TokenType.Error, new TokenValue(contents));
             }
 
-            // Проверяем наличие escape-последовательности.
-            if (TryParseStringLiteralEscapeSequence(out char unescaped))
-            {
-                contents += unescaped;
-            }
-            else
-            {
-                contents += _scanner.Peek();
-                _scanner.Advance();
-            }
+            contents += _scanner.Peek();
+            _scanner.Advance();
         }
 
         _scanner.Advance();
 
         return new Token(TokenType.StringLiteral, new TokenValue(contents));
-    }
-
-    /// <summary>
-    ///  Распознаёт escape-последовательности по правилам:
-    ///     escape_sequence = "\", "\" | "\", "'" ;
-    ///  Возвращает null при появлении неизвестных escape-последовательностей.
-    /// </summary>
-    private bool TryParseStringLiteralEscapeSequence(out char unescaped)
-    {
-        if (_scanner.Peek() == '\\')
-        {
-            _scanner.Advance();
-            if (_scanner.Peek() == '\"')
-            {
-                _scanner.Advance();
-                unescaped = '\"';
-                return true;
-            }
-
-            if (_scanner.Peek() == '\\')
-            {
-                _scanner.Advance();
-                unescaped = '\\';
-                return true;
-            }
-        }
-
-        unescaped = '\0';
-        return false;
     }
 
     /// <summary>
