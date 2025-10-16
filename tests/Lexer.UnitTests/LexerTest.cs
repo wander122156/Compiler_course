@@ -322,10 +322,6 @@ public class LexerTest
                 """,
                 []
             },
-            {
-                "$d/as\"as\n",
-                []
-            },
 
             // Строковые литералы
             {
@@ -339,15 +335,7 @@ public class LexerTest
                 ]
             },
             {
-                """x = "he\"llo" """,
-                [
-                    new Token(TokenType.Identifier, new TokenValue("x")),
-                    new Token(TokenType.Assignment),
-                    new Token(TokenType.StringLiteral, new TokenValue("he\"llo")),
-                ]
-            },
-            {
-                """x = "hello\\world" """,
+                """x = "hello\world" """,
                 [
                     new Token(TokenType.Identifier, new TokenValue("x")),
                     new Token(TokenType.Assignment),

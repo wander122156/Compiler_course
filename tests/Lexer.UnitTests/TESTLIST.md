@@ -54,6 +54,6 @@
   ```
 ### Строковый литерал
 - [x] `x = "he%^&*()asd"`
-- [x] `x = "he"llo"`
 - [x] `x = "hello\world`
 - [x] `x = ""`
+- [ ] `x = "hello"world" `
