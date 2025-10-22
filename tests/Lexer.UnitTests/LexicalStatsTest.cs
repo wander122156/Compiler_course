@@ -1,6 +1,6 @@
 ﻿using Lexer.UnitTests.Helpers;
 
-namespace Lexer.UnitTests;
+namespace Blang.Lexer.UnitTests;
 public class LexicalStatsTest
 {
     [Theory]

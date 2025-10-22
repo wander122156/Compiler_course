@@ -1,4 +1,4 @@
-﻿namespace Lexer;
+﻿namespace Blang.Lexer;
 
 /// <summary>
 ///  Сканирует текст code-запроса, предоставляя три операции: Peek(N), Advance() и IsEnd().

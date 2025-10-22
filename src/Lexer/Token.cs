@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Lexer;
+namespace Blang.Lexer;
 
 public class Token(TokenType type, TokenValue? value = null)
 {

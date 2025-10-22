@@ -1,4 +1,4 @@
-﻿namespace Lexer.UnitTests;
+﻿namespace Blang.Lexer.UnitTests;
 
 public class LexerTest
 {

@@ -1,6 +1,7 @@
-﻿using System.Globalization;
+﻿using System.Collections.Immutable;
+using System.Globalization;
 
-namespace Lexer;
+namespace Blang.Lexer;
 
 /// <summary>
 ///  Лексический анализатор code. Поддерживает подмножество code, необходимое этому проекту.

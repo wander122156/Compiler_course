@@ -1,4 +1,4 @@
-﻿namespace Lexer;
+﻿namespace Blang.Lexer;
 
 public enum TokenType
 {

@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Lexer;
+namespace Blang.Lexer;
 
 public class TokenValue
 {
