@@ -39,4 +39,13 @@ public class ParserTest
 
         // result пустой
     }
+
+    [Fact]
+    public void Can_parse_If_condition_with_multiple_expressions()
+    {
+        Row result = Parser.ExecuteCode("if (1 + 4 - 2 == 3) {}");
+        Assert.Equal(0, result.ColumnCount);
+
+        // result пустой
+    }
 }

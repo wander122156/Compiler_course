@@ -248,10 +248,41 @@ public class Parser
         {
             switch (_tokens.Peek().Type)
             {
+                case TokenType.PlusSign:
+                    _tokens.Advance();
+                    value = EvaluateArithmetic(value, ParseTermExpression(), TokenType.PlusSign);
+                    break;
+                case TokenType.MinusSign:
+                    _tokens.Advance();
+                    value = EvaluateArithmetic(value, ParseTermExpression(), TokenType.MinusSign);
+                    break;
                 default:
                     return value;
             }
         }
+    }
+
+    /// <summary>
+    /// Вычисляет арифметическую операцию
+    /// </summary>
+    private RuntimeValue EvaluateArithmetic(RuntimeValue left, RuntimeValue right, TokenType operation)
+    {
+        if (left.Type == RuntimeValue.ValueType.Number && right.Type == RuntimeValue.ValueType.Number)
+        {
+            decimal leftNum = (decimal)left.Value;
+            decimal rightNum = (decimal)right.Value;
+
+            decimal result = operation switch
+            {
+                TokenType.PlusSign => leftNum + rightNum,
+                TokenType.MinusSign => leftNum - rightNum,
+                _ => 0
+            };
+
+            return RuntimeValue.Number(result);
+        }
+
+        throw new Exception($"Unsupported arithmetic operation between {left.Type} and {right.Type}");
     }
 
     /// <summary>
@@ -318,6 +349,12 @@ public class Parser
         {
             _tokens.Advance();
             return RuntimeValue.String(t.Value!.ToString());
+        }
+
+        if (t.Type == TokenType.NumericLiteral)
+        {
+            _tokens.Advance();
+            return RuntimeValue.Number(t.Value!.ToDecimal());
         }
 
         // Пока что константы здесь
