@@ -1,4 +1,6 @@
-﻿using Blang.Lexer;
+﻿using System.Numerics;
+
+using Blang.Lexer;
 
 namespace Parser;
 
@@ -59,6 +61,9 @@ public class Parser
             case TokenType.Write:
                 result = ParseWriteStatement();
                 break;
+            case TokenType.If:
+                result = ParseIfStatement();
+                break;
 
             default:
                 throw new UnexpectedLexemeException(keyword.Type, keyword);
@@ -93,6 +98,139 @@ public class Parser
         SkipExpectedLexeme(TokenType.CloseParenthesis);
 
         return new Row(values.ToArray());
+    }
+
+    /// <summary>
+    /// Разбирает аргументы команды If
+    ///     if_statement = "if", "(", condition, ")", statement, [ "else", statement ]
+    /// Реализовано:
+    ///     "if", "(", condition, ")", statement 
+    /// </summary>
+    private Row ParseIfStatement()
+    {
+        _tokens.Advance();
+
+        List<RuntimeValue> values = new List<RuntimeValue>();
+
+        SkipExpectedLexeme(TokenType.OpenParenthesis);
+        RuntimeValue conditionResult = ParseCondition();
+        SkipExpectedLexeme(TokenType.CloseParenthesis);
+
+        // Выполняем then
+        Row thenResult = ParseCompoundStatement();
+
+        // else?
+        if (_tokens.Peek().Type == TokenType.Else)
+        {
+            _tokens.Advance(); // Пропускаем "else"
+            Row elseResult = ParseCompoundStatement();
+
+            // Возвращаем результат соответствующей ветки
+            return ConvertToBoolean(conditionResult)
+                ? thenResult
+                : elseResult;
+        }
+
+        // если условие false и нет else - возвращаем пустой Row
+        return ConvertToBoolean(conditionResult) ? thenResult : new Row();
+    }
+
+    /// <summary>
+    /// Разбирает условие
+    ///     condition = expression, [ comparison_operator, expression ] statement ]
+    /// Реализовано:
+    ///     condition = expression, [ comparison_operator, expression ] statement ]
+    /// </summary>
+    private RuntimeValue ParseCondition()
+    {
+        RuntimeValue left = ParseExpression();
+
+        Token operationToken = _tokens.Peek();
+        if (IsComparisonOperator(operationToken.Type))
+        {
+            _tokens.Advance();
+            RuntimeValue right = ParseExpression();
+
+            return EvaluateComparison(left, operationToken.Type, right);
+        }
+
+        return ConvertToBooleanValue(left);
+    }
+
+    /// <summary>
+    /// Проверяет является ли токен оператором сравнения
+    /// </summary>
+    private bool IsComparisonOperator(TokenType type)
+    {
+        return type == TokenType.LooseEquality ||
+               type == TokenType.NotEqual ||
+               type == TokenType.LessThan ||
+               type == TokenType.GreaterThan ||
+               type == TokenType.GreaterThanOrEqual ||
+               type == TokenType.LessThan ||
+               type == TokenType.LessThanOrEqual;
+    }
+
+    /// <summary>
+    /// Вычисляет операцию сравнения
+    /// </summary>
+    private RuntimeValue EvaluateComparison(RuntimeValue left, TokenType operation, RuntimeValue right)
+    {
+        // TODO: Реализовать логику сравнения
+        // Пока что всегда true
+        return RuntimeValue.Boolean(true);
+    }
+
+    /// <summary>
+    /// Преобразует RuntimeValue в boolean значение
+    /// </summary>
+    private RuntimeValue ConvertToBooleanValue(RuntimeValue value)
+    {
+        bool boolValue = ConvertToBoolean(value);
+        return RuntimeValue.Boolean(boolValue);
+    }
+
+    /// <summary>
+    /// Преобразует RuntimeValue в boolean значение
+    /// </summary>
+    private bool ConvertToBoolean(RuntimeValue value)
+    {
+        return value.Type switch
+        {
+            RuntimeValue.ValueType.Boolean => (bool)value.Value,
+            RuntimeValue.ValueType.Number => (decimal)value.Value != 0,
+            RuntimeValue.ValueType.String => !string.IsNullOrEmpty((string)value.Value),
+            RuntimeValue.ValueType.Null => false,
+            _ => false,
+        };
+    }
+
+    /// <summary>
+    /// Разбирает составной statement в фигурных скобках
+    /// compound_statement = "{", { statement, [ ";" ] }, "}"
+    /// Возвращает результат ПОСЛЕДНЕГО statement в блоке
+    /// </summary>
+    private Row ParseCompoundStatement()
+    {
+        SkipExpectedLexeme(TokenType.OpenBraces);
+
+        Row result = new(); // Пустой результат по умолчанию
+
+        // Выполняем все statements внутри блока
+        // Каждый statement перезаписывает результат, сохраняя последний
+        while (_tokens.Peek().Type != TokenType.CloseBraces)
+        {
+            result = ParseStatement(); // Сохраняем результат последнего statement
+
+            // Если встретили конец файла до закрывающей скобки - ошибка
+            if (_tokens.Peek().Type == TokenType.EndOfFile)
+            {
+                throw new UnexpectedLexemeException(TokenType.CloseBraces, _tokens.Peek());
+            }
+        }
+
+        SkipExpectedLexeme(TokenType.CloseBraces);
+        return result;
     }
 
     /// <summary>
@@ -170,15 +308,33 @@ public class Parser
     ///  Разбирает простейшую часть выражения.
     ///     simple_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression
     ///  Реализовано:
-    ///     simple_expression = string 
+    ///     simple_expression = string | const_expression
     /// </summary>
     private RuntimeValue ParseSimpleExpression()
     {
         Token t = _tokens.Peek();
+
         if (t.Type == TokenType.StringLiteral)
         {
             _tokens.Advance();
             return RuntimeValue.String(t.Value!.ToString());
+        }
+
+        // Пока что константы здесь
+        if (t.Type == TokenType.Identifier)
+        {
+            string identifier = t.Value!.ToString();
+            if (identifier == "true" || identifier == "True")
+            {
+                _tokens.Advance();
+                return RuntimeValue.Boolean(true);
+            }
+
+            if (identifier == "false" || identifier == "False")
+            {
+                _tokens.Advance();
+                return RuntimeValue.Boolean(false);
+            }
         }
 
         throw new UnexpectedLexemeException(TokenType.StringLiteral, t);

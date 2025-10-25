@@ -30,4 +30,13 @@ public class ParserTest
         Assert.Equal(RuntimeValue.ValueType.String, result[1].Type);
         Assert.Equal("asd", result[1].Value);
     }
+
+    [Fact]
+    public void Can_parse_If_without_Else()
+    {
+        Row result = Parser.ExecuteCode("if (True) {}");
+        Assert.Equal(0, result.ColumnCount);
+
+        // result пустой
+    }
 }

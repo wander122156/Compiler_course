@@ -12,7 +12,7 @@
 - [x] Разбор write без завершающего разделителя: `write ("hello")`
 - [x] Разбор write без с завершающим разделителем: `write ("hello"); `
 - [x] Разбор write со списком выражений: `write ("hello", "asd"); `
-- [ ] Разбор if без else: ` if (True) {} `
+- [x] Разбор if без else: ` if (True) {} `
 - [ ] Разбор сложения и вычитания: `if (1 + 4 - 2 == 3) {};`
 - [ ] Разбор вызова функций: 
 `x = min(7, 10 - 4)`
@@ -45,8 +45,13 @@ statement = write_statement
 write_statement = "write", "( ", [ expression_list ], " )" ;
 read_statement = "read", "(", identifier, ")" ;
 assignment_statement = identifier, ":=", expression ;
-if_statement = "if", "(", condition, ")", statement, [ "else", statement ] ;
+if_statement = "if", "(", condition, ")", compound_statement, [ "else", statement ] ;
 while_statement = "while", "(", condition, ")", statement ;
+
+(* Условия *)
+compound_statement = "{", { statement, [ ";" ] }, "}" ;
+condition = expression, [ comparison_operator, expression ] ;
+comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 
 (* Выражения *)
 
@@ -62,3 +67,11 @@ expression_list = expression, { ",", expression } ;
 const_expression = "Pi" | "MathE" | "true" | "false" ;
 
 ````
+
+## Проблемные места (Вопросы преподу)
+Что делать с тестом где тело if выполняет больше 1 statement
+- [ ] Возвращать массив результатов [Row]
+- [x] Возвращать результат последнего statement 
+Что такое True|False (лексер считает его identifier)
+- [ ] Ключевое слово (токен)
+- [x] Константа
