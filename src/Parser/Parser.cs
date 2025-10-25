@@ -65,6 +65,9 @@ public class Parser
             case TokenType.If:
                 result = ParseIfStatement();
                 break;
+            case TokenType.Identifier:
+                result = ParseAssignmentStatement();
+                break;
 
             default:
                 throw new UnexpectedLexemeException(keyword.Type, keyword);
@@ -134,6 +137,23 @@ public class Parser
 
         // если условие false и нет else - возвращаем пустой Row
         return ConvertToBoolean(conditionResult) ? thenResult : new Row();
+    }
+
+    /// <summary>
+    /// Разбирает присваивание =
+    ///     assignment_statement = identifier, "=", expression 
+    /// </summary>
+    private Row ParseAssignmentStatement()
+    {
+        Token identifierToken = _tokens.Peek();
+        string variableName = identifierToken.Value!.ToString();
+        _tokens.Advance();
+
+        SkipExpectedLexeme(TokenType.Assignment);
+
+        RuntimeValue value = ParseExpression();
+
+        return new Row(value);
     }
 
     /// <summary>

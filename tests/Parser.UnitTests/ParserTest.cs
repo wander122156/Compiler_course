@@ -34,7 +34,7 @@ public class ParserTest
     [Fact]
     public void Can_parse_If_without_Else()
     {
-        Row result = Parser.ExecuteCode("if (True) {}");
+        Row result = Parser.ExecuteCode("if (true) {}");
         Assert.Equal(0, result.ColumnCount);
 
         // result пустой
@@ -43,7 +43,7 @@ public class ParserTest
     [Fact]
     public void Can_parse_If_true_condition_body()
     {
-        Row result = Parser.ExecuteCode("if (True) { write(\"hello\") }");
+        Row result = Parser.ExecuteCode("if (true) { write(\"hello\") }");
         Assert.Equal(1, result.ColumnCount);
         Assert.Equal(RuntimeValue.ValueType.String, result[0].Type);
         Assert.Equal("hello", result[0].Value);
@@ -52,7 +52,7 @@ public class ParserTest
     [Fact]
     public void Can_parse_If_false_condition_body()
     {
-        Row result = Parser.ExecuteCode("if (False) { write(\"hello\") }");
+        Row result = Parser.ExecuteCode("if (false) { write(\"hello\") }");
         Assert.Equal(0, result.ColumnCount);
     }
 
@@ -61,6 +61,17 @@ public class ParserTest
     {
         Row result = Parser.ExecuteCode("if (1 + 4 - 2 == 3) {}");
         Assert.Equal(0, result.ColumnCount);
+
+        // result пустой
+    }
+
+    [Fact]
+    public void Can_parse_AssignOperation()
+    {
+        Row result = Parser.ExecuteCode("x = \"qwerty\" ");
+        Assert.Equal(1, result.ColumnCount);
+        Assert.Equal(RuntimeValue.ValueType.String, result[0].Type);
+        Assert.Equal("qwerty", result[0].Value);
 
         // result пустой
     }
