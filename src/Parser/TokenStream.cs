@@ -7,11 +7,16 @@ namespace Parser;
 ///  - Peek() возвращает текущий токен
 ///  - Advance() переходит к следующему токену
 /// </summary>
-public class TokenStream(string code)
+public class TokenStream
 {
-    private readonly Lexer _lexer = new(code);
-
+    private readonly Lexer _lexer;
     private Token _nextToken;
+
+    public TokenStream(string sql)
+    {
+        _lexer = new Lexer(sql);
+        _nextToken = _lexer.ParseToken();
+    }
 
     public Token Peek()
     {

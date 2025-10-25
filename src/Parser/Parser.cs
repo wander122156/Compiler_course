@@ -7,69 +7,209 @@ namespace Parser;
 /// </summary>
 public class Parser
 {
-    private Lexer _lexer;
+    private readonly TokenStream _tokens;
 
-    private Parser(string sql)
+    private Parser(string code)
     {
-        _lexer = new Lexer(sql);
+        _tokens = new TokenStream(code);
     }
 
     /// <summary>
     /// Выполняет код и возвращает результат.
     /// </summary>
-    public static string ExecuteCode(string code)
+    public static Row ExecuteCode(string code)
     {
         Parser p = new(code);
-        return p.Parsecode();
+        return p.ParseCode();
     }
 
     /// <summary>
-    /// Выполняет SQL-запрос и возвращает результат.
+    /// Выполняет код и возвращает результат.
     /// Поддерживает правила:
-    ///  code = select_statement, [ ";" ] ;
+    ///     program = { statement, [ ";" ] }
+    ///
+    /// Реализовано:
+    ///     program =  write_statement, ";"
     /// </summary>
-    private string Parsecode()
+    private Row ParseCode()
     {
-        Token keyword = _lexer.ParseToken();
-        if (keyword.Type != TokenType.Write)
+        Row result = ParseStatement();
+        ParseCodeDelimiter();
+
+        return result;
+    }
+
+    /// <summary>
+    /// Разбирает 1 из statement.
+    /// statement = write_statement
+    ///      | read_statement
+    ///      | assignment_statement
+    ///      | if_statement
+    ///      | while_statement
+    ///      | compound_statement
+    /// Реализовано:
+    ///     statement = write_statemen 
+    /// </summary>
+    private Row ParseStatement()
+    {
+        Row result;
+        Token keyword = _tokens.Peek();
+        switch (keyword.Type)
+        {
+            case TokenType.Write:
+                result = ParseWriteStatement();
+                break;
+
+            default:
+                throw new UnexpectedLexemeException(keyword.Type, keyword);
+        }
+
+        ParseCodeDelimiter();
+
+        return result;
+    }
+
+    /// <summary>
+    /// Разбирает аргументы команды write
+    /// write_statement = "write", "( ", [ expression_list ], " )"
+    /// </summary>
+    private Row ParseWriteStatement()
+    {
+        _tokens.Advance();
+        SkipExpectedLexeme(TokenType.OpenParenthesis);
+
+        List<RuntimeValue> values = new List<RuntimeValue>();
+
+        // Первое выражение
+        values.Add(ParseExpression());
+
+        // Остальные выражения через запятую
+        while (_tokens.Peek().Type == TokenType.Comma)
+        {
+            SkipExpectedLexeme(TokenType.Comma);
+            values.Add(ParseExpression());
+        }
+
+        SkipExpectedLexeme(TokenType.CloseParenthesis);
+
+        return new Row(values.ToArray());
+    }
+
+    /// <summary>
+    /// Разбирает одно выражение.
+    /// Правила:
+    ///     expression = term_expression, { ("+" | "-"), term_expression }
+    ///
+    /// Реализовано:
+    ///     expression = term_expression {}
+    /// </summary>
+    private RuntimeValue ParseExpression()
+    {
+        RuntimeValue value = ParseTermExpression();
+        while (true)
+        {
+            switch (_tokens.Peek().Type)
+            {
+                default:
+                    return value;
+            }
+        }
+    }
+
+    /// <summary>
+    ///  Разбирает один операнд сложения/вычитания.
+    ///  Правила:
+    ///     term_expression = factor_expression, { ("*" | "/"), factor_expression }
+    ///  Реализовано:
+    ///     term_expression = factor_expression {}
+    /// </summary>
+    private RuntimeValue ParseTermExpression()
+    {
+        RuntimeValue value = ParseFactorExpression();
+        while (true)
+        {
+            switch (_tokens.Peek().Type)
+            {
+                default:
+                    return value;
+            }
+        }
+    }
+
+    /// <summary>
+    ///  Разбирает один операнд умножения / деления.
+    ///  Правило:
+    ///     factor_expression = [ "+" | "-" ], exponentiation_expression ;
+    ///  Реализовано:
+    ///     factor_expression = exponentiation_expression
+    /// </summary>
+    private RuntimeValue ParseFactorExpression()
+    {
+        switch (_tokens.Peek().Type)
+        {
+            default:
+                return ParseExponentiationExpression();
+        }
+    }
+
+    /// <summary>
+    ///  Разбирает одну операцию возведения в степень.
+    ///  Правило:
+    ///     exponentiation_expression = simple_expression, { ("^"), exponentiation_expression }
+    ///  Реализовано:
+    ///     exponentiation_expression = simple_expression
+    /// </summary>
+    private RuntimeValue ParseExponentiationExpression()
+    {
+        RuntimeValue value = ParseSimpleExpression();
+
+        return value;
+    }
+
+    /// <summary>
+    ///  Разбирает простейшую часть выражения.
+    ///     simple_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression
+    ///  Реализовано:
+    ///     simple_expression = string 
+    /// </summary>
+    private RuntimeValue ParseSimpleExpression()
+    {
+        Token t = _tokens.Peek();
+        if (t.Type == TokenType.StringLiteral)
         {
             _tokens.Advance();
-            value = ParseExpression();
-        }
-        else
-        {
-            throw new UnexpectedLexemeException(TokenType.Write, keyword);
+            return RuntimeValue.String(t.Value!.ToString());
         }
 
-        Token openParenthesis = _lexer.ParseToken();
-        if (openParenthesis.Type != TokenType.OpenParenthesis)
+        throw new UnexpectedLexemeException(TokenType.StringLiteral, t);
+    }
+
+    private void ParseCodeDelimiter()
+    {
+        Token t = _tokens.Peek();
+        switch (t.Type)
         {
-            throw new UnexpectedLexemeException(TokenType.StringLiteral, openParenthesis);
+            case TokenType.Semicolon:
+                _tokens.Advance();
+                break;
+            case TokenType.EndOfFile:
+                break;
+            default:
+                throw new UnexpectedLexemeException(TokenType.Semicolon, t);
+        }
+    }
+
+    /// <summary>
+    /// Пропускает ожидаемую лексему либо бросает исключение, если встретит иную лексему.
+    /// </summary>
+    private void SkipExpectedLexeme(TokenType expected)
+    {
+        Token t = _tokens.Peek();
+        if (t.Type != expected)
+        {
+            throw new UnexpectedLexemeException(expected, t);
         }
 
-        Token value = _lexer.ParseToken();
-        if (value.Type != TokenType.StringLiteral)
-        {
-            throw new UnexpectedLexemeException(TokenType.StringLiteral, value);
-        }
-
-        Token closeParenthesis = _lexer.ParseToken();
-        if (closeParenthesis.Type != TokenType.CloseParenthesis)
-        {
-            throw new UnexpectedLexemeException(TokenType.StringLiteral, closeParenthesis);
-        }
-
-        Token end = _lexer.ParseToken();
-        if (end.Type == TokenType.Semicolon)
-        {
-            end = _lexer.ParseToken();
-        }
-
-        if (end.Type != TokenType.EndOfFile)
-        {
-            throw new UnexpectedLexemeException(TokenType.EndOfFile, end);
-        }
-
-        return value.Value!.ToString();
+        _tokens.Advance();
     }
 }
