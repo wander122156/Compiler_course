@@ -50,7 +50,8 @@ public class Parser
     ///      | while_statement
     ///      | compound_statement
     /// Реализовано:
-    ///     statement = write_statemen 
+    ///     statement = write_statemen
+    ///         | if_statement
     /// </summary>
     private Row ParseStatement()
     {
@@ -276,6 +277,8 @@ public class Parser
             {
                 TokenType.PlusSign => leftNum + rightNum,
                 TokenType.MinusSign => leftNum - rightNum,
+                TokenType.MultiplySign => leftNum * rightNum,
+                TokenType.DivideSign => rightNum != 0 ? leftNum / rightNum : 0,
                 _ => 0
             };
 
@@ -361,13 +364,13 @@ public class Parser
         if (t.Type == TokenType.Identifier)
         {
             string identifier = t.Value!.ToString();
-            if (identifier == "true" || identifier == "True")
+            if (identifier == "true")
             {
                 _tokens.Advance();
                 return RuntimeValue.Boolean(true);
             }
 
-            if (identifier == "false" || identifier == "False")
+            if (identifier == "false")
             {
                 _tokens.Advance();
                 return RuntimeValue.Boolean(false);
@@ -382,6 +385,9 @@ public class Parser
         Token t = _tokens.Peek();
         switch (t.Type)
         {
+            case TokenType.CloseBraces:
+                //_tokens.Advance();
+                break;
             case TokenType.Semicolon:
                 _tokens.Advance();
                 break;
