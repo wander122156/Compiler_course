@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-using Blang.Lexer;
+﻿using Blang.Lexer;
 
 namespace Parser;
 
@@ -50,31 +48,30 @@ public class Parser
     ///      | while_statement
     ///      | compound_statement
     /// Реализовано:
-    ///     statement = write_statemen
-    ///         | if_statement
+    ///     statement = if_statement
+    ///             | expression (временно)
     /// </summary>
     private Row ParseStatement()
     {
-        Row result;
+
+        List<RuntimeValue> values = new List<RuntimeValue>();
         Token keyword = _tokens.Peek();
         switch (keyword.Type)
         {
-            case TokenType.Write:
-                result = ParseWriteStatement();
-                break;
             case TokenType.If:
-                result = ParseIfStatement();
+                values.Add(ParseIfStatement());
                 break;
-            case TokenType.Identifier:
-                result = ParseAssignmentStatement();
-                break;
+            //case TokenType.Write:
+            //    result = ParseWriteStatement();
+            //    break;
 
             default:
-                throw new UnexpectedLexemeException(keyword.Type, keyword);
+                values.Add(ParseExpression());
+                break;
         }
 
         ParseCodeDelimiter();
-
+        Row result = new(values.ToArray());
         return result;
     }
 
@@ -110,11 +107,9 @@ public class Parser
     /// Реализовано:
     ///     "if", "(", condition, ")", statement 
     /// </summary>
-    private Row ParseIfStatement()
+    private RuntimeValue ParseIfStatement()
     {
         _tokens.Advance();
-
-        List<RuntimeValue> values = new List<RuntimeValue>();
 
         SkipExpectedLexeme(TokenType.OpenParenthesis);
         RuntimeValue conditionResult = ParseCondition();
@@ -126,34 +121,17 @@ public class Parser
         // else?
         if (_tokens.Peek().Type == TokenType.Else)
         {
-            _tokens.Advance(); // Пропускаем "else"
-            Row elseResult = ParseCompoundStatement();
-
+            //_tokens.Advance(); // Пропускаем "else"
+            //Row elseResult = ParseCompoundStatement();
             // Возвращаем результат соответствующей ветки
-            return ConvertToBoolean(conditionResult)
-                ? thenResult
-                : elseResult;
+            //return ConvertToBoolean(conditionResult)
+            //    ? thenResult
+            //    : elseResult;
         }
 
         // если условие false и нет else - возвращаем пустой Row
-        return ConvertToBoolean(conditionResult) ? thenResult : new Row();
-    }
-
-    /// <summary>
-    /// Разбирает присваивание =
-    ///     assignment_statement = identifier, "=", expression 
-    /// </summary>
-    private Row ParseAssignmentStatement()
-    {
-        Token identifierToken = _tokens.Peek();
-        string variableName = identifierToken.Value!.ToString();
-        _tokens.Advance();
-
-        SkipExpectedLexeme(TokenType.Assignment);
-
-        RuntimeValue value = ParseExpression();
-
-        return new Row(value);
+        //return ConvertToBoolean(conditionResult) ? thenResult : new Row();
+        return conditionResult;
     }
 
     /// <summary>

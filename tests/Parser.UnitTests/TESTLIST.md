@@ -1,4 +1,9 @@
-﻿# Список тестов
+﻿Заметка лекц 8
+в c# можно сделать изначально object а затем провести диспетчеризацию по типу объекта или двойуную диспетч
+(реализуется с помощью visitor или match)
+храним в стеке значения присваивания переменных, при этом именно послденего присваивания(последний statement)
+возваращаем последнее значение в стеке
+# Список тестов
 
 ## Требования к синтаксическому анализатору
 
@@ -48,8 +53,9 @@ statement = write_statement
 write_statement = "write", "( ", [ expression_list ], " )" ;
 read_statement = "read", "(", identifier, ")" ;
 assignment_statement = identifier, ":=", expression ;
-if_statement = "if", "(", condition, ")", compound_statement, [ "else", statement ] ;
 while_statement = "while", "(", condition, ")", statement ;
+
+if_statement = "if", "(", condition, ")", compound_statement, [ "else", statement ] ;
 
 (* Условия *)
 compound_statement = "{", { statement, [ ";" ] }, "}" ;
@@ -57,7 +63,7 @@ condition = expression, [ comparison_operator, expression ] ;
 comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 
 (* Выражения *)
-
+if(){}
 expression = term_expression, { ("+" | "-"), term_expression } ;  
 term_expression = factor_expression, { ("*" | "/" | "%"), factor_expression } ;
 factor_expression = [ "+" | "-" ], exponentiation_expression ;
@@ -75,6 +81,9 @@ const_expression = "Pi" | "MathE" | "true" | "false" ;
 Что делать с тестом где тело if выполняет больше 1 statement
 - [ ] Возвращать массив результатов [Row]
 - [x] Возвращать результат последнего statement 
-Что такое True|False (лексер считает его identifier)
-- [ ] Ключевое слово (токен)
-- [x] Константа
+
+Что должны вовращать write/read/writeln/readln
+
+(В интерпретаторе обычно есть два подхода:
+Строить абстрактное синтаксическое дерево (AST) и затем его интерпретировать.
+Интерпретировать непосредственно в процессе разбора (как у меня сейчас).)
