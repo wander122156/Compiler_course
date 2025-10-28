@@ -61,9 +61,6 @@ public class Parser
             case TokenType.If:
                 values.Add(ParseIfStatement());
                 break;
-            //case TokenType.Write:
-            //    result = ParseWriteStatement();
-            //    break;
 
             default:
                 values.Add(ParseExpression());
@@ -136,9 +133,9 @@ public class Parser
 
     /// <summary>
     /// Разбирает условие
-    ///     condition = expression, [ comparison_operator, expression ] statement ]
+    ///     condition = expression, [ comparison_operator, expression ] 
     /// Реализовано:
-    ///     condition = expression, [ comparison_operator, expression ] statement ]
+    ///     condition = expression, [ comparison_operator, expression ] 
     /// </summary>
     private RuntimeValue ParseCondition()
     {
@@ -236,9 +233,6 @@ public class Parser
     /// Разбирает одно выражение.
     /// Правила:
     ///     expression = term_expression, { ("+" | "-"), term_expression }
-    ///
-    /// Реализовано:
-    ///     expression = term_expression {}
     /// </summary>
     private RuntimeValue ParseExpression()
     {
@@ -262,36 +256,9 @@ public class Parser
     }
 
     /// <summary>
-    /// Вычисляет арифметическую операцию
-    /// </summary>
-    private RuntimeValue EvaluateArithmetic(RuntimeValue left, RuntimeValue right, TokenType operation)
-    {
-        if (left.Type == RuntimeValue.ValueType.Number && right.Type == RuntimeValue.ValueType.Number)
-        {
-            decimal leftNum = (decimal)left.Value;
-            decimal rightNum = (decimal)right.Value;
-
-            decimal result = operation switch
-            {
-                TokenType.PlusSign => leftNum + rightNum,
-                TokenType.MinusSign => leftNum - rightNum,
-                TokenType.MultiplySign => leftNum * rightNum,
-                TokenType.DivideSign => rightNum != 0 ? leftNum / rightNum : 0,
-                _ => 0
-            };
-
-            return RuntimeValue.Number(result);
-        }
-
-        throw new Exception($"Unsupported arithmetic operation between {left.Type} and {right.Type}");
-    }
-
-    /// <summary>
     ///  Разбирает один операнд сложения/вычитания.
     ///  Правила:
-    ///     term_expression = factor_expression, { ("*" | "/"), factor_expression }
-    ///  Реализовано:
-    ///     term_expression = factor_expression {}
+    ///     term_expression = factor_expression, { ("*" | "/" | "%"), factor_expression }
     /// </summary>
     private RuntimeValue ParseTermExpression()
     {
@@ -300,6 +267,19 @@ public class Parser
         {
             switch (_tokens.Peek().Type)
             {
+                case TokenType.MultiplySign:
+                    _tokens.Advance();
+                    value = EvaluateArithmetic(value, ParseTermExpression(), TokenType.MultiplySign);
+                    break;
+                case TokenType.DivideSign:
+                    _tokens.Advance();
+                    value = EvaluateArithmetic(value, ParseTermExpression(), TokenType.DivideSign);
+                    break;
+                case TokenType.ModuloSign:
+                    _tokens.Advance();
+                    value = EvaluateArithmetic(value, ParseTermExpression(), TokenType.ModuloSign);
+                    break;
+
                 default:
                     return value;
             }
@@ -309,16 +289,31 @@ public class Parser
     /// <summary>
     ///  Разбирает один операнд умножения / деления.
     ///  Правило:
-    ///     factor_expression = [ "+" | "-" ], exponentiation_expression ;
-    ///  Реализовано:
-    ///     factor_expression = exponentiation_expression
-    /// </summary>
+    ///     factor_expression = ("+" | "-"), factor_expression | exponentiation_expression
     private RuntimeValue ParseFactorExpression()
     {
-        switch (_tokens.Peek().Type)
+        if (_tokens.Peek().Type == TokenType.MinusSign)
         {
-            default:
-                return ParseExponentiationExpression();
+            _tokens.Advance();
+            RuntimeValue operand = ParseFactorExpression(); // Рекурсивно
+
+            if (operand.Type == RuntimeValue.ValueType.Number)
+            {
+                return new RuntimeValue(RuntimeValue.ValueType.Number, -(decimal)operand.Value);
+            }
+            else
+            {
+                throw new Exception($"Unary minus cannot be applied to {operand.Type}");
+            }
+        }
+        else if (_tokens.Peek().Type == TokenType.PlusSign)
+        {
+            _tokens.Advance();
+            return ParseFactorExpression(); // Рекурсивно (если + просто скипаем, они ничего не меняют)
+        }
+        else
+        {
+            return ParseExponentiationExpression();
         }
     }
 
@@ -340,7 +335,7 @@ public class Parser
     ///  Разбирает простейшую часть выражения.
     ///     simple_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression
     ///  Реализовано:
-    ///     simple_expression = string | const_expression
+    ///     simple_expression = number | string | const_expression(true, false)
     /// </summary>
     private RuntimeValue ParseSimpleExpression()
     {
@@ -408,5 +403,31 @@ public class Parser
         }
 
         _tokens.Advance();
+    }
+
+    /// <summary>
+    /// Вычисляет арифметическую бинарную операцию
+    /// </summary>
+    private RuntimeValue EvaluateArithmetic(RuntimeValue left, RuntimeValue right, TokenType operation)
+    {
+        if (left.Type == RuntimeValue.ValueType.Number && right.Type == RuntimeValue.ValueType.Number)
+        {
+            decimal leftNum = (decimal)left.Value;
+            decimal rightNum = (decimal)right.Value;
+
+            decimal result = operation switch
+            {
+                TokenType.PlusSign => leftNum + rightNum,
+                TokenType.MinusSign => leftNum - rightNum,
+                TokenType.MultiplySign => leftNum * rightNum,
+                TokenType.DivideSign => rightNum != 0 ? leftNum / rightNum : throw new DivideByZeroException("Division by zero"),
+                TokenType.ModuloSign => rightNum != 0 ? leftNum % rightNum : throw new DivideByZeroException("Modulo by zero"),
+                _ => 0
+            };
+
+            return RuntimeValue.Number(result);
+        }
+
+        throw new Exception($"Unsupported arithmetic operation between {left.Type} and {right.Type}");
     }
 }
