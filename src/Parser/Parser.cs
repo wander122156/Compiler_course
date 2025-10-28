@@ -172,9 +172,16 @@ public class Parser
     /// </summary>
     private RuntimeValue EvaluateComparison(RuntimeValue left, TokenType operation, RuntimeValue right)
     {
-        // TODO: Реализовать логику сравнения
-        // Пока что всегда true
-        return RuntimeValue.Boolean(true);
+        if (operation == TokenType.LessThan)
+        {
+            if (left.Type == right.Type && left.Type == RuntimeValue.ValueType.Number)
+            {
+                bool result = (decimal)left.Value < (decimal)right.Value;
+                return RuntimeValue.Boolean(result);
+            }
+        }
+
+        throw new Exception($"Cannot compare {left.Type} and {right.Type} with < operator");
     }
 
     /// <summary>
