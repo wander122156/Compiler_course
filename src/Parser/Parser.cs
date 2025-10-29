@@ -237,6 +237,27 @@ public class Parser
     }
 
     /// <summary>
+    /// Разбирает список выражений, разделённый запятыми.
+    /// Правила:
+    ///     expression = expression, { ",", expression } ;
+    /// </summary>
+    private Row ParseExpressionList()
+    {
+        List<RuntimeValue> values =
+        [
+            ParseExpression(),
+        ];
+        while (_tokens.Peek().Type == TokenType.Comma)
+        {
+            _tokens.Advance();
+            values.Add(ParseExpression());
+        }
+
+        Row result = new(values.ToArray());
+        return result;
+    }
+
+    /// <summary>
     /// Разбирает одно выражение.
     /// Правила:
     ///     expression = term_expression, { ("+" | "-"), term_expression }
@@ -342,7 +363,7 @@ public class Parser
     ///  Разбирает простейшую часть выражения.
     ///     simple_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression
     ///  Реализовано:
-    ///     simple_expression = number | string | const_expression(true, false)
+    ///     simple_expression = number | string | function_call | const_expression(true, false, MathE, Pi)
     /// </summary>
     private RuntimeValue ParseSimpleExpression()
     {
@@ -360,24 +381,55 @@ public class Parser
             return RuntimeValue.Number(t.Value!.ToDecimal());
         }
 
-        // Пока что константы здесь
+        // Пока что константы и встроенные функции
         if (t.Type == TokenType.Identifier)
         {
             string identifier = t.Value!.ToString();
-            if (identifier == "true")
-            {
-                _tokens.Advance();
-                return RuntimeValue.Boolean(true);
-            }
 
-            if (identifier == "false")
+            switch (identifier)
             {
-                _tokens.Advance();
-                return RuntimeValue.Boolean(false);
+                case "true":
+                    _tokens.Advance();
+                    return RuntimeValue.Boolean(true);
+                case "false":
+                    _tokens.Advance();
+                    return RuntimeValue.Boolean(false);
+                case "MathE":
+                    _tokens.Advance();
+                    return RuntimeValue.Number((decimal)Math.E);
+                case "Pi":
+                    _tokens.Advance();
+                    return RuntimeValue.Number((decimal)Math.PI);
+                default:
+                    //func_call
+                    _tokens.Advance();
+                    SkipExpectedLexeme(TokenType.OpenParenthesis);
+                    Row arguments = ParseExpressionList();
+                    SkipExpectedLexeme(TokenType.CloseParenthesis);
+                    return RuntimeValue.Number(BuiltinFunctions.Invoke(t.Value!.ToString(), ConvertToDecimalList(arguments)));
             }
         }
 
-        throw new UnexpectedLexemeException(TokenType.StringLiteral, t);
+        throw new UnexpectedLexemeException(TokenType.Identifier, t);
+    }
+
+    private List<decimal> ConvertToDecimalList(Row runtimeValues)
+    {
+        List<decimal> decimals = new List<decimal>();
+
+        for(int i = 0; i < runtimeValues.ColumnCount; i++)
+        {
+            if (runtimeValues[i].Type == RuntimeValue.ValueType.Number)
+            {
+                decimals.Add((decimal)runtimeValues[i].Value);
+            }
+            else
+            {
+                throw new Exception($"Function argument must be number, got {runtimeValues[i].Type}");
+            }
+        }
+
+        return decimals;
     }
 
     private void ParseCodeDelimiter()

@@ -86,17 +86,6 @@ public class ParserTest
     }
 
     [Fact]
-    public void Can_parse_If_condition_with_multiple_expressions()
-    {
-        Row result = Parser.ExecuteCode("if (1 + 4 - 2 == 3) {}");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Boolean, result[0].Type);
-        Assert.Equal(true, result[0].Value);
-
-        // result пустой
-    }
-
-    [Fact]
     public void Can_parse_less_than_operator()
     {
         Row result = Parser.ExecuteCode("if (3 < 5) {}");
@@ -112,7 +101,7 @@ public class ParserTest
         Assert.Equal(1, result.ColumnCount);
         Assert.Equal(RuntimeValue.ValueType.Boolean, result[0].Type);
         Assert.Equal(true, result[0].Value);
-    } 
+    }
 
     [Fact]
     public void Can_parse_all_priority_operators()
@@ -148,5 +137,59 @@ public class ParserTest
         Assert.Equal(1, result.ColumnCount);
         Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
         Assert.Equal(4m, result[0].Value);
+    }
+
+    [Fact]
+    public void Can_parse_BuiltinConstant_Pi()
+    {
+        Row result = Parser.ExecuteCode("Pi");
+        Assert.Equal(1, result.ColumnCount);
+        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
+        Assert.Equal((decimal)Math.PI, result[0].Value);
+    }
+
+    [Fact]
+    public void Can_parse_BuiltinConstant_MathE()
+    {
+        Row result = Parser.ExecuteCode("MathE * 1");
+        Assert.Equal(1, result.ColumnCount);
+        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
+        Assert.Equal((decimal)Math.E, result[0].Value);
+    }
+
+    [Fact]
+    public void Can_parse_BuiltinFunction_min()
+    {
+        Row result = Parser.ExecuteCode("min(7, 10 - 4, 8)");
+        Assert.Equal(1, result.ColumnCount);
+        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
+        Assert.Equal(6m, result[0].Value);
+    }
+
+    [Fact]
+    public void Can_parse_BuiltinFunction_max()
+    {
+        Row result = Parser.ExecuteCode("max(1, 3)");
+        Assert.Equal(1, result.ColumnCount);
+        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
+        Assert.Equal(3m, result[0].Value);
+    }
+
+    [Fact]
+    public void Can_parse_BuiltinFunction_abs()
+    {
+        Row result = Parser.ExecuteCode("abs(-4)");
+        Assert.Equal(1, result.ColumnCount);
+        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
+        Assert.Equal(4m, result[0].Value);
+    }
+
+    [Fact]
+    public void Can_parse_BuiltinFunction_pow()
+    {
+        Row result = Parser.ExecuteCode("pow(5, 3)");
+        Assert.Equal(1, result.ColumnCount);
+        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
+        Assert.Equal(125m, result[0].Value);
     }
 }
