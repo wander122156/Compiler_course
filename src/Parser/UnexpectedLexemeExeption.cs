@@ -1,6 +1,6 @@
 ﻿using Blang.Lexer;
 
-namespace Parser;
+namespace Blang.Parser;
 
 #pragma warning disable RCS1194 // Конструкторы исключения не нужны, т.к. это не класс общего назначения.
 public class UnexpectedLexemeException : Exception

@@ -1,21 +1,4 @@
-﻿namespace Parser;
-
-public class Row
-{
-    private readonly RuntimeValue[] _values;
-
-    public Row(params RuntimeValue[] values)
-    {
-        _values = values;
-    }
-
-    public int ColumnCount => _values.Length;
-
-    public RuntimeValue this[int index]
-    {
-        get => _values[index];
-    }
-}
+﻿namespace Blang.Common;
 
 public class RuntimeValue
 {
@@ -48,4 +31,9 @@ public class RuntimeValue
 
     public static RuntimeValue Null()
         => new RuntimeValue(ValueType.Null, null);
+
+    public static explicit operator double(RuntimeValue v)
+    {
+        throw new NotImplementedException();
+    }
 }

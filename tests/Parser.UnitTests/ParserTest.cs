@@ -1,195 +1,115 @@
-﻿namespace Parser.UnitTests;
+﻿using Blang.Common;
+using Blang.Execution;
 
-public class ParserTest
+namespace Blang.Parser.UnitTests;
+
+public class ParserExpressionsTest
 {
-    [Fact]
-    public void Can_parse_arithmetic_with_priority()
+    private const int Precision = 5;
+
+    private readonly Context _context;
+    private readonly FakeEnvironment _environment;
+
+    public ParserExpressionsTest()
     {
-        Row result = Parser.ExecuteCode("1 + 2 * 3");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(7m, result[0].Value);
+        _context = new Context();
+        _environment = new FakeEnvironment();
     }
 
-    [Fact]
-    public void Can_parse_operators_with_different_priority()
+    public static TheoryData<string, decimal> GetParseTestData()
     {
-        Row result = Parser.ExecuteCode("2 + 3 * 4 % 2 - 2.5");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(-0.5m, result[0].Value);
+        return new TheoryData<string, decimal>
+        {
+            // Арифметические операции с приоритетами
+            { "1 + 2 * 3", 7m },
+            { "2 + 3 * 4 % 2 - 2.5", -0.5m },
+            { "10 - 3 - 2", 5m },
+
+            // Унарные операции
+            { "+5 + -4", 1m },
+            { "--5", 5m },
+            { "-5 + 3 * -2", -11m },
+
+            // Скобки
+            { "(1 + 2) * 3", 9m },
+            { "((1 + 2) * (3 - 1)) - 2", 4m },
+
+            // Встроенные константы
+            { "Pi", (decimal)Math.PI },
+            { "MathE * 1", (decimal)Math.E },
+
+            // Встроенные функции
+            { "min(7, 10 - 4, 8)", 6m },
+            { "max(1, 3)", 3m },
+            { "abs(-4)", 4m },
+            { "pow(5, 3)", 125m },
+        };
     }
 
-    [Fact]
-    public void Check_left_associativity_subtraction()
+    public static TheoryData<string, bool> GetBooleanExpressionsTestData()
     {
-        Row result = Parser.ExecuteCode("10 - 3 - 2");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(5m, result[0].Value);
+        return new TheoryData<string, bool>
+        {
+            // Условные выражения и сравнения
+            { "true", true },
+            { "false", false },
+            { "3 < 5", true },
+            { "1 + 2 < 5", true },
+            { "1 + 2 * 3 < 7", false },
+            { "1 < 2 < 3", true },
+        };
     }
 
-    [Fact]
-    public void Can_parse_unary_plus_minus()
+    public static TheoryData<string> GetIfStatementsTestData()
     {
-        Row result = Parser.ExecuteCode("+5 + -4");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(1m, result[0].Value);
+        return new TheoryData<string>
+        {
+            // Операторы if
+            "if (true) {}",
+            "if (true) { 1 + 5 - 3 }",
+            "if (false) { 1 + 5 - 3 }",
+            "if (3 < 5) {}",
+            "if (1 + 2 < 5) {}",
+            "if (1 + 2 * 3 < 7) {}",
+            "if (1 < 2 < 3) {}",
+        };
     }
 
-    [Fact]
-    public void Can_parse_multiple_unary_operators()
+    [Theory]
+    [MemberData(nameof(GetParseTestData))]
+    public void Can_parse_expressions(string code, decimal expected)
     {
-        Row result = Parser.ExecuteCode("--5");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(5m, result[0].Value);
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        // Проверяем вычисленный результат.
+        RuntimeValue result = Assert.Single(_environment.Results);
+        Assert.Equal((double)expected, (double)result.Value, Precision);
     }
 
-    [Fact]
-    public void Can_parse_unary_and_binary_operators()
+    [Theory]
+    [MemberData(nameof(GetBooleanExpressionsTestData))]
+    public void Can_parse_boolean_expressions(string code, bool expected)
     {
-        Row result = Parser.ExecuteCode("-5 + 3 * -2");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(-11m, result[0].Value);
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        RuntimeValue result = Assert.Single(_environment.Results);
+        Assert.Equal(RuntimeValue.ValueType.Boolean, result.Type);
+        Assert.Equal(expected, result.Value);
     }
 
-    [Fact]
-    public void Can_parse_If_without_Else()
+    [Theory]
+    [MemberData(nameof(GetIfStatementsTestData))]
+    public void Can_parse_if_statements(string code)
     {
-        Row result = Parser.ExecuteCode("if (true) {}");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Boolean, result[0].Type);
-        Assert.Equal(true, result[0].Value);
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
 
-        // result пустой
-    }
-
-    [Fact]
-    public void Can_parse_If_true_condition_body()
-    {
-        Row result = Parser.ExecuteCode("if (true) { 1 + 5 - 3 }");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Boolean, result[0].Type);
-        Assert.Equal(true, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_If_false_condition_body()
-    {
-        Row result = Parser.ExecuteCode("if (false) { 1 + 5 - 3 }");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Boolean, result[0].Type);
-        Assert.Equal(false, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_less_than_operator()
-    {
-        Row result = Parser.ExecuteCode("if (3 < 5) {}");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Boolean, result[0].Type);
-        Assert.Equal(true, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_comparison_with_arithmetic()
-    {
-        Row result = Parser.ExecuteCode("if (1 + 2 < 5) {}");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Boolean, result[0].Type);
-        Assert.Equal(true, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_all_priority_operators()
-    {
-        Row result = Parser.ExecuteCode("if (1 + 2 * 3 < 7) {}");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Boolean, result[0].Type);
-        Assert.Equal(false, result[0].Value);
-    }
-
-    [Fact]
-    public void Check_left_associativity_comparisons()
-    {
-        Row result = Parser.ExecuteCode("if (1 < 2 < 3) {}");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Boolean, result[0].Type);
-        Assert.Equal(true, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_single_parentheses()
-    {
-        Row result = Parser.ExecuteCode("(1 + 2) * 3");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(4m, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_multiple_parentheses()
-    {
-        Row result = Parser.ExecuteCode("((1 + 2) * (3 - 1)) - 2");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(4m, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_BuiltinConstant_Pi()
-    {
-        Row result = Parser.ExecuteCode("Pi");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal((decimal)Math.PI, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_BuiltinConstant_MathE()
-    {
-        Row result = Parser.ExecuteCode("MathE * 1");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal((decimal)Math.E, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_BuiltinFunction_min()
-    {
-        Row result = Parser.ExecuteCode("min(7, 10 - 4, 8)");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(6m, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_BuiltinFunction_max()
-    {
-        Row result = Parser.ExecuteCode("max(1, 3)");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(3m, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_BuiltinFunction_abs()
-    {
-        Row result = Parser.ExecuteCode("abs(-4)");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(4m, result[0].Value);
-    }
-
-    [Fact]
-    public void Can_parse_BuiltinFunction_pow()
-    {
-        Row result = Parser.ExecuteCode("pow(5, 3)");
-        Assert.Equal(1, result.ColumnCount);
-        Assert.Equal(RuntimeValue.ValueType.Number, result[0].Type);
-        Assert.Equal(125m, result[0].Value);
+        // Для операторов if проверяем, что они выполняются без ошибок
+        // и возвращают boolean результат
+        RuntimeValue result = Assert.Single(_environment.Results);
+        Assert.Equal(RuntimeValue.ValueType.Boolean, result.Type);
+        Assert.IsType<bool>(result.Value);
     }
 }

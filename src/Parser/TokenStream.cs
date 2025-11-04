@@ -1,6 +1,6 @@
 ﻿using Blang.Lexer;
 
-namespace Parser;
+namespace Blang.Parser;
 
 /// <summary>
 /// Представляет поток токенов с двумя операциями:
@@ -9,12 +9,12 @@ namespace Parser;
 /// </summary>
 public class TokenStream
 {
-    private readonly Lexer _lexer;
+    private readonly Lexer.Lexer _lexer;
     private Token _nextToken;
 
     public TokenStream(string sql)
     {
-        _lexer = new Lexer(sql);
+        _lexer = new Lexer.Lexer(sql);
         _nextToken = _lexer.ParseToken();
     }
 

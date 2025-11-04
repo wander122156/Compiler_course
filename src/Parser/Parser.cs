@@ -1,42 +1,42 @@
-﻿using Blang.Lexer;
+﻿using System;
 
-namespace Parser;
+using Blang.Common;
+using Blang.Execution;
+using Blang.Lexer;
+
+namespace Blang.Parser;
 
 /// <summary>
 /// Выполняет синтаксический разбор строк кода.
 /// </summary>
 public class Parser
 {
+    private readonly Context _context;
+    private readonly IEnvironment _environment;
     private readonly TokenStream _tokens;
 
-    private Parser(string code)
+    public Parser(Context context, IEnvironment environment, string code)
     {
+        _context = context;
+        _environment = environment;
         _tokens = new TokenStream(code);
     }
 
-    /// <summary>
-    /// Выполняет код и возвращает результат.
-    /// </summary>
-    public static Row ExecuteCode(string code)
+    public void ParseProgram()
     {
-        Parser p = new(code);
-        return p.ParseCode();
-    }
+        do
+        {
+            RuntimeValue result = ParseStatement();
 
-    /// <summary>
-    /// Выполняет код и возвращает результат.
-    /// Поддерживает правила:
-    ///     program = { statement, [ ";" ] }
-    ///
-    /// Реализовано:
-    ///     program =  write_statement, ";"
-    /// </summary>
-    private Row ParseCode()
-    {
-        Row result = ParseStatement();
-        ParseCodeDelimiter();
+            // Проверяем, есть ли еще инструкции после точки с запятой
+            if (_tokens.Peek().Type == TokenType.Semicolon)
+            {
+                Match(TokenType.Semicolon);
+            }
 
-        return result;
+            _environment.AddResult(result);
+        }
+        while (_tokens.Peek().Type != TokenType.EndOfFile);
     }
 
     /// <summary>
@@ -51,24 +51,22 @@ public class Parser
     ///     statement = if_statement
     ///             | expression (временно)
     /// </summary>
-    private Row ParseStatement()
+    private RuntimeValue ParseStatement()
     {
-
-        List<RuntimeValue> values = new List<RuntimeValue>();
+        RuntimeValue result;
         Token keyword = _tokens.Peek();
         switch (keyword.Type)
         {
             case TokenType.If:
-                values.Add(ParseIfStatement());
+                result = ParseIfStatement();
                 break;
 
             default:
-                values.Add(ParseExpression());
+                result = ParseExpression();
                 break;
         }
 
         ParseCodeDelimiter();
-        Row result = new(values.ToArray());
         return result;
     }
 
@@ -76,10 +74,10 @@ public class Parser
     /// Разбирает аргументы команды write
     /// write_statement = "write", "( ", [ expression_list ], " )"
     /// </summary>
-    private Row ParseWriteStatement()
+    private List<RuntimeValue> ParseWriteStatement()
     {
         _tokens.Advance();
-        SkipExpectedLexeme(TokenType.OpenParenthesis);
+        Match(TokenType.OpenParenthesis);
 
         List<RuntimeValue> values = new List<RuntimeValue>();
 
@@ -89,13 +87,13 @@ public class Parser
         // Остальные выражения через запятую
         while (_tokens.Peek().Type == TokenType.Comma)
         {
-            SkipExpectedLexeme(TokenType.Comma);
+            Match(TokenType.Comma);
             values.Add(ParseExpression());
         }
 
-        SkipExpectedLexeme(TokenType.CloseParenthesis);
+        Match(TokenType.CloseParenthesis);
 
-        return new Row(values.ToArray());
+        return new List<RuntimeValue>(values.ToArray());
     }
 
     /// <summary>
@@ -108,26 +106,26 @@ public class Parser
     {
         _tokens.Advance();
 
-        SkipExpectedLexeme(TokenType.OpenParenthesis);
+        Match(TokenType.OpenParenthesis);
         RuntimeValue conditionResult = ParseCondition();
-        SkipExpectedLexeme(TokenType.CloseParenthesis);
+        Match(TokenType.CloseParenthesis);
 
         // Выполняем then
-        Row thenResult = ParseCompoundStatement();
+        List<RuntimeValue> thenResult = ParseCompoundStatement();
 
         // else?
         if (_tokens.Peek().Type == TokenType.Else)
         {
             //_tokens.Advance(); // Пропускаем "else"
-            //Row elseResult = ParseCompoundStatement();
+            //List<RuntimeValue> elseResult = ParseCompoundStatement();
             // Возвращаем результат соответствующей ветки
             //return ConvertToBoolean(conditionResult)
             //    ? thenResult
             //    : elseResult;
         }
 
-        // если условие false и нет else - возвращаем пустой Row
-        //return ConvertToBoolean(conditionResult) ? thenResult : new Row();
+        // если условие false и нет else - возвращаем пустой List<RuntimeValue>
+        //return ConvertToBoolean(conditionResult) ? thenResult : new List<RuntimeValue>();
         return conditionResult;
     }
 
@@ -213,17 +211,17 @@ public class Parser
     /// compound_statement = "{", { statement, [ ";" ] }, "}"
     /// Возвращает результат ПОСЛЕДНЕГО statement в блоке
     /// </summary>
-    private Row ParseCompoundStatement()
+    private List<RuntimeValue> ParseCompoundStatement()
     {
-        SkipExpectedLexeme(TokenType.OpenBraces);
+        Match(TokenType.OpenBraces);
 
-        Row result = new(); // Пустой результат по умолчанию
+        List<RuntimeValue> result = new(); // Пустой результат по умолчанию
 
         // Выполняем все statements внутри блока
         // Каждый statement перезаписывает результат, сохраняя последний
         while (_tokens.Peek().Type != TokenType.CloseBraces)
         {
-            result = ParseStatement(); // Сохраняем результат последнего statement
+            result.Add(ParseStatement()); // Сохраняем результат последнего statement
 
             // Если встретили конец файла до закрывающей скобки - ошибка
             if (_tokens.Peek().Type == TokenType.EndOfFile)
@@ -232,7 +230,7 @@ public class Parser
             }
         }
 
-        SkipExpectedLexeme(TokenType.CloseBraces);
+        Match(TokenType.CloseBraces);
         return result;
     }
 
@@ -241,7 +239,7 @@ public class Parser
     /// Правила:
     ///     expression = expression, { ",", expression } ;
     /// </summary>
-    private Row ParseExpressionList()
+    private List<RuntimeValue> ParseExpressionList()
     {
         List<RuntimeValue> values =
         [
@@ -253,7 +251,7 @@ public class Parser
             values.Add(ParseExpression());
         }
 
-        Row result = new(values.ToArray());
+        List<RuntimeValue> result = new(values.ToArray());
         return result;
     }
 
@@ -403,9 +401,9 @@ public class Parser
                 default:
                     //func_call
                     _tokens.Advance();
-                    SkipExpectedLexeme(TokenType.OpenParenthesis);
-                    Row arguments = ParseExpressionList();
-                    SkipExpectedLexeme(TokenType.CloseParenthesis);
+                    Match(TokenType.OpenParenthesis);
+                    List<RuntimeValue> arguments = ParseExpressionList();
+                    Match(TokenType.CloseParenthesis);
                     return RuntimeValue.Number(BuiltinFunctions.Invoke(t.Value!.ToString(), ConvertToDecimalList(arguments)));
             }
         }
@@ -413,11 +411,11 @@ public class Parser
         throw new UnexpectedLexemeException(TokenType.Identifier, t);
     }
 
-    private List<decimal> ConvertToDecimalList(Row runtimeValues)
+    private List<decimal> ConvertToDecimalList(List<RuntimeValue> runtimeValues)
     {
         List<decimal> decimals = new List<decimal>();
 
-        for(int i = 0; i < runtimeValues.ColumnCount; i++)
+        for (int i = 0; i < runtimeValues.Count; i++)
         {
             if (runtimeValues[i].Type == RuntimeValue.ValueType.Number)
             {
@@ -453,7 +451,7 @@ public class Parser
     /// <summary>
     /// Пропускает ожидаемую лексему либо бросает исключение, если встретит иную лексему.
     /// </summary>
-    private void SkipExpectedLexeme(TokenType expected)
+    private void Match(TokenType expected)
     {
         Token t = _tokens.Peek();
         if (t.Type != expected)

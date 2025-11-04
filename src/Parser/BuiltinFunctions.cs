@@ -1,4 +1,4 @@
-﻿namespace Parser;
+﻿namespace Blang.Parser;
 public static class BuiltinFunctions
 {
     private static readonly Dictionary<string, Func<List<decimal>, decimal>> Functions = new()
