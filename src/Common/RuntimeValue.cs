@@ -2,6 +2,15 @@
 
 public class RuntimeValue
 {
+    public enum ValueType
+    {
+        Number,
+        String,
+        Boolean,
+        Null,
+        Undefined,
+    }
+
     public ValueType Type { get; }
 
     public object Value { get; }
@@ -10,14 +19,6 @@ public class RuntimeValue
     {
         Type = type;
         Value = value;
-    }
-
-    public enum ValueType
-    {
-        Number,
-        String,
-        Boolean,
-        Null
     }
 
     public static RuntimeValue Number(decimal value)
@@ -30,9 +31,12 @@ public class RuntimeValue
         => new RuntimeValue(ValueType.Boolean, value);
 
     public static RuntimeValue Null()
-        => new RuntimeValue(ValueType.Null, null);
+        => new RuntimeValue(ValueType.Null, null!);
 
-    public static explicit operator double(RuntimeValue v)
+    public static RuntimeValue Undefined()
+        => new RuntimeValue(ValueType.Undefined, null!);
+
+    public static explicit operator decimal(RuntimeValue v)
     {
         throw new NotImplementedException();
     }

@@ -3,6 +3,31 @@
 public enum TokenType
 {
     /// <summary>
+    ///  Тип true.
+    /// </summary>
+    True,
+
+    /// <summary>
+    ///  Тип false.
+    /// </summary>
+    False,
+
+    /// <summary>
+    ///  Тип int.
+    /// </summary>
+    Int,
+
+    /// <summary>
+    ///  Тип string.
+    /// </summary>
+    String,
+
+    /// <summary>
+    ///  Ключевое слово const.
+    /// </summary>
+    Const,
+
+    /// <summary>
     ///  Ключевое слово while.
     /// </summary>
     While,

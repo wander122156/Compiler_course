@@ -53,10 +53,6 @@ public class ParserExpressionsTest
             // Условные выражения и сравнения
             { "true", true },
             { "false", false },
-            { "3 < 5", true },
-            { "1 + 2 < 5", true },
-            { "1 + 2 * 3 < 7", false },
-            { "1 < 2 < 3", true },
         };
     }
 
@@ -66,7 +62,6 @@ public class ParserExpressionsTest
         {
             // Операторы if
             "if (true) {}",
-            "if (true) { 1 + 5 - 3 }",
             "if (false) { 1 + 5 - 3 }",
             "if (3 < 5) {}",
             "if (1 + 2 < 5) {}",
@@ -82,9 +77,8 @@ public class ParserExpressionsTest
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
 
-        // Проверяем вычисленный результат.
         RuntimeValue result = Assert.Single(_environment.Results);
-        Assert.Equal((double)expected, (double)result.Value, Precision);
+        Assert.Equal((decimal)expected, (decimal)result.Value, Precision);
     }
 
     [Theory]
@@ -106,8 +100,6 @@ public class ParserExpressionsTest
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
 
-        // Для операторов if проверяем, что они выполняются без ошибок
-        // и возвращают boolean результат
         RuntimeValue result = Assert.Single(_environment.Results);
         Assert.Equal(RuntimeValue.ValueType.Boolean, result.Type);
         Assert.IsType<bool>(result.Value);

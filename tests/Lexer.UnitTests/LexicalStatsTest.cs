@@ -57,11 +57,11 @@ public class LexicalStatsTest
                 """,
                 """
                 Keywords: 5
-                Identifiers: 12
+                Identifiers: 11
                 Number literals: 0
                 String literals: 5
                 Operators: 2
-                Other lexemes: 26
+                Other lexemes: 27
                 """
             },
         };

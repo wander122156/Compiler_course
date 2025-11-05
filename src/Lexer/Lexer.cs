@@ -11,6 +11,18 @@ public class Lexer(string code)
     private static readonly Dictionary<string, TokenType> Keywords = new()
     {
         {
+            "true", TokenType.True
+        },
+        {
+            "false", TokenType.False
+        },
+        {
+            "int", TokenType.Int
+        },
+        {
+            "const", TokenType.Const
+        },
+        {
             "if", TokenType.If
         },
         {

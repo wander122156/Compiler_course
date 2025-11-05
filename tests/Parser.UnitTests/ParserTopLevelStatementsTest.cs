@@ -5,8 +5,6 @@ namespace Blang.Parser.UnitTests;
 
 public class ParseTopLevelStatementsTest
 {
-    private const decimal Precision = 5m;
-
     private readonly Context _context;
     private readonly FakeEnvironment _environment;
 
@@ -17,10 +15,10 @@ public class ParseTopLevelStatementsTest
     }
 
     [Fact]
-    public void Can_parse_single_mutable_variable_declaration()
+    public void Can_parse_single_variable_declaration_without_initialization()
     {
-        string code = "int x = 3 in x + 1";
-        List<decimal> expected = [4];
+        string code = "int x ";
+        List<decimal> expected = [0];
 
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
@@ -31,10 +29,10 @@ public class ParseTopLevelStatementsTest
     }
 
     [Fact]
-    public void Can_parse_multiple_mutable_variable_declarations()
+    public void Can_parse_single_variable_declaration_with_initialization()
     {
-        string code = "int x = 1, y = 2, z = 3 in x + y * z";
-        List<decimal> expected = [7];
+        string code = "int x = 3";
+        List<decimal> expected = [3];
 
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
@@ -45,10 +43,10 @@ public class ParseTopLevelStatementsTest
     }
 
     [Fact]
-    public void Can_parse_multiple_assignment()
+    public void Can_parse_multiple_variable_declarations_with_expressions()
     {
-        string code = "int x, y in x = y = 10 : x + y";
-        List<decimal> expected = [20];
+        string code = "int x = 1, y = 2, z = 3 ; x + y * z";
+        List<decimal> expected = [3, 7];
 
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
@@ -59,7 +57,21 @@ public class ParseTopLevelStatementsTest
     }
 
     [Fact]
-    public void Can_parse_expressions_separated_by_semicolons()
+    public void Can_parse_variable_declarations_and_assignments()
+    {
+        string code = "int x, y; x = 10; y = 12 ; x + y";
+        List<decimal> expected = [0, 10, 12, 22];
+
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_parse_multiple_expressions_separated_by_semicolons()
     {
         string code = "1 + 2; 2 * 5; 4.5";
         List<decimal> expected = [3, 10, 4.5m];
@@ -73,10 +85,10 @@ public class ParseTopLevelStatementsTest
     }
 
     [Fact]
-    public void Can_parse_constant_declaration()
+    public void Can_parse_constant_declaration_with_initialization()
     {
-        string code = "const int Pi 3.14159; 4.0 * Pi * 4.0;";
-        List<decimal> expected = [3.14159m, 50.26544m];
+        string code = "const int c = 3";
+        List<decimal> expected = [3];
 
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
@@ -87,10 +99,10 @@ public class ParseTopLevelStatementsTest
     }
 
     [Fact]
-    public void Can_parse_declared_variables_in_complex_expression()
+    public void Can_parse_variable_reassignment_in_sequence()
     {
-        string code = "int a = 1, b = 2 in (a = 5 : b = a + 1) : b";
-        List<decimal> expected = [6];
+        string code = "int a = 1, b = 2 ; a = 5 ; b = a + 1 ";
+        List<decimal> expected = [2, 5, 6];
 
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
@@ -101,10 +113,10 @@ public class ParseTopLevelStatementsTest
     }
 
     [Fact]
-    public void Can_parse_variables_hiding_constants()
+    public void Can_parse_variable_shadowing_constant()
     {
-        string code = "const int Pi 3.14159; int Pi = 2 in 4.0 * Pi * 4.0;";
-        List<decimal> expected = [3.14159m, 32m];
+        string code = "const int c = 3.14159; int c = 2 ; 4.0 * c * 4.0;";
+        List<decimal> expected = [3.14159m, 2, 32m];
 
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
@@ -115,9 +127,9 @@ public class ParseTopLevelStatementsTest
     }
 
     [Fact]
-    public void Throws_on_undefined_variable_no_declarations()
+    public void Throws_on_undefined_variable_without_declarations()
     {
-        string code = "x + 1"; // Нет объявления переменных
+        string code = "x + 1";
 
         Parser parser = new(_context, _environment, code);
 
@@ -125,9 +137,9 @@ public class ParseTopLevelStatementsTest
     }
 
     [Fact]
-    public void Throws_on_undefined_variable_in_expression()
+    public void Throws_on_undefined_variable_in_complex_expression()
     {
-        string code = "int x, y in x + y + z"; // Одна из переменных не объявлена
+        string code = "int x, y; x + y + z";
 
         Parser parser = new(_context, _environment, code);
 
@@ -135,39 +147,9 @@ public class ParseTopLevelStatementsTest
     }
 
     [Fact]
-    public void Throws_on_variable_declaration_without_in()
+    public void Throws_on_invalid_identifier_in_declaration()
     {
-        string code = "int x = 5"; // Разбор объявления переменной без in
-
-        Parser parser = new(_context, _environment, code);
-
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
-    }
-
-    [Fact]
-    public void Throws_on_variable_declaration_with_empty_identifier()
-    {
-        string code = "int in x + 1"; // Разбор объявления переменной с пустым идентификатором
-
-        Parser parser = new(_context, _environment, code);
-
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
-    }
-
-    [Fact]
-    public void Throws_on_variable_declaration_with_empty_expression()
-    {
-        string code = "int x in"; // Разбор объявления переменной с пустым выражением
-
-        Parser parser = new(_context, _environment, code);
-
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
-    }
-
-    [Fact]
-    public void Throws_on_variable_declaration_with_invalid_identifier()
-    {
-        string code = "int 123 in x + 1"; // Разбор объявления переменной с неправильным идентификатором
+        string code = "int 123";
 
         Parser parser = new(_context, _environment, code);
 
@@ -178,7 +160,7 @@ public class ParseTopLevelStatementsTest
     {
         for (int i = 0, iMax = Math.Min(expected.Count, actual.Count); i < iMax; ++i)
         {
-            Assert.Equal((double)expected[i], (double)actual[i], (double)Precision);
+            Assert.Equal(expected[i], (decimal)actual[i].Value, 5);
         }
 
         if (expected.Count != actual.Count)
