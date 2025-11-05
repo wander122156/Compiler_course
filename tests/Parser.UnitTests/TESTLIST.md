@@ -101,17 +101,17 @@ condition = expression, [ comparison_operator, expression ] ;
 comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 
 (* Выражения *)
-expression = term_expression, { ("+" | "-"), term_expression } ;  
-term_expression = factor_expression, { ("*" | "/" | "%"), factor_expression } ;
-factor_expression = ("+" | "-"), factor_expression
+expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression } ;  
+multiplicative_expression = unary_expression, { ("*" | "/" | "%"), unary_expression } ;
+unary_expression = ("+" | "-"), unary_expression
                     | exponentiation_expression
-exponentiation_expression = simple_expression, [ "^", exponentiation_expression ] ;
-simple_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression ;
+exponentiation_expression = primary_expression, [ "^", exponentiation_expression ] ;
+primary_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression ;
 
 function_call = identifier, "(", [ expression_list ], ")" ;
 expression_list = expression, { ",", expression } ;
 
-const_expression = "Pi" | "MathE" | "true" | "false" ;
+const_expression = "Pi" | "MathE" ;
 
 ````
 

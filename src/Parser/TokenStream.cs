@@ -10,8 +10,8 @@ namespace Blang.Parser;
 public class TokenStream
 {
     private readonly Lexer.Lexer _lexer;
-    private Token _nextToken;
     private readonly List<Token> _lookupBuffer;
+    private Token _nextToken;
 
     public TokenStream(string expression)
     {

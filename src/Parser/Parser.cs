@@ -253,7 +253,7 @@ public class Parser
     /// <summary>
     /// Разбирает список выражений, разделённый запятыми.
     /// Правила:
-    ///     expression = expression, { ",", expression } ;
+    ///     expression_list = expression, { ",", expression } ;
     /// </summary>
     private List<RuntimeValue> ParseExpressionList()
     {
@@ -375,10 +375,7 @@ public class Parser
 
     /// <summary>
     ///  Разбирает простейшую часть выражения.
-    ///     primary_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression
-    ///  Реализовано:
-    ///     primary_expression = number | string | function_call | const_expression(true, false, MathE, Pi)
-    /// </summary>
+    ///     primary_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression(MathE, Pi)
     private RuntimeValue ParsePrimaryExpression()
     {
         Token t = _tokens.Peek();
@@ -415,7 +412,7 @@ public class Parser
             return RuntimeValue.Boolean(false);
         }
 
-            // Пока что встроенные константы и встроенные функции
+        // Пока что встроенные константы и встроенные функции
         if (t.Type == TokenType.Identifier)
         {
             string identifier = t.Value!.ToString();

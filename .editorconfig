@@ -346,6 +346,7 @@ dotnet_naming_style.s_camelcase.word_separator =
 dotnet_naming_style.s_camelcase.capitalization = camel_case
 
 # Отключаем излишние правила StyleCop
+dotnet_diagnostic.SA1201.severity = none
 dotnet_diagnostic.SA0001.severity = none
 dotnet_diagnostic.SA1633.severity = none
 dotnet_diagnostic.SA1629.severity = none

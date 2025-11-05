@@ -1,0 +1,10 @@
+﻿int x = 2, y = 6
+
+if (y/x < 4 )
+{
+    write(massage, x, y)
+}
+else
+{
+    write("Condition false")
+}

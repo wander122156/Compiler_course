@@ -2,6 +2,12 @@
 
 public class RuntimeValue
 {
+    public RuntimeValue(ValueType type, object value)
+    {
+        Type = type;
+        Value = value;
+    }
+
     public enum ValueType
     {
         Number,
@@ -14,12 +20,6 @@ public class RuntimeValue
     public ValueType Type { get; }
 
     public object Value { get; }
-
-    public RuntimeValue(ValueType type, object value)
-    {
-        Type = type;
-        Value = value;
-    }
 
     public static RuntimeValue Number(decimal value)
         => new RuntimeValue(ValueType.Number, value);
