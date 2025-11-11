@@ -10,4 +10,24 @@ public interface IEnvironment
     /// Вызывается после вычисления результата очередной инструкции программы.
     /// </summary>
     public void AddResult(RuntimeValue result);
+
+    /// <summary>
+    /// Вывод переданного аргумента.
+    /// </summary>
+    public void Write(RuntimeValue value);
+
+    /// <summary>
+    /// Вывод переданного аргумента и переход на новую строку.
+    /// </summary>
+    public void Writeln(RuntimeValue value);
+
+    /// <summary>
+    /// Чтение аргумента.
+    /// </summary>
+    public RuntimeValue Read();
+
+    /// <summary>
+    /// Чтение аргумента и переход на новую строку.
+    /// </summary>
+    // public RuntimeValue ReadLine();
 }

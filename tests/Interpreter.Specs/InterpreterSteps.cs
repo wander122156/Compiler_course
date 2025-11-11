@@ -1,4 +1,8 @@
-﻿using Parser;
+﻿using System.Globalization;
+
+using Blang.Common;
+using Blang.Execution;
+using Blang.Parser;
 
 using Xunit;
 
@@ -6,38 +10,93 @@ namespace Interpreter.Specs;
 
 public class InterpreterTests
 {
+    // Допустимая абсолютная погрешность сравнения чисел с плавающей точкой.
     private const int Precision = 5;
+    private static readonly decimal Tolerance = (decimal)Math.Pow(0.1, Precision);
 
-    [Fact]
-    public void ExecuteProgram_SimpleArithmetic_ReturnsCorrectResult()
+    private readonly Context _context;
+    private readonly FakeEnvironment _environment;
+
+    public InterpreterTests()
     {
-        // Arrange
-        string code = "1 + 2 * 3";
-        var expectedResults = new[] { 7.0 };
-
-        // Act
-        List<RuntimeValue> result = Parser.ExecuteCode(code);
-
-        // Assert
-        Assert.Single(result); // Проверяем что одна колонка
-        Assert.Equal(expectedResults[0], (double)(decimal)result[0].Value, Precision);
+        _context = new Context();
+        _environment = new FakeEnvironment();
     }
 
     [Fact]
-    public void ExecuteProgram_MultipleExpressions_ReturnsCorrectResults()
+    public void Can_execute_SumNums_program()
     {
-        // Arrange
-        string code = "2 + 3 : 5 * 2 : 10 - 1";
-        var expectedResults = new[] { 5.0, 10.0, 9.0 };
+        string code = """
+            int a, b, sum;
+            
+            write("First num: ");
+            read(a);
+            
+            write("Second num: ");
+            read(b);
+            
+            write("Sum is: ");
+            
+            sum = a + b;
+            write(sum)
+            """;
+        _environment.SetSimulatedInput("0.1", "0.2");
 
-        // Act
-        List<RuntimeValue> result = Parser.ExecuteCode(code);
+        // выполнение программы:
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
 
-        // Assert
-        Assert.Equal(expectedResults.Length, result.Count);
-        for (int i = 0; i < expectedResults.Length; i++)
+        // получение результата
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+
+        // ожидаемый результат
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(0),
+            RuntimeValue.String("First num: "),
+            RuntimeValue.Number(0.1m),
+            RuntimeValue.String("Second num: "),
+            RuntimeValue.Number(0.2m),
+            RuntimeValue.String("Sum is: "),
+            RuntimeValue.Number(0.3m), // результат выражения
+            RuntimeValue.Number(0.3m), // результат write
+        ];
+
+        // сравниваю результаты
+        AssertResults(expected, actual);
+    }
+
+    private void AssertResults(List<RuntimeValue> expected, IReadOnlyList<RuntimeValue> actual)
+    {
+        // Сначала проверяем количество
+        if (expected.Count != actual.Count)
         {
-            Assert.Equal(expectedResults[i], (double)(decimal)result[i].Value, Precision);
+            Assert.Fail(
+                $"Actual results count does not match expected. Expected: {expected.Count}, Actual: {actual.Count}."
+            );
+        }
+
+        for (int i = 0; i < expected.Count; i++)
+        {
+            RuntimeValue expectedValue = expected[i];
+            RuntimeValue actualValue = actual[i];
+
+            Assert.Equal(expectedValue.Type, actualValue.Type);
+
+            switch (expectedValue.Type)
+            {
+                case RuntimeValue.ValueType.Number:
+                    if (Math.Abs((decimal)expectedValue.Value - (decimal)actualValue.Value) >= Tolerance)
+                    {
+                        Assert.Fail($"Expected does not match actual at index {i}: {expectedValue.Value} != {expectedValue.Value}");
+                    }
+
+                    Assert.Equal((decimal)expectedValue.Value, (decimal)actualValue.Value, Precision);
+                    break;
+
+                case RuntimeValue.ValueType.String:
+                    Assert.Equal((string)expectedValue.Value, (string)actualValue.Value);
+                    break;
+            }
         }
     }
 }

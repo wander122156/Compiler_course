@@ -15,12 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Parser\Parser.csproj" />
-    <ProjectReference Include="..\..\src\Interpreter\Interpreter.csproj" />
-    <ProjectReference Include="..\..\src\Common\Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

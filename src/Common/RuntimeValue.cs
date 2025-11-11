@@ -36,8 +36,23 @@ public class RuntimeValue
     public static RuntimeValue Undefined()
         => new RuntimeValue(ValueType.Undefined, null!);
 
-    public static explicit operator decimal(RuntimeValue v)
+    public static explicit operator decimal(RuntimeValue value)
     {
-        throw new NotImplementedException();
+        if (value.Type != ValueType.Number)
+        {
+            throw new InvalidCastException($"Cannot convert {value.Type} to decimal");
+        }
+
+        return (decimal)value.Value;
+    }
+
+    public static explicit operator string(RuntimeValue value)
+    {
+        if (value.Type != ValueType.String)
+        {
+            throw new InvalidCastException($"Cannot convert {value.Type} to string");
+        }
+
+        return (string)value.Value;
     }
 }

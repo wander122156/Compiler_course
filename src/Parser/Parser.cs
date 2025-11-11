@@ -24,7 +24,7 @@ public class Parser
 
     /// <summary>
     /// Выполняет синтаксический разбор строк кода по правилу.
-    /// program = { statement, [ ";" ] }
+    /// program = statement, { ";", statement }, [ ";" ]
     /// </summary>
     public void ParseProgram()
     {
@@ -35,6 +35,11 @@ public class Parser
             if (_tokens.Peek().Type == TokenType.Semicolon)
             {
                 Match(TokenType.Semicolon);
+            }
+            else if (_tokens.Peek().Type != TokenType.Semicolon &&
+                     _tokens.Peek().Type != TokenType.EndOfFile)
+            {
+                throw new UnexpectedLexemeException(TokenType.Semicolon, _tokens.Peek());
             }
 
             _environment.AddResult(result);
@@ -57,6 +62,8 @@ public class Parser
     ///     statement = if_statement
     ///             | variable_declaration
     ///             | const_defenition
+    ///             | write_statement
+    ///             | read_statement
     ///             | assignment
     ///             | expression (временно)
     /// </summary>
@@ -77,10 +84,63 @@ public class Parser
                 return ParseVariableDeclaration();
             case TokenType.If:
                 return ParseIfStatement();
+            case TokenType.Write:
+                return ParseWriteStatement();
+            case TokenType.Read:
+                return ParseReadStatement();
 
             default:
                 return ParseExpression();
         }
+    }
+
+    /// <summary>
+    /// Разбирает readln.
+    /// Правило:
+    ///     read_statement = "read", "(", identifier, {"," ,identifier } ")" ;
+    /// Реализовано:
+    ///     read_statement = "read", "(", identifier, ")"
+    /// </summary>
+    private RuntimeValue ParseReadStatement()
+    {
+        // сделать Readln
+        Match(TokenType.Read);
+
+        Match(TokenType.OpenParenthesis);
+        string name = Match(TokenType.Identifier).Value!.ToString();
+        Match(TokenType.CloseParenthesis);
+
+        // читаем значение из окружения (пока что только decimal)
+        RuntimeValue value = _environment.Read();
+
+        if (value.Type == RuntimeValue.ValueType.Number)
+        {
+            _context.AssignVariable(name, (decimal)value.Value);
+        }
+
+        return value;
+    }
+
+    /// <summary>
+    /// Разбирает writeln.
+    /// Правило:
+    ///     write_statement = "write", "(" expression_list ")" ;
+    /// Реализовано:
+    ///     write_statement = "write", "(" expression ")"
+    /// </summary>
+    private RuntimeValue ParseWriteStatement()
+    {
+        Match(TokenType.Write);
+
+        Match(TokenType.OpenParenthesis);
+
+        RuntimeValue value = ParseExpression();
+
+        Match(TokenType.CloseParenthesis);
+
+        _environment.Write(value);
+
+        return value;
     }
 
     /// <summary>

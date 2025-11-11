@@ -1,10 +1,12 @@
-﻿int x = 2, y = 6
+﻿int a, b, sum;
 
-if (y/x < 4 )
-{
-    write(massage, x, y)
-}
-else
-{
-    write("Condition false")
-}
+write("First num: ");
+read(a);
+
+write("Second num: ");
+read(b);
+
+write("Sum is: ");
+
+sum = a + b;
+write(sum)
