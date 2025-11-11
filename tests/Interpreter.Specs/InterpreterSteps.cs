@@ -57,7 +57,7 @@ public class InterpreterTests
             RuntimeValue.String("Second num: "),
             RuntimeValue.Number(0.2m),
             RuntimeValue.String("Sum is: "),
-            RuntimeValue.Number(0.3m), // результат выражения
+            RuntimeValue.Number(0.3m), // результат asigment
             RuntimeValue.Number(0.3m), // результат write
         ];
 
@@ -73,10 +73,10 @@ public class InterpreterTests
             num S;
             write("Введите радиус окружности: ");
             readln(r);
-            S = r^2;
-            writeln("Площадь окружности: ", r)
+            S = Pi * r^2;
+            writeln("Площадь окружности: ", S)
             """;
-        _environment.SetSimulatedInput("0.1", "0.2");
+        _environment.SetSimulatedInput("10");
 
         // выполнение программы:
         Parser parser = new(_context, _environment, code);
@@ -89,13 +89,10 @@ public class InterpreterTests
         List<RuntimeValue> expected = [
             RuntimeValue.Number(0),
             RuntimeValue.Number(0),
-            RuntimeValue.String("First num: "),
-            RuntimeValue.Number(0.1m),
-            RuntimeValue.String("Second num: "),
-            RuntimeValue.Number(0.2m),
-            RuntimeValue.String("Sum is: "),
-            RuntimeValue.Number(0.3m), // результат выражения
-            RuntimeValue.Number(0.3m), // результат writeln
+            RuntimeValue.String("Введите радиус окружности: "),
+            RuntimeValue.Number(10),
+            RuntimeValue.Number(314.15926535897900m), // результат assigment
+            RuntimeValue.Number(314.15926535897900m), // результат последнего выражения в writeln
         ];
 
         // сравнение результататов
@@ -128,7 +125,7 @@ public class InterpreterTests
             RuntimeValue.Number(0),
             RuntimeValue.String("Введите количество милей: "),
             RuntimeValue.Number(120),
-            RuntimeValue.Number(193.2m), // результат выражения
+            RuntimeValue.Number(193.2m), // результат assigment
             RuntimeValue.Number(193.2m), // результат writeln
         ];
 

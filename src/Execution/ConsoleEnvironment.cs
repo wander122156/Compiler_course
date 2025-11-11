@@ -33,6 +33,9 @@ public class ConsoleEnvironment : IEnvironment
     {
         switch (value.Type)
         {
+            case RuntimeValue.ValueType.Null:
+                Console.WriteLine();
+                break;
             case RuntimeValue.ValueType.Number:
                 Console.WriteLine((decimal)value.Value);
                 break;

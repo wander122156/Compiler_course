@@ -50,22 +50,22 @@ public class Parser
     /// <summary>
     /// Разбирает 1 из statement.
     /// statement =
-    ///      | variable_declaration
-    ///      | const_defenition
-    ///      | assignment
-    ///      | if_statement
-    ///      | write_statement
-    ///      | read_statement
-    ///      | while_statement
-    ///      | compound_statement
-    /// Реализовано:
-    ///     statement = if_statement
-    ///             | variable_declaration
-    ///             | const_defenition
-    ///             | write_statement
-    ///             | read_statement
-    ///             | assignment
-    ///             | expression (временно)
+    ///         | variable_declaration
+    ///         | const_defenition
+    ///         | assignment
+    ///         | if_statement
+    ///         | write_statement
+    ///         | writeln_statement
+    ///         | read_statement
+    ///         | readln_statement
+    ///         | while_statement
+    ///         | compound_statement
+    ///         | expression(временно)
+    ///
+    /// Осталось реализовать :
+    /// statement =
+    ///         | while_statement
+    ///         | if_statement
     /// </summary>
     private RuntimeValue ParseStatement()
     {
@@ -99,9 +99,9 @@ public class Parser
     }
 
     /// <summary>
-    /// Разбирает readln.
+    /// Разбирает read.
     /// Правило:
-    ///     read_statement = "read", "(", identifier, {"," ,identifier } ")" ;
+    ///     read_statement = "read", "(", identifier, {"," ,identifier } ")"
     /// Реализовано:
     ///     read_statement = "read", "(", identifier, ")"
     /// </summary>
@@ -128,7 +128,7 @@ public class Parser
     /// <summary>
     /// Разбирает readln.
     /// Правило:
-    ///     readln_statement = "readln", "(", identifier, {"," ,identifier } ")" ;
+    ///     readln_statement = "readln", "(", identifier, {"," ,identifier } ")"
     /// Реализовано:
     ///     readln_statement = "readln", "(", identifier, ")"
     /// </summary>
@@ -155,8 +155,6 @@ public class Parser
     /// Разбирает write.
     /// Правило:
     ///     write_statement = "write", "(" expression_list ")" ;
-    /// Реализовано:
-    ///     write_statement = "write", "(" expression ")"
     /// </summary>
     private RuntimeValue ParseWriteStatement()
     {
@@ -164,21 +162,23 @@ public class Parser
 
         Match(TokenType.OpenParenthesis);
 
-        RuntimeValue value = ParseExpression();
+        List<RuntimeValue> values = ParseExpressionList();
+
+        foreach(RuntimeValue value in values)
+        {
+            _environment.Write(value);
+        }
 
         Match(TokenType.CloseParenthesis);
 
-        _environment.Write(value);
-
-        return value;
+        return values.Last();
     }
 
     /// <summary>
     /// Разбирает writeln.
     /// Правило:
-    ///     writeln_statement = "writeln", "(" expression_list ")" ;
-    /// Реализовано:
-    ///     writeln_statement = "writeln", "(" expression ")"
+    ///     writeln_statement = "writeln", "(" expression_list ")"
+    ///                       | "writeln", "(", ")"
     /// </summary>
     private RuntimeValue ParseWriteLineStatement()
     {
@@ -186,13 +186,25 @@ public class Parser
 
         Match(TokenType.OpenParenthesis);
 
-        RuntimeValue value = ParseExpression();
+        if (_tokens.Peek().Type == TokenType.CloseParenthesis)
+        {
+            _tokens.Advance();
+            RuntimeValue emptyRes = RuntimeValue.Null();
+
+            _environment.Writeln(emptyRes);
+            return emptyRes;
+        }
+
+        List<RuntimeValue> values = ParseExpressionList();
+
+        foreach (RuntimeValue value in values)
+        {
+            _environment.Writeln(value);
+        }
 
         Match(TokenType.CloseParenthesis);
 
-        _environment.Writeln(value);
-
-        return value;
+        return values.Last();
     }
 
     /// <summary>
@@ -475,14 +487,45 @@ public class Parser
     ///  Разбирает одну операцию возведения в степень.
     ///  Правило:
     ///     exponentiation_expression = primary_expression, { ("^"), exponentiation_expression }
-    ///  Реализовано:
-    ///     exponentiation_expression = primary_expression
     /// </summary>
     private RuntimeValue ParseExponentiationExpression()
     {
         RuntimeValue value = ParsePrimaryExpression();
 
+        while (_tokens.Peek().Type == TokenType.ExponentiationSign)
+        {
+            _tokens.Advance();
+            RuntimeValue exponent = ParseExponentiationExpression(); // правая ассициотивность
+            value = EvaluateExponentiation(value, exponent);
+        }
+
         return value;
+    }
+
+    /// <summary>
+    /// Вычисляет операцию возведения в степень.
+    /// </summary>
+    private RuntimeValue EvaluateExponentiation(RuntimeValue left, RuntimeValue right)
+    {
+        if (left.Type == RuntimeValue.ValueType.Number && right.Type == RuntimeValue.ValueType.Number)
+        {
+            decimal baseValue = (decimal)left.Value;
+            decimal exponentValue = (decimal)right.Value;
+
+            if (baseValue == 0 && exponentValue <= 0)
+            {
+                throw new DivideByZeroException("Zero cannot be raised to a non-positive power");
+            }
+
+            if (exponentValue == 0)
+            {
+                return RuntimeValue.Number(1);
+            }
+
+            return RuntimeValue.Number((decimal)Math.Pow((double)baseValue, (double)exponentValue));
+        }
+
+        throw new Exception($"Exponentiation operation is not supported between {left.Type} and {right.Type}");
     }
 
     /// <summary>
@@ -524,7 +567,6 @@ public class Parser
             return RuntimeValue.Boolean(false);
         }
 
-        // Пока что встроенные константы и встроенные функции
         if (t.Type == TokenType.Identifier)
         {
             string identifier = t.Value!.ToString();
@@ -578,23 +620,6 @@ public class Parser
         }
 
         return decimals;
-    }
-
-    private void ParseCodeDelimiter()
-    {
-        Token t = _tokens.Peek();
-        switch (t.Type)
-        {
-            case TokenType.CloseBraces:
-                break;
-            case TokenType.Semicolon:
-                _tokens.Advance();
-                break;
-            case TokenType.EndOfFile:
-                break;
-            default:
-                throw new UnexpectedLexemeException(TokenType.Semicolon, t);
-        }
     }
 
     /// <summary>

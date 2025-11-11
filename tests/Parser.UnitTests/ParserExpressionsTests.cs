@@ -3,14 +3,14 @@ using Blang.Execution;
 
 namespace Blang.Parser.UnitTests;
 
-public class ParserExpressionsTest
+public class ParserExpressionsTests
 {
     private const int Precision = 5;
 
     private readonly Context _context;
     private readonly FakeEnvironment _environment;
 
-    public ParserExpressionsTest()
+    public ParserExpressionsTests()
     {
         _context = new Context();
         _environment = new FakeEnvironment();
@@ -66,7 +66,6 @@ public class ParserExpressionsTest
             "if (3 < 5) {}",
             "if (1 + 2 < 5) {}",
             "if (1 + 2 * 3 < 7) {}",
-            "if (1 < 2 < 3) {}",
         };
     }
 

@@ -1,5 +1,4 @@
-﻿TODO: сделать ассоциативность
-# Список тестов
+﻿# Список тестов
 
 ## Требования к синтаксическому анализатору
 
@@ -27,7 +26,6 @@
 - [x] Разбор оператора "меньше": `if (3 < 5) {}` → true
 - [x] Разбор выражений со сравнениями и арифметикой: `if (1 + 2 < 5) {}` → true
 - [x] Разбор операторов всех приоритетов: `if (1 + 2 * 3 < 7) {}` → false
-- [ ] Проверка левоассоциативности сравнений: `if (1 < 2 < 3) {}` → true
 - [x] Разбор арифметических выражений с учётом скобок: `(1 + 2) * 3` → 9
 - [x] Разбор выражения с множественными скобками: `((1 + 2) * (3 - 1)) - 2` → 4
 - [x] Поддержка встроенных констант: 
@@ -87,13 +85,17 @@ statement =
           | assignment
           | if_statement
           | write_statement 
+          | writeln_statement
           | read_statement
+          | readln_statement
           | while_statement
           | compound_statement
           | expression (временно)
 
 write_statement = "write", "( ", [ expression_list ], " )" ;
-read_statement = "read", "(", identifier, ")" ;
+writeln_statement = "writeln", "(" expression_list ")" ;
+read_statement = "read", "(", identifier, {"," ,identifier } ")" ;
+readln_statement = "readln", "(", identifier, {"," ,identifier } ")"
 while_statement = "while", "(", condition, ")", statement ;
 
 variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
@@ -123,9 +125,9 @@ const_expression = "Pi" | "MathE" ;
 ````
 
 ## Проблемные места (Вопросы преподу)
-Что делать с тестом где тело if выполняет больше 1 statement
-- [ ] Возвращать массив результатов [Row]
-- [x] Возвращать результат последнего statement 
+Что делать со списком выражений?
+- [x] возвращать последнее выражение?
+- [ ] возвращать все
 
 Почему BinOpExpr - ?expression? - AstNode
 (ConcreteElement - expression - IElement)

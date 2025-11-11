@@ -1,10 +1,13 @@
-﻿int a, b, sum;
+﻿num a, b, sum;
 
+writeln();
 write("First num: ");
 read(a);
+writeln();
 
 write("Second num: ");
 read(b);
+writeln();
 
 write("Sum is: ");
 
