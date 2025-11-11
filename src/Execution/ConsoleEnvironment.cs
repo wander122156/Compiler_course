@@ -60,8 +60,24 @@ public class ConsoleEnvironment : IEnvironment
 
         string result = input.ToString();
 
-        // string input = Console.ReadLine() ?? string.Empty
         if (decimal.TryParse(result, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal number))
+        {
+            return RuntimeValue.Number(number);
+        }
+        else
+        {
+            // по дефолту читаем как строку
+            return new RuntimeValue(RuntimeValue.ValueType.String, input);
+        }
+
+        // else остальные типы
+    }
+
+    public RuntimeValue Readln()
+    {
+        string input = Console.ReadLine() ?? string.Empty;
+
+        if (decimal.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal number))
         {
             return RuntimeValue.Number(number);
         }

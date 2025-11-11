@@ -13,9 +13,9 @@ public enum TokenType
     False,
 
     /// <summary>
-    ///  Тип int.
+    ///  Тип num.
     /// </summary>
-    Int,
+    Num,
 
     /// <summary>
     ///  Тип string.
@@ -51,6 +51,11 @@ public enum TokenType
     ///  Ключевое слово Read.
     /// </summary>
     Read,
+
+    /// <summary>
+    ///  Ключевое слово Readln.
+    /// </summary>
+    Readln,
 
     /// <summary>
     ///  Ключевое слово if.

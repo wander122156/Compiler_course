@@ -17,7 +17,7 @@ public class Lexer(string code)
             "false", TokenType.False
         },
         {
-            "int", TokenType.Int
+            "num", TokenType.Num
         },
         {
             "const", TokenType.Const
@@ -42,6 +42,9 @@ public class Lexer(string code)
         },
         {
             "read", TokenType.Read
+        },
+        {
+            "readln", TokenType.Readln
         },
         {
             "and", TokenType.And

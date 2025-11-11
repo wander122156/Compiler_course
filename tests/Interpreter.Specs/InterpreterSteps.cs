@@ -27,7 +27,7 @@ public class InterpreterTests
     public void Can_execute_SumNums_program()
     {
         string code = """
-            int a, b, sum;
+            num a, b, sum;
             
             write("First num: ");
             read(a);
@@ -61,7 +61,78 @@ public class InterpreterTests
             RuntimeValue.Number(0.3m), // результат write
         ];
 
-        // сравниваю результаты
+        // сравнение результататов
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_CircleSquare_program()
+    {
+        string code = """
+            num r;
+            num S;
+            write("Введите радиус окружности: ");
+            readln(r);
+            S = r^2;
+            writeln("Площадь окружности: ", r)
+            """;
+        _environment.SetSimulatedInput("0.1", "0.2");
+
+        // выполнение программы:
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        // получение результата
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+
+        // ожидаемый результат
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(0),
+            RuntimeValue.Number(0),
+            RuntimeValue.String("First num: "),
+            RuntimeValue.Number(0.1m),
+            RuntimeValue.String("Second num: "),
+            RuntimeValue.Number(0.2m),
+            RuntimeValue.String("Sum is: "),
+            RuntimeValue.Number(0.3m), // результат выражения
+            RuntimeValue.Number(0.3m), // результат writeln
+        ];
+
+        // сравнение результататов
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_MilesToKm_program()
+    {
+        string code = """
+            num miles;
+            num kms;
+            write("Введите количество милей: ");
+            readln(miles);
+            kms = miles * 1.61;
+            writeln(kms)
+            """;
+        _environment.SetSimulatedInput("120");
+
+        // выполнение программы:
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        // получение результата
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+
+        // ожидаемый результат
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(0),
+            RuntimeValue.Number(0),
+            RuntimeValue.String("Введите количество милей: "),
+            RuntimeValue.Number(120),
+            RuntimeValue.Number(193.2m), // результат выражения
+            RuntimeValue.Number(193.2m), // результат writeln
+        ];
+
+        // сравнение результататов
         AssertResults(expected, actual);
     }
 

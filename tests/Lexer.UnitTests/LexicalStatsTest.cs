@@ -42,7 +42,7 @@ public class LexicalStatsTest
             {
                 """
                 {
-                    int num1, num2, sum;
+                    num num1, num2, sum;
                     writeln("Enter the first number: ");
                     read(num1);
 

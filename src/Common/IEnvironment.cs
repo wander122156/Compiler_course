@@ -29,5 +29,5 @@ public interface IEnvironment
     /// <summary>
     /// Чтение аргумента и переход на новую строку.
     /// </summary>
-    // public RuntimeValue ReadLine();
+    public RuntimeValue Readln();
 }

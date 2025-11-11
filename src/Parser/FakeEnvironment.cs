@@ -60,4 +60,9 @@ public class FakeEnvironment : IEnvironment
             return RuntimeValue.String(input);
         }
     }
+
+    public RuntimeValue Readln()
+    {
+        return Read();
+    }
 }

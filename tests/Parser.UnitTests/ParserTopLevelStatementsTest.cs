@@ -17,7 +17,7 @@ public class ParseTopLevelStatementsTest
     [Fact]
     public void Can_parse_single_variable_declaration_without_initialization()
     {
-        string code = "int x ";
+        string code = "num x ";
         List<decimal> expected = [0];
 
         Parser parser = new(_context, _environment, code);
@@ -31,7 +31,7 @@ public class ParseTopLevelStatementsTest
     [Fact]
     public void Can_parse_single_variable_declaration_with_initialization()
     {
-        string code = "int x = 3";
+        string code = "num x = 3";
         List<decimal> expected = [3];
 
         Parser parser = new(_context, _environment, code);
@@ -45,7 +45,7 @@ public class ParseTopLevelStatementsTest
     [Fact]
     public void Can_parse_multiple_variable_declarations_with_expressions()
     {
-        string code = "int x = 1, y = 2, z = 3 ; x + y * z";
+        string code = "num x = 1, y = 2, z = 3 ; x + y * z";
         List<decimal> expected = [3, 7];
 
         Parser parser = new(_context, _environment, code);
@@ -59,7 +59,7 @@ public class ParseTopLevelStatementsTest
     [Fact]
     public void Can_parse_variable_declarations_and_assignments()
     {
-        string code = "int x, y; x = 10; y = 12 ; x + y";
+        string code = "num x, y; x = 10; y = 12 ; x + y";
         List<decimal> expected = [0, 10, 12, 22];
 
         Parser parser = new(_context, _environment, code);
@@ -87,7 +87,7 @@ public class ParseTopLevelStatementsTest
     [Fact]
     public void Can_parse_constant_declaration_with_initialization()
     {
-        string code = "const int c = 3";
+        string code = "const num c = 3";
         List<decimal> expected = [3];
 
         Parser parser = new(_context, _environment, code);
@@ -101,7 +101,7 @@ public class ParseTopLevelStatementsTest
     [Fact]
     public void Can_parse_variable_reassignment_in_sequence()
     {
-        string code = "int a = 1, b = 2 ; a = 5 ; b = a + 1 ";
+        string code = "num a = 1, b = 2 ; a = 5 ; b = a + 1 ";
         List<decimal> expected = [2, 5, 6];
 
         Parser parser = new(_context, _environment, code);
@@ -115,7 +115,7 @@ public class ParseTopLevelStatementsTest
     [Fact]
     public void Can_parse_variable_shadowing_constant()
     {
-        string code = "const int c = 3.14159; int c = 2 ; 4.0 * c * 4.0;";
+        string code = "const num c = 3.14159; num c = 2 ; 4.0 * c * 4.0;";
         List<decimal> expected = [3.14159m, 2, 32m];
 
         Parser parser = new(_context, _environment, code);
@@ -139,7 +139,7 @@ public class ParseTopLevelStatementsTest
     [Fact]
     public void Throws_on_undefined_variable_in_complex_expression()
     {
-        string code = "int x, y; x + y + z";
+        string code = "num x, y; x + y + z";
 
         Parser parser = new(_context, _environment, code);
 
@@ -149,7 +149,7 @@ public class ParseTopLevelStatementsTest
     [Fact]
     public void Throws_on_invalid_identifier_in_declaration()
     {
-        string code = "int 123";
+        string code = "num 123";
 
         Parser parser = new(_context, _environment, code);
 

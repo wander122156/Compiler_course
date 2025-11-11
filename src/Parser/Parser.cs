@@ -80,14 +80,18 @@ public class Parser
         {
             case TokenType.Const:
                 return ParseConstantDefinition();
-            case TokenType.Int:
+            case TokenType.Num:
                 return ParseVariableDeclaration();
             case TokenType.If:
                 return ParseIfStatement();
             case TokenType.Write:
                 return ParseWriteStatement();
+            case TokenType.Writeln:
+                return ParseWriteLineStatement();
             case TokenType.Read:
                 return ParseReadStatement();
+            case TokenType.Readln:
+                return ParseReadLineStatement();
 
             default:
                 return ParseExpression();
@@ -122,7 +126,33 @@ public class Parser
     }
 
     /// <summary>
-    /// Разбирает writeln.
+    /// Разбирает readln.
+    /// Правило:
+    ///     readln_statement = "readln", "(", identifier, {"," ,identifier } ")" ;
+    /// Реализовано:
+    ///     readln_statement = "readln", "(", identifier, ")"
+    /// </summary>
+    private RuntimeValue ParseReadLineStatement()
+    {
+        Match(TokenType.Readln);
+
+        Match(TokenType.OpenParenthesis);
+        string name = Match(TokenType.Identifier).Value!.ToString();
+        Match(TokenType.CloseParenthesis);
+
+        // читаем значение из окружения (пока что только decimal)
+        RuntimeValue value = _environment.Readln();
+
+        if (value.Type == RuntimeValue.ValueType.Number)
+        {
+            _context.AssignVariable(name, (decimal)value.Value);
+        }
+
+        return value;
+    }
+
+    /// <summary>
+    /// Разбирает write.
     /// Правило:
     ///     write_statement = "write", "(" expression_list ")" ;
     /// Реализовано:
@@ -144,14 +174,36 @@ public class Parser
     }
 
     /// <summary>
+    /// Разбирает writeln.
+    /// Правило:
+    ///     writeln_statement = "writeln", "(" expression_list ")" ;
+    /// Реализовано:
+    ///     writeln_statement = "writeln", "(" expression ")"
+    /// </summary>
+    private RuntimeValue ParseWriteLineStatement()
+    {
+        Match(TokenType.Writeln);
+
+        Match(TokenType.OpenParenthesis);
+
+        RuntimeValue value = ParseExpression();
+
+        Match(TokenType.CloseParenthesis);
+
+        _environment.Writeln(value);
+
+        return value;
+    }
+
+    /// <summary>
     /// Разбирает объявление константы.
     /// Правило:
-    ///      constant_definition = "const", "int", identifier, "=", expression
+    ///      constant_definition = "const", "num", identifier, "=", expression
     /// </summary>
     private RuntimeValue ParseConstantDefinition()
     {
         Match(TokenType.Const);
-        Match(TokenType.Int);
+        Match(TokenType.Num);
 
         string name = Match(TokenType.Identifier).Value!.ToString();
 
@@ -184,12 +236,12 @@ public class Parser
     /// <summary>
     /// Разбирает объявление переменных и следующее за ним выражение.
     /// Правило:
-    ///     variable_declaration = "int", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
+    ///     variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
     ///     Возвращает результат последнего присваивания
     /// </summary>
     private RuntimeValue ParseVariableDeclaration()
     {
-        Match(TokenType.Int);
+        Match(TokenType.Num);
         _context.PushScope(new Scope());
 
         List<RuntimeValue> results = new List<RuntimeValue>();
