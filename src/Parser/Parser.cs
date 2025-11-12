@@ -102,26 +102,27 @@ public class Parser
     /// Разбирает read.
     /// Правило:
     ///     read_statement = "read", "(", identifier, {"," ,identifier } ")"
-    /// Реализовано:
-    ///     read_statement = "read", "(", identifier, ")"
     /// </summary>
     private RuntimeValue ParseReadStatement()
     {
-        // сделать Readln
         Match(TokenType.Read);
-
         Match(TokenType.OpenParenthesis);
-        string name = Match(TokenType.Identifier).Value!.ToString();
-        Match(TokenType.CloseParenthesis);
 
-        // читаем значение из окружения (пока что только decimal)
-        RuntimeValue value = _environment.Read();
+        RuntimeValue value;
 
-        if (value.Type == RuntimeValue.ValueType.Number)
+        do
         {
-            _context.AssignVariable(name, (decimal)value.Value);
-        }
+            string name = Match(TokenType.Identifier).Value!.ToString();
+            value = _environment.Read();
 
+            if (value.Type == RuntimeValue.ValueType.Number)
+            {
+                _context.AssignVariable(name, (decimal)value.Value);
+            }
+        }
+        while (_tokens.Peek().Type == TokenType.Comma && Match(TokenType.Comma) != null);
+
+        Match(TokenType.CloseParenthesis);
         return value;
     }
 
@@ -129,24 +130,27 @@ public class Parser
     /// Разбирает readln.
     /// Правило:
     ///     readln_statement = "readln", "(", identifier, {"," ,identifier } ")"
-    /// Реализовано:
-    ///     readln_statement = "readln", "(", identifier, ")"
     /// </summary>
     private RuntimeValue ParseReadLineStatement()
     {
         Match(TokenType.Readln);
-
         Match(TokenType.OpenParenthesis);
-        string name = Match(TokenType.Identifier).Value!.ToString();
-        Match(TokenType.CloseParenthesis);
 
-        // читаем значение из окружения (пока что только decimal)
-        RuntimeValue value = _environment.Readln();
+        RuntimeValue value;
 
-        if (value.Type == RuntimeValue.ValueType.Number)
+        do
         {
-            _context.AssignVariable(name, (decimal)value.Value);
+            string name = Match(TokenType.Identifier).Value!.ToString();
+            value = _environment.Readln();
+
+            if (value.Type == RuntimeValue.ValueType.Number)
+            {
+                _context.AssignVariable(name, (decimal)value.Value);
+            }
         }
+        while (_tokens.Peek().Type == TokenType.Comma && Match(TokenType.Comma) != null);
+
+        Match(TokenType.CloseParenthesis);
 
         return value;
     }

@@ -50,7 +50,6 @@ public class FakeEnvironment : IEnvironment
 
         string input = _simulatedInput.Dequeue();
 
-        // Пытаемся определить тип автоматически
         if (decimal.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal number))
         {
             return RuntimeValue.Number(number);
