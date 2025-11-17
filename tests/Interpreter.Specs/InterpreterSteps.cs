@@ -1,10 +1,6 @@
-﻿using System.Globalization;
-
-using Blang.Common;
+﻿using Blang.Common;
 using Blang.Execution;
 using Blang.Parser;
-
-using Xunit;
 
 namespace Interpreter.Specs;
 
@@ -26,7 +22,7 @@ public class InterpreterTests
     [Fact]
     public void Can_execute_SumNums_program()
     {
-        string code = """
+        const string code = """
             num a, b, sum;
             
             write("First num: ");
@@ -40,7 +36,7 @@ public class InterpreterTests
             sum = a + b;
             write(sum)
             """;
-        _environment.SetSimulatedInput("0.1", "0.2");
+        _environment.SetInputLines("0.1", "0.2");
 
         // выполнение программы:
         Parser parser = new(_context, _environment, code);
@@ -76,7 +72,7 @@ public class InterpreterTests
             S = Pi * r^2;
             writeln("Площадь окружности: ", S)
             """;
-        _environment.SetSimulatedInput("10");
+        _environment.SetInputLines("10");
 
         // выполнение программы:
         Parser parser = new(_context, _environment, code);
@@ -110,7 +106,7 @@ public class InterpreterTests
             kms = miles * 1.61;
             writeln(kms)
             """;
-        _environment.SetSimulatedInput("120");
+        _environment.SetInputLines("120");
 
         // выполнение программы:
         Parser parser = new(_context, _environment, code);

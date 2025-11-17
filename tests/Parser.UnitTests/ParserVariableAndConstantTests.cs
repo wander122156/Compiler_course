@@ -16,23 +16,14 @@ public class ParserVariableAndConstantTests
 
     public static TheoryData<string, List<decimal>> ValidCodeTestData => new()
     {
-        // Single variable declarations
         { "num x ", [0] },
         { "num x = 3", [3] },
         { "const num c = 3", [3] },
-
-        // Multiple variable declarations
         { "num x = 1, y = 2, z = 3 ; x + y * z", [3, 7] },
         { "num x, y; x = 10; y = 12 ; x + y", [0, 10, 12, 22] },
         { "num a = 1, b = 2 ; a = 5 ; b = a + 1 ", [2, 5, 6] },
-
-        // Multiple expressions
         { "1 + 2; 2 * 5; 4.5", [3, 10, 4.5m] },
-
-        // Variable shadowing
         { "const num c = 3.14159; num c = 2 ; 4.0 * c * 4.0;", [3.14159m, 2, 32m] },
-
-        // Edge cases
         { "num x = 1 + 2 * 3", [7] },
         { "num a = 5; num b = a * 2", [5, 10] },
         { "const num PI = 3.14; num radius = 2; PI * radius * radius", [3.14m, 2, 12.56m] },

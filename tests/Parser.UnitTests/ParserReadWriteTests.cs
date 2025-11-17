@@ -64,7 +64,7 @@ public class ParserReadWriteTests
     public void Can_parse_read_single_variable()
     {
         string code = "num a; read(a)";
-        _environment.SetSimulatedInput("42");
+        _environment.SetInputLines("42");
 
         List<RuntimeValue> expected = [
             RuntimeValue.Number(0),
@@ -82,7 +82,7 @@ public class ParserReadWriteTests
     public void Can_parse_read_multiple_variables()
     {
         string code = "num a, b, c; read(a, b, c)";
-        _environment.SetSimulatedInput("10", "20", "30");
+        _environment.SetInputLines("10", "20", "30");
 
         List<RuntimeValue> expected = [
             RuntimeValue.Number(0),
@@ -100,7 +100,7 @@ public class ParserReadWriteTests
     public void Can_parse_readln_multiple_lines()
     {
         string code = "num first, second; readln(first); readln(second)";
-        _environment.SetSimulatedInput("100", "200");
+        _environment.SetInputLines("100", "200");
 
         List<RuntimeValue> expected = [
             RuntimeValue.Number(0),
@@ -161,7 +161,7 @@ public class ParserReadWriteTests
     public void Can_parse_read_with_different_types()
     {
         string code = "num a; read(a)";
-        _environment.SetSimulatedInput("3.14");
+        _environment.SetInputLines("3.14");
 
         List<RuntimeValue> expected = [
             RuntimeValue.Number(0),
@@ -179,7 +179,7 @@ public class ParserReadWriteTests
     public void Can_parse_readln_with_string_input()
     {
         string code = "num number; readln(number)";
-        _environment.SetSimulatedInput("123.456");
+        _environment.SetInputLines("123.456");
 
         List<RuntimeValue> expected = [
             RuntimeValue.Number(0),
@@ -254,6 +254,7 @@ public class ParserReadWriteTests
                     {
                         Assert.Fail($"Expected does not match actual at index {i}: {expectedValue.Value} != {actualValue.Value}");
                     }
+
                     break;
 
                 case RuntimeValue.ValueType.String:

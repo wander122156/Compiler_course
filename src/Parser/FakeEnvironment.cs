@@ -11,16 +11,16 @@ public class FakeEnvironment : IEnvironment
 {
     private readonly List<RuntimeValue> _results = [];
 
-    private readonly Queue<string> _simulatedInput = new();
+    private readonly Queue<string> _inputLines = new();
 
     public IReadOnlyList<RuntimeValue> Results => _results;
 
-    public void SetSimulatedInput(params string[] inputs)
+    public void SetInputLines(params string[] inputs)
     {
-        _simulatedInput.Clear();
+        _inputLines.Clear();
         foreach (string input in inputs)
         {
-            _simulatedInput.Enqueue(input);
+            _inputLines.Enqueue(input);
         }
     }
 
@@ -41,14 +41,14 @@ public class FakeEnvironment : IEnvironment
 
     public RuntimeValue Read()
     {
-        if (_simulatedInput.Count == 0)
+        if (_inputLines.Count == 0)
         {
             // Если ввод не настроен, возвращаем значение по умолчанию
             RuntimeValue defaultValue = RuntimeValue.Number(0);
             return defaultValue;
         }
 
-        string input = _simulatedInput.Dequeue();
+        string input = _inputLines.Dequeue();
 
         if (decimal.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal number))
         {
