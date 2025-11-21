@@ -35,6 +35,8 @@ public class ParserReadWriteTests
     {
         string code = "write (\"hello, \", \"i am \", \"Blang\")";
         List<RuntimeValue> expected = [
+            RuntimeValue.String("hello, "),
+            RuntimeValue.String("i am "),
             RuntimeValue.String("Blang")
         ];
 
@@ -50,6 +52,7 @@ public class ParserReadWriteTests
     {
         string code = "writeln (\"sum:\", 2 + 2)";
         List<RuntimeValue> expected = [
+            RuntimeValue.String("sum:"),
             RuntimeValue.Number(4)
         ];
 
@@ -63,7 +66,7 @@ public class ParserReadWriteTests
     [Fact]
     public void Can_parse_read_single_variable()
     {
-        string code = "num a; read(a)";
+        string code = "num a; write(a); read(a); write(a)";
         _environment.SetInputLines("42");
 
         List<RuntimeValue> expected = [
@@ -81,11 +84,12 @@ public class ParserReadWriteTests
     [Fact]
     public void Can_parse_read_multiple_variables()
     {
-        string code = "num a, b, c; read(a, b, c)";
+        string code = "num a, b, c; read(a, b, c); write(a); write(b); write(c)";
         _environment.SetInputLines("10", "20", "30");
 
         List<RuntimeValue> expected = [
-            RuntimeValue.Number(0),
+            RuntimeValue.Number(10),
+            RuntimeValue.Number(20),
             RuntimeValue.Number(30)
         ];
 
@@ -99,11 +103,10 @@ public class ParserReadWriteTests
     [Fact]
     public void Can_parse_readln_multiple_lines()
     {
-        string code = "num first, second; readln(first); readln(second)";
+        string code = "num first, second; readln(first); readln(second); write(first); write(second)";
         _environment.SetInputLines("100", "200");
 
         List<RuntimeValue> expected = [
-            RuntimeValue.Number(0),
             RuntimeValue.Number(100),
             RuntimeValue.Number(200)
         ];
@@ -132,10 +135,7 @@ public class ParserReadWriteTests
     public void Can_parse_write_with_variable_expression()
     {
         string code = "num x = 5; write(x * 2)";
-        List<RuntimeValue> expected = [
-            RuntimeValue.Number(5),
-            RuntimeValue.Number(10)
-        ];
+        List<RuntimeValue> expected = [RuntimeValue.Number(10)];
 
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
@@ -160,13 +160,10 @@ public class ParserReadWriteTests
     [Fact]
     public void Can_parse_read_with_different_types()
     {
-        string code = "num a; read(a)";
+        string code = "num a; read(a); write(a)";
         _environment.SetInputLines("3.14");
 
-        List<RuntimeValue> expected = [
-            RuntimeValue.Number(0),
-            RuntimeValue.Number(3.14m)
-        ];
+        List<RuntimeValue> expected = [RuntimeValue.Number(3.14m)];
 
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
@@ -178,12 +175,37 @@ public class ParserReadWriteTests
     [Fact]
     public void Can_parse_readln_with_string_input()
     {
-        string code = "num number; readln(number)";
+        string code = "num number; readln(number); write(number)";
         _environment.SetInputLines("123.456");
 
+        List<RuntimeValue> expected = [RuntimeValue.Number(123.456m)];
+
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_parse_mixed_read_write_operations()
+    {
+        string code = """
+            num a, b;
+            write("Enter first number: ");
+            read(a);
+            write("Enter second number: ");
+            read(b);
+            write("Sum: ", a + b)
+            """;
+
+        _environment.SetInputLines("15", "25");
+
         List<RuntimeValue> expected = [
-            RuntimeValue.Number(0),
-            RuntimeValue.Number(123.456m)
+            RuntimeValue.String("Enter first number: "),
+            RuntimeValue.String("Enter second number: "),
+            RuntimeValue.String("Sum: "),
+            RuntimeValue.Number(40)
         ];
 
         Parser parser = new(_context, _environment, code);

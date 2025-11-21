@@ -24,19 +24,14 @@ public class FakeEnvironment : IEnvironment
         }
     }
 
-    public void AddResult(RuntimeValue result)
-    {
-        _results.Add(result);
-    }
-
     public void Write(RuntimeValue value)
     {
-        // _results.Add(value);
+        _results.Add(value);
     }
 
     public void Writeln(RuntimeValue value)
     {
-        // _results.Add(value);
+        _results.Add(value);
     }
 
     public RuntimeValue Read()

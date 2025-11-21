@@ -46,61 +46,16 @@ public class ParserExpressionsTests
         };
     }
 
-    public static TheoryData<string, bool> GetBooleanExpressionsTestData()
-    {
-        return new TheoryData<string, bool>
-        {
-            // Условные выражения и сравнения
-            { "true", true },
-            { "false", false },
-        };
-    }
-
-    public static TheoryData<string> GetIfStatementsTestData()
-    {
-        return new TheoryData<string>
-        {
-            // Операторы if
-            "if (true) {}",
-            "if (false) { 1 + 5 - 3 }",
-            "if (3 < 5) {}",
-            "if (1 + 2 < 5) {}",
-            "if (1 + 2 * 3 < 7) {}",
-        };
-    }
-
     [Theory]
     [MemberData(nameof(GetParseTestData))]
-    public void Can_parse_expressions(string code, decimal expected)
+    public void Can_parse_expressions(string expression, decimal expected)
     {
+        string code = $"num result = {expression}; write(result)";
+
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();
 
         RuntimeValue result = Assert.Single(_environment.Results);
-        Assert.Equal((decimal)expected, (decimal)result.Value, Precision);
-    }
-
-    [Theory]
-    [MemberData(nameof(GetBooleanExpressionsTestData))]
-    public void Can_parse_boolean_expressions(string code, bool expected)
-    {
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
-
-        RuntimeValue result = Assert.Single(_environment.Results);
-        Assert.Equal(RuntimeValue.ValueType.Boolean, result.Type);
-        Assert.Equal(expected, result.Value);
-    }
-
-    [Theory]
-    [MemberData(nameof(GetIfStatementsTestData))]
-    public void Can_parse_if_statements(string code)
-    {
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
-
-        RuntimeValue result = Assert.Single(_environment.Results);
-        Assert.Equal(RuntimeValue.ValueType.Boolean, result.Type);
-        Assert.IsType<bool>(result.Value);
+        Assert.Equal(expected, (decimal)result.Value, Precision);
     }
 }

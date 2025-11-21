@@ -7,12 +7,6 @@ namespace Blang.Execution;
 
 public class ConsoleEnvironment : IEnvironment
 {
-    public void AddResult(RuntimeValue result)
-    {
-        // Console.Write("Result: " + result.Value.ToString(CultureInfo.InvariantCulture));
-        Console.WriteLine(" @Result: " + result.Value);
-    }
-
     public void Write(RuntimeValue value)
     {
         switch (value.Type)

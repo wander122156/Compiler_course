@@ -7,11 +7,6 @@
 public interface IEnvironment
 {
     /// <summary>
-    /// Вызывается после вычисления результата очередной инструкции программы.
-    /// </summary>
-    public void AddResult(RuntimeValue result);
-
-    /// <summary>
     /// Вывод переданного аргумента.
     /// </summary>
     public void Write(RuntimeValue value);

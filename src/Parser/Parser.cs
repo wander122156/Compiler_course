@@ -41,8 +41,6 @@ public class Parser
             {
                 throw new UnexpectedLexemeException(TokenType.Semicolon, _tokens.Peek());
             }
-
-            _environment.AddResult(result);
         }
         while (_tokens.Peek().Type != TokenType.EndOfFile);
     }

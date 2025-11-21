@@ -16,30 +16,37 @@ public class ParserVariableAndConstantTests
 
     public static TheoryData<string, List<decimal>> ValidCodeTestData => new()
     {
-        { "num x ", [0] },
-        { "num x = 3", [3] },
-        { "const num c = 3", [3] },
-        { "num x = 1, y = 2, z = 3 ; x + y * z", [3, 7] },
-        { "num x, y; x = 10; y = 12 ; x + y", [0, 10, 12, 22] },
-        { "num a = 1, b = 2 ; a = 5 ; b = a + 1 ", [2, 5, 6] },
-        { "1 + 2; 2 * 5; 4.5", [3, 10, 4.5m] },
-        { "const num c = 3.14159; num c = 2 ; 4.0 * c * 4.0;", [3.14159m, 2, 32m] },
-        { "num x = 1 + 2 * 3", [7] },
-        { "num a = 5; num b = a * 2", [5, 10] },
-        { "const num PI = 3.14; num radius = 2; PI * radius * radius", [3.14m, 2, 12.56m] },
+        // Объявления переменных
+        { "num x; write(x)", [0] },
+        { "num x = 3; write(x)", [3] },
+        { "const num c = 3; write(c)", [3] },
+
+        // Множественные объявления
+        { "num x = 1, y = 2, z = 3; write(x); write(y); write(z)", [1, 2, 3] },
+        { "num x, y; x = 10; y = 12; write(x); write(y)", [10, 12] },
+        { "num a = 1, b = 2; a = 5; b = a + 1; write(a); write(b)", [5, 6] },
+
+        // Выражения с переменными
+        { "num x = 1, y = 2, z = 3; num result = x + y * z; write(result)", [7] },
+        { "num x, y; x = 10; y = 12; num sum = x + y; write(sum)", [22] },
+        { "num a = 1 + 2 * 3; write(a)", [7] },
+        { "num a = 5; num b = a * 2; write(b)", [10] },
+
+        // Константы и выражения
+        { "const num PI = 3.14; num radius = 2; num area = PI * radius * radius; write(area)", [12.56m] },
+        { "const num c = 3.14159; num c = 2; num result = 4.0 * c * 4.0; write(result)", [32m] },
+
+        // Множественные выражения с выводом
+        { "num a = 1 + 2; write(a); num b = 2 * 5; write(b); num c = 4.5; write(c)", [3, 10, 4.5m] },
     };
 
     [Theory]
     [MemberData(nameof(ValidCodeTestData))]
     public void Can_parse_valid_code(string code, List<decimal> expected)
     {
-        // Arrange
         Parser parser = new(_context, _environment, code);
-
-        // Act
         parser.ParseProgram();
 
-        // Assert
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
     }
@@ -48,7 +55,7 @@ public class ParserVariableAndConstantTests
     [Fact]
     public void Throws_on_undefined_variable_without_declarations()
     {
-        string code = "x + 1";
+        string code = "write(x + 1)";
         Parser parser = new(_context, _environment, code);
 
         Assert.Throws<ArgumentException>(() => parser.ParseProgram());
@@ -57,7 +64,7 @@ public class ParserVariableAndConstantTests
     [Fact]
     public void Throws_on_undefined_variable_in_complex_expression()
     {
-        string code = "num x, y; x + y + z";
+        string code = "num x, y; write(x + y + z)";
         Parser parser = new(_context, _environment, code);
 
         Assert.Throws<ArgumentException>(() => parser.ParseProgram());

@@ -47,14 +47,10 @@ public class InterpreterTests
 
         // ожидаемый результат
         List<RuntimeValue> expected = [
-            RuntimeValue.Number(0),
             RuntimeValue.String("First num: "),
-            RuntimeValue.Number(0.1m),
             RuntimeValue.String("Second num: "),
-            RuntimeValue.Number(0.2m),
             RuntimeValue.String("Sum is: "),
-            RuntimeValue.Number(0.3m), // результат asigment
-            RuntimeValue.Number(0.3m), // результат write
+            RuntimeValue.Number(0.3m),
         ];
 
         // сравнение результататов
@@ -83,11 +79,8 @@ public class InterpreterTests
 
         // ожидаемый результат
         List<RuntimeValue> expected = [
-            RuntimeValue.Number(0),
-            RuntimeValue.Number(0),
             RuntimeValue.String("Введите радиус окружности: "),
-            RuntimeValue.Number(10),
-            RuntimeValue.Number(314.15926535897900m), // результат assigment
+            RuntimeValue.String("Площадь окружности: "),
             RuntimeValue.Number(314.15926535897900m), // результат последнего выражения в writeln
         ];
 
@@ -117,12 +110,8 @@ public class InterpreterTests
 
         // ожидаемый результат
         List<RuntimeValue> expected = [
-            RuntimeValue.Number(0),
-            RuntimeValue.Number(0),
             RuntimeValue.String("Введите количество милей: "),
-            RuntimeValue.Number(120),
-            RuntimeValue.Number(193.2m), // результат assigment
-            RuntimeValue.Number(193.2m), // результат writeln
+            RuntimeValue.Number(193.2m),
         ];
 
         // сравнение результататов
