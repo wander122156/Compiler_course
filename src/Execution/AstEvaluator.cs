@@ -172,7 +172,6 @@ public class AstEvaluator : IAstVisitor
 
     public void Visit(FunctionCallExpression e)
     {
-        // Вычисляем все аргументы
         List<decimal> arguments = new();
         foreach (Expression arg in e.Arguments)
         {
@@ -239,5 +238,57 @@ public class AstEvaluator : IAstVisitor
                 throw new InvalidOperationException($"Readln expected number but got {value.Type}");
             }
         }
+    }
+
+    public void Visit(IfElseStatement s)
+    {
+        s.Condition.Accept(this);
+        RuntimeValue conditionValue = _values.Pop();
+
+        bool isTrue = ConvertToBoolean(conditionValue);
+
+        if (isTrue)
+        {
+            s.ThenBranch.Accept(this);
+        }
+        else if (s.ElseBranch != null)
+        {
+            s.ElseBranch.Accept(this);
+        }
+
+        // Если условие false и нет else - ничего не делаем
+    }
+
+    public void Visit(CompoundStatement s)
+    {
+        _context.PushScope(new Scope());
+
+        try
+        {
+            foreach (IAstElement statement in s.Statements)
+            {
+                statement.Accept(this);
+                if (_values.Count > 0)
+                {
+                    _values.Pop();
+                }
+            }
+        }
+        finally
+        {
+            _context.PopScope();
+        }
+    }
+
+    private bool ConvertToBoolean(RuntimeValue value)
+    {
+        return value.Type switch
+        {
+            RuntimeValue.ValueType.Boolean => (bool)value.Value,
+            RuntimeValue.ValueType.Number => (decimal)value.Value != 0,
+            RuntimeValue.ValueType.String => !string.IsNullOrEmpty((string)value.Value),
+            RuntimeValue.ValueType.Null => false,
+            _ => false,
+        };
     }
 }

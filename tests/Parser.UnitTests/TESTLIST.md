@@ -20,11 +20,25 @@
 
 ### Разбор условий
 
-- [ ] Разбор if без else: ` if (true) {} ` → []
-- [ ] Проверка выполнения тела if при TRUE условии: ` if (true) { write (1 + 5 - 3) }  ` → 3
-- [ ] Проверка выполнения тела if при FALSE условии: ` if (false) { write(1 + 5 - 3) } ` → []
-- [ ] Разбор оператора "меньше": `if (3 < 5) {write(1)}` → 1
-- [ ] Разбор выражений со сравнениями и арифметикой: `if (1 + 2 * 6^4 < 5) { write(1) }` → 1
+- [x] Разбор `if без else: if (true) {}` → []
+- [x] Проверка выполнения тела if при TRUE условии: `if (true) { write(1 + 5 - 3) }` → 3
+- [x] Проверка выполнения тела if при FALSE условии: `if (false) { write(1 + 5 - 3) }` → []
+- [x] Разбор оператора "меньше": `if (3 < 5) { write(1) }` → 1
+- [x] Разбор выражений со сравнениями и арифметикой: `if (1 + 2 * 6^2 < 321) { write(1) }` → 1
+- [x] Разбор if с else (обе ветки): `if (true) { write(1) } else { write(2) }` → 1
+- [x] Разбор if с else (ветка else): `if (false) { write(1) } else { write(2) }` → 2
+- [x] Вложенные if-else: `if (true) { if (false) { write(1) } else { write(2) } }` → 2
+- [x] Условие с переменной: `num x = 10; if (x > 5) { write(1) } `→ 1
+- [x] Оператор равенства: `if (5 == 5) { write(1) }` → 1
+- [x] Оператор неравенства: `if (5 != 3) { write(1) }` → 1
+- [x] Оператор "больше или равно": `if (5 >= 5) { write(1) }` → 1
+- [x] Оператор "меньше или равно": `if (3 <= 5) { write(1) }` → 1
+- [x] Несколько statements в теле: `if (true) { write(1); write(2) }` → 1, 2
+- [x] Несколько statements в else: `if (false) { write(1); write(2) } else { write(3); write(4) }` → 3, 4
+- [x] Ошибка: отсутствует скобка условия: `if true) { write(1) }`
+- [x] Ошибка: отсутствует открывающая фигурная скобка: `if (true) write(1) }`
+- [x] Ошибка: неверное выражение условия: `if (true false) { write(1) }`
+
 - [x] Разбор арифметических выражений с учётом скобок: `(1 + 2) * 3` → 9
 - [x] Разбор выражения с множественными скобками: `((1 + 2) * (3 - 1)) - 2` → 4
 - [x] Поддержка встроенных констант: 
@@ -86,6 +100,7 @@ statement =
           | const_defenition
           | assignment
           | if_statement
+          | function_statement
           | write_statement 
           | writeln_statement
           | read_statement
@@ -107,7 +122,7 @@ assignment = identifier, "=", expression ;
 if_statement = "if", "(", condition, ")", compound_statement, [ "else", statement ] ;
 
 (* Условия *)
-compound_statement = "{", { statement, [ ";" ] }, "}" ;
+compound_statement = "{", statement, { ";", statement }, [ ";" ], "}"
 condition = expression, [ comparison_operator, expression ] ;
 comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 

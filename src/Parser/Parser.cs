@@ -61,18 +61,18 @@ public class Parser
     ///         | const_defenition
     ///         | assignment
     ///         | if_statement
+    ///         | function_statement
     ///         | write_statement
     ///         | writeln_statement
     ///         | read_statement
     ///         | readln_statement
     ///         | while_statement
     ///         | compound_statement
-    ///         | expression(временно)
     ///
     /// Осталось реализовать :
     /// statement =
     ///         | while_statement
-    ///         | if_statement
+    ///         | function_statement
     /// </summary>
     private IAstElement ParseStatement()
     {
@@ -89,8 +89,8 @@ public class Parser
                 return ParseConstantDefinition();
             case TokenType.Num:
                 return ParseVariableDeclaration();
-            // case TokenType.If:
-            //    return ParseIfStatement();
+            case TokenType.If:
+                return ParseIfStatement();
             case TokenType.Write:
                 return ParseWriteStatement();
             case TokenType.Writeln:
@@ -268,19 +268,65 @@ public class Parser
     }
 
     /// <summary>
+    /// Разбирает аргументы команды If
+    ///     if_statement = "if", "(", condition, ")", statement, [ "else", statement ]
+    /// </summary>
+    private IfElseStatement ParseIfStatement()
+    {
+        _tokens.Advance();
+
+        Match(TokenType.OpenParenthesis);
+        Expression condition = ParseCondition();
+        Match(TokenType.CloseParenthesis);
+
+        // Выполняем then
+        IAstElement thenBranch = ParseStatementOrBlock();
+
+        // else?
+        IAstElement? elseBranch = null;
+        if (_tokens.Peek().Type == TokenType.Else)
+        {
+            _tokens.Advance();
+            elseBranch = ParseStatementOrBlock();
+        }
+
+        return new IfElseStatement(condition, thenBranch, elseBranch);
+    }
+
+    /// <summary>
+    /// Парсит statement или блок в фигурных скобках
+    /// </summary>
+    private IAstElement ParseStatementOrBlock()
+    {
+        // Если следующая лексема - открывающая фигурная скобка, парсим compound statement
+        if (_tokens.Peek().Type == TokenType.OpenBraces)
+        {
+            return ParseCompoundStatement();
+        }
+        else
+        {
+            return ParseStatement();
+        }
+    }
+
+    /// <summary>
     /// Разбирает составной statement в фигурных скобках
-    /// compound_statement = "{", { statement, [ ";" ] }, "}"
+    /// compound_statement = "{", statement, { ";", statement }, [ ";" ], "}"
     /// Возвращает результат ПОСЛЕДНЕГО statement в блоке
     /// </summary>
-    private List<IAstElement> ParseCompoundStatement()
+    private CompoundStatement ParseCompoundStatement()
     {
         Match(TokenType.OpenBraces);
 
-        List<IAstElement> results = new();
+        List<IAstElement> statements = new();
 
         while (_tokens.Peek().Type != TokenType.CloseBraces)
         {
-            results.Add(ParseStatement());
+            statements.Add(ParseStatement());
+            if (_tokens.Peek().Type != TokenType.CloseBraces)
+            {
+                Match(TokenType.Semicolon);
+            }
 
             if (_tokens.Peek().Type == TokenType.EndOfFile)
             {
@@ -289,43 +335,8 @@ public class Parser
         }
 
         Match(TokenType.CloseBraces);
-        return results;
+        return new CompoundStatement(statements);
     }
-
-    /// <summary>
-    /// Разбирает аргументы команды If
-    ///     if_statement = "if", "(", condition, ")", statement, [ "else", statement ]
-    /// Реализовано:
-    ///     "if", "(", condition, ")", statement
-    /// </summary>
-    //private Expression ParseIfStatement()
-    //{
-    //    _tokens.Advance();
-
-    //    Match(TokenType.OpenParenthesis);
-    //    Expression conditionResult = ParseCondition();
-    //    Match(TokenType.CloseParenthesis);
-
-    //    // Выполняем then
-    //    List<Expression> thenResult = ParseCompoundStatement();
-
-    //    // else?
-    //    if (_tokens.Peek().Type == TokenType.Else)
-    //    {
-    //        _tokens.Advance();
-    //        List<Expression> elseResult = ParseCompoundStatement();
-    //        return ConvertToBoolean(conditionResult)
-    //           ? thenResult.Last()
-    //           : elseResult.Last(); // возврат последнего
-    //    }
-
-    //    // если условие false и нет else и блок then пустой - возвращаем conditionResult
-    //    return ConvertToBoolean(conditionResult)
-    //        ? thenResult.Count > 0
-    //            ? thenResult.Last()
-    //            : conditionResult
-    //        : conditionResult;
-    //}
 
     /// <summary>
     /// Разбирает условие
@@ -533,6 +544,18 @@ public class Parser
             return new NumericLiteralExpression(t.Value!.ToDecimal());
         }
 
+        if (t.Type == TokenType.True)
+        {
+            _tokens.Advance();
+            return new BooleanLiteralExpression(true);
+        }
+
+        if (t.Type == TokenType.False)
+        {
+            _tokens.Advance();
+            return new BooleanLiteralExpression(false);
+        }
+
         if (t.Type == TokenType.Identifier)
         {
             string identifier = Match(TokenType.Identifier).Value!.ToString();
@@ -610,19 +633,4 @@ public class Parser
                type == TokenType.LessThan ||
                type == TokenType.LessThanOrEqual;
     }
-
-    /// <summary>
-    /// Преобразует RuntimeValue в boolean значение
-    /// </summary>
-    //private bool ConvertToBoolean(RuntimeValue value)
-    //{
-    //    return value.Type switch
-    //    {
-    //        RuntimeValue.ValueType.Boolean => (bool)value.Value,
-    //        RuntimeValue.ValueType.Number => (decimal)value.Value != 0,
-    //        RuntimeValue.ValueType.String => !string.IsNullOrEmpty((string)value.Value),
-    //        RuntimeValue.ValueType.Null => false,
-    //        _ => false,
-    //    };
-    //}
 }

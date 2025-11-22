@@ -35,4 +35,8 @@ public interface IAstVisitor
     public void Visit(ReadStatement s);
 
     public void Visit(ReadLineStatement s);
+
+    public void Visit(IfElseStatement s);
+
+    public void Visit(CompoundStatement s);
 }
