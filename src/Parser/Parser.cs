@@ -1,8 +1,16 @@
-﻿using System;
+﻿using System.Xml.Linq;
 
+using Blang.Ast;
+using Blang.Ast.Declarations;
+using Blang.Ast.Expressions;
+using Blang.Ast.Statement;
 using Blang.Common;
 using Blang.Execution;
 using Blang.Lexer;
+
+using static Blang.Ast.Expressions.BinaryOperationExpression;
+
+using Expression = Blang.Ast.Expressions.Expression;
 
 namespace Blang.Parser;
 
@@ -11,15 +19,15 @@ namespace Blang.Parser;
 /// </summary>
 public class Parser
 {
-    private readonly Context _context;
     private readonly IEnvironment _environment;
     private readonly TokenStream _tokens;
+    private readonly AstEvaluator _evaluator;
 
     public Parser(Context context, IEnvironment environment, string code)
     {
-        _context = context;
         _environment = environment;
         _tokens = new TokenStream(code);
+        _evaluator = new AstEvaluator(context, environment);
     }
 
     /// <summary>
@@ -30,7 +38,8 @@ public class Parser
     {
         do
         {
-            RuntimeValue result = ParseStatement();
+            IAstElement node = ParseStatement();
+            _evaluator.Evaluate(node);
 
             if (_tokens.Peek().Type == TokenType.Semicolon)
             {
@@ -65,7 +74,7 @@ public class Parser
     ///         | while_statement
     ///         | if_statement
     /// </summary>
-    private RuntimeValue ParseStatement()
+    private IAstElement ParseStatement()
     {
         if (_tokens.Peek().Type == TokenType.Identifier &&
             _tokens.Peek(1).Type == TokenType.Assignment)
@@ -80,8 +89,8 @@ public class Parser
                 return ParseConstantDefinition();
             case TokenType.Num:
                 return ParseVariableDeclaration();
-            case TokenType.If:
-                return ParseIfStatement();
+            // case TokenType.If:
+            //    return ParseIfStatement();
             case TokenType.Write:
                 return ParseWriteStatement();
             case TokenType.Writeln:
@@ -101,27 +110,22 @@ public class Parser
     /// Правило:
     ///     read_statement = "read", "(", identifier, {"," ,identifier } ")"
     /// </summary>
-    private RuntimeValue ParseReadStatement()
+    private ReadStatement ParseReadStatement()
     {
         Match(TokenType.Read);
         Match(TokenType.OpenParenthesis);
+        List<string> variableNames = new();
 
-        RuntimeValue value;
+        variableNames.Add(Match(TokenType.Identifier).Value!.ToString());
 
-        do
+        while(_tokens.Peek().Type == TokenType.Comma)
         {
-            string name = Match(TokenType.Identifier).Value!.ToString();
-            value = _environment.Read();
-
-            if (value.Type == RuntimeValue.ValueType.Number)
-            {
-                _context.AssignVariable(name, (decimal)value.Value);
-            }
+            _tokens.Advance();
+            variableNames.Add(Match(TokenType.Identifier).Value!.ToString());
         }
-        while (_tokens.Peek().Type == TokenType.Comma && Match(TokenType.Comma) != null);
 
         Match(TokenType.CloseParenthesis);
-        return value;
+        return new ReadStatement(variableNames);
     }
 
     /// <summary>
@@ -129,28 +133,23 @@ public class Parser
     /// Правило:
     ///     readln_statement = "readln", "(", identifier, {"," ,identifier } ")"
     /// </summary>
-    private RuntimeValue ParseReadLineStatement()
+    private ReadLineStatement ParseReadLineStatement()
     {
         Match(TokenType.Readln);
         Match(TokenType.OpenParenthesis);
 
-        RuntimeValue value;
+        List<string> variableNames = new();
 
-        do
+        variableNames.Add(Match(TokenType.Identifier).Value!.ToString());
+
+        while (_tokens.Peek().Type == TokenType.Comma)
         {
-            string name = Match(TokenType.Identifier).Value!.ToString();
-            value = _environment.Readln();
-
-            if (value.Type == RuntimeValue.ValueType.Number)
-            {
-                _context.AssignVariable(name, (decimal)value.Value);
-            }
+            _tokens.Advance();
+            variableNames.Add(Match(TokenType.Identifier).Value!.ToString());
         }
-        while (_tokens.Peek().Type == TokenType.Comma && Match(TokenType.Comma) != null);
 
         Match(TokenType.CloseParenthesis);
-
-        return value;
+        return new ReadLineStatement(variableNames);
     }
 
     /// <summary>
@@ -158,22 +157,15 @@ public class Parser
     /// Правило:
     ///     write_statement = "write", "(" expression_list ")" ;
     /// </summary>
-    private RuntimeValue ParseWriteStatement()
+    private WriteStatement ParseWriteStatement()
     {
         Match(TokenType.Write);
-
         Match(TokenType.OpenParenthesis);
 
-        List<RuntimeValue> values = ParseExpressionList();
-
-        foreach(RuntimeValue value in values)
-        {
-            _environment.Write(value);
-        }
-
+        List<Expression> expressions = ParseExpressionList();
         Match(TokenType.CloseParenthesis);
 
-        return values.Last();
+        return new WriteStatement(expressions);
     }
 
     /// <summary>
@@ -182,31 +174,21 @@ public class Parser
     ///     writeln_statement = "writeln", "(" expression_list ")"
     ///                       | "writeln", "(", ")"
     /// </summary>
-    private RuntimeValue ParseWriteLineStatement()
+    private WriteLineStatement ParseWriteLineStatement()
     {
         Match(TokenType.Writeln);
-
         Match(TokenType.OpenParenthesis);
 
         if (_tokens.Peek().Type == TokenType.CloseParenthesis)
         {
-            _tokens.Advance();
-            RuntimeValue emptyRes = RuntimeValue.Null();
-
-            _environment.Writeln(emptyRes);
-            return emptyRes;
+            Match(TokenType.CloseParenthesis);
+            return new WriteLineStatement(new List<Expression>()); // writeln()
         }
 
-        List<RuntimeValue> values = ParseExpressionList();
-
-        foreach (RuntimeValue value in values)
-        {
-            _environment.Writeln(value);
-        }
-
+        List<Expression> expressions = ParseExpressionList();
         Match(TokenType.CloseParenthesis);
 
-        return values.Last();
+        return new WriteLineStatement(expressions);
     }
 
     /// <summary>
@@ -214,7 +196,7 @@ public class Parser
     /// Правило:
     ///      constant_definition = "const", "num", identifier, "=", expression
     /// </summary>
-    private RuntimeValue ParseConstantDefinition()
+    private ConstantDeclaration ParseConstantDefinition()
     {
         Match(TokenType.Const);
         Match(TokenType.Num);
@@ -223,12 +205,10 @@ public class Parser
 
         Match(TokenType.Assignment);
 
-        RuntimeValue value = ParseExpression();
+        Expression value = ParseExpression();
 
         // пока только decimal
-        _context.DefineConstant(name, (decimal)value.Value);
-
-        return value;
+        return new ConstantDeclaration(name, value);
     }
 
     /// <summary>
@@ -236,15 +216,13 @@ public class Parser
     /// Правило:
     ///     assignment = identifier, "=", expression
     /// </summary>
-    private RuntimeValue ParseAssignment()
+    private AssignmentExpression ParseAssignment()
     {
         string name = Match(TokenType.Identifier).Value!.ToString();
         Match(TokenType.Assignment);
 
-        RuntimeValue value = ParseExpression();
-        _context.AssignVariable(name, (decimal)value.Value);
-
-        return value;
+        Expression value = ParseExpression();
+        return new AssignmentExpression(name, value);
     }
 
     /// <summary>
@@ -253,37 +231,30 @@ public class Parser
     ///     variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
     ///     Возвращает результат последнего присваивания
     /// </summary>
-    private RuntimeValue ParseVariableDeclaration()
+    private VariableDeclarationStatement ParseVariableDeclaration()
     {
         Match(TokenType.Num);
-        _context.PushScope(new Scope());
 
-        List<RuntimeValue> results = new List<RuntimeValue>();
+        List<VariableDeclaration> declarations = new();
 
         // Первая переменная
         string firstName = Match(TokenType.Identifier).Value!.ToString();
-        RuntimeValue firstValue = ParseOptionalAssignment();
-        _context.DefineVariable(firstName, (decimal)firstValue.Value);
+        Expression? firstValue = ParseOptionalAssignment();
+        declarations.Add(new VariableDeclaration(firstName, firstValue));
 
-        results.Add(firstValue);
-
-        // Остальные
+        // Остальные переменные
         while (_tokens.Peek().Type == TokenType.Comma)
         {
             Match(TokenType.Comma);
-
             string name = Match(TokenType.Identifier).Value!.ToString();
-            RuntimeValue value = ParseOptionalAssignment();
-            _context.DefineVariable(name, (decimal)value.Value);
-
-            results.Add(value);
+            Expression? value = ParseOptionalAssignment();
+            declarations.Add(new VariableDeclaration(name, value));
         }
 
-        // Возвращаем результат последнего присваивания
-        return results.Last();
+        return new VariableDeclarationStatement(declarations);
     }
 
-    private RuntimeValue ParseOptionalAssignment()
+    private Expression? ParseOptionalAssignment()
     {
         if (_tokens.Peek().Type == TokenType.Assignment)
         {
@@ -292,7 +263,7 @@ public class Parser
         }
         else
         {
-            return RuntimeValue.Number(0);
+            return null; // Нет инициализации
         }
     }
 
@@ -301,15 +272,15 @@ public class Parser
     /// compound_statement = "{", { statement, [ ";" ] }, "}"
     /// Возвращает результат ПОСЛЕДНЕГО statement в блоке
     /// </summary>
-    private List<RuntimeValue> ParseCompoundStatement()
+    private List<IAstElement> ParseCompoundStatement()
     {
         Match(TokenType.OpenBraces);
 
-        List<RuntimeValue> result = new();
+        List<IAstElement> results = new();
 
         while (_tokens.Peek().Type != TokenType.CloseBraces)
         {
-            result.Add(ParseStatement());
+            results.Add(ParseStatement());
 
             if (_tokens.Peek().Type == TokenType.EndOfFile)
             {
@@ -318,7 +289,7 @@ public class Parser
         }
 
         Match(TokenType.CloseBraces);
-        return result;
+        return results;
     }
 
     /// <summary>
@@ -327,53 +298,69 @@ public class Parser
     /// Реализовано:
     ///     "if", "(", condition, ")", statement
     /// </summary>
-    private RuntimeValue ParseIfStatement()
-    {
-        Match(TokenType.If);
+    //private Expression ParseIfStatement()
+    //{
+    //    _tokens.Advance();
 
-        Match(TokenType.OpenParenthesis);
-        RuntimeValue conditionResult = ParseCondition();
-        Match(TokenType.CloseParenthesis);
+    //    Match(TokenType.OpenParenthesis);
+    //    Expression conditionResult = ParseCondition();
+    //    Match(TokenType.CloseParenthesis);
 
-        // Выполняем then
-        List<RuntimeValue> thenResult = ParseCompoundStatement();
+    //    // Выполняем then
+    //    List<Expression> thenResult = ParseCompoundStatement();
 
-        // else?
-        if (_tokens.Peek().Type == TokenType.Else)
-        {
-            _tokens.Advance();
-            List<RuntimeValue> elseResult = ParseCompoundStatement();
-            return ConvertToBoolean(conditionResult)
-               ? thenResult.Last()
-               : elseResult.Last(); // возврат последнего
-        }
+    //    // else?
+    //    if (_tokens.Peek().Type == TokenType.Else)
+    //    {
+    //        _tokens.Advance();
+    //        List<Expression> elseResult = ParseCompoundStatement();
+    //        return ConvertToBoolean(conditionResult)
+    //           ? thenResult.Last()
+    //           : elseResult.Last(); // возврат последнего
+    //    }
 
-        // если условие false и нет else и блок then пустой - возвращаем conditionResult
-        return ConvertToBoolean(conditionResult)
-            ? thenResult.Count > 0
-                ? thenResult.Last()
-                : conditionResult
-            : conditionResult;
-    }
+    //    // если условие false и нет else и блок then пустой - возвращаем conditionResult
+    //    return ConvertToBoolean(conditionResult)
+    //        ? thenResult.Count > 0
+    //            ? thenResult.Last()
+    //            : conditionResult
+    //        : conditionResult;
+    //}
 
     /// <summary>
     /// Разбирает условие
     ///     condition = expression, [ comparison_operator, expression ]
     /// </summary>
-    private RuntimeValue ParseCondition()
+    private Expression ParseCondition()
     {
-        RuntimeValue left = ParseExpression();
+        Expression left = ParseExpression();
 
         Token operationToken = _tokens.Peek();
         if (IsComparisonOperator(operationToken.Type))
         {
             _tokens.Advance();
-            RuntimeValue right = ParseExpression();
+            Expression right = ParseExpression();
 
-            return EvaluateComparison(left, operationToken.Type, right);
+            return CreateComparisonExpression(left, operationToken.Type, right);
         }
 
-        return ConvertToBooleanValue(left);
+        return left;
+    }
+
+    private Expression CreateComparisonExpression(Expression left, TokenType operation, Expression right)
+    {
+        BinaryOperation binaryOp = operation switch
+        {
+            TokenType.LessThan => BinaryOperation.LessThan,
+            TokenType.GreaterThan => BinaryOperation.GreaterThan,
+            TokenType.LooseEquality => BinaryOperation.LooseEquality,
+            TokenType.NotEqual => BinaryOperation.NotEqual,
+            TokenType.LessThanOrEqual => BinaryOperation.LessThanOrEqual,
+            TokenType.GreaterThanOrEqual => BinaryOperation.GreaterThanOrEqual,
+            _ => throw new Exception($"Unsupported comparison operator: {operation}")
+        };
+
+        return new BinaryOperationExpression(left, binaryOp, right);
     }
 
     /// <summary>
@@ -381,20 +368,19 @@ public class Parser
     /// Правила:
     ///     expression_list = expression, { ",", expression } ;
     /// </summary>
-    private List<RuntimeValue> ParseExpressionList()
+    private List<Expression> ParseExpressionList()
     {
-        List<RuntimeValue> values =
+        List<Expression> expressions =
         [
             ParseExpression(),
         ];
         while (_tokens.Peek().Type == TokenType.Comma)
         {
             _tokens.Advance();
-            values.Add(ParseExpression());
+            expressions.Add(ParseExpression());
         }
 
-        List<RuntimeValue> result = new(values.ToArray());
-        return result;
+        return expressions;
     }
 
     /// <summary>
@@ -402,23 +388,31 @@ public class Parser
     /// Правила:
     ///     expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression }
     /// </summary>
-    private RuntimeValue ParseExpression()
+    private Expression ParseExpression()
     {
-        RuntimeValue value = ParseMultiplicativeExpression();
+        Expression left = ParseMultiplicativeExpression();
         while (true)
         {
             switch (_tokens.Peek().Type)
             {
                 case TokenType.PlusSign:
                     _tokens.Advance();
-                    value = EvaluateArithmetic(value, ParseMultiplicativeExpression(), TokenType.PlusSign);
+                    left = new BinaryOperationExpression(
+                        left,
+                        BinaryOperation.Plus,
+                        ParseMultiplicativeExpression()
+                    );
                     break;
                 case TokenType.MinusSign:
                     _tokens.Advance();
-                    value = EvaluateArithmetic(value, ParseMultiplicativeExpression(), TokenType.MinusSign);
+                    left = new BinaryOperationExpression(
+                        left,
+                        BinaryOperation.Minus,
+                        ParseMultiplicativeExpression()
+                    );
                     break;
                 default:
-                    return value;
+                    return left;
             }
         }
     }
@@ -428,28 +422,39 @@ public class Parser
     ///  Правила:
     ///     multiplicative_expression = unary_expression, { ("*" | "/" | "%"), unary_expression }
     /// </summary>
-    private RuntimeValue ParseMultiplicativeExpression()
+    private Expression ParseMultiplicativeExpression()
     {
-        RuntimeValue value = ParseUnaryExpression();
+        Expression left = ParseUnaryExpression();
         while (true)
         {
             switch (_tokens.Peek().Type)
             {
                 case TokenType.MultiplySign:
                     _tokens.Advance();
-                    value = EvaluateArithmetic(value, ParseMultiplicativeExpression(), TokenType.MultiplySign);
+                    left = new BinaryOperationExpression(
+                        left,
+                        BinaryOperation.Multiply,
+                        ParseUnaryExpression()
+                    );
                     break;
                 case TokenType.DivideSign:
                     _tokens.Advance();
-                    value = EvaluateArithmetic(value, ParseMultiplicativeExpression(), TokenType.DivideSign);
+                    left = new BinaryOperationExpression(
+                        left,
+                        BinaryOperation.Divide,
+                        ParseUnaryExpression()
+                    );
                     break;
                 case TokenType.ModuloSign:
                     _tokens.Advance();
-                    value = EvaluateArithmetic(value, ParseMultiplicativeExpression(), TokenType.ModuloSign);
+                    left = new BinaryOperationExpression(
+                        left,
+                        BinaryOperation.Modulo,
+                        ParseUnaryExpression()
+                    );
                     break;
-
                 default:
-                    return value;
+                    return left;
             }
         }
     }
@@ -458,21 +463,14 @@ public class Parser
     ///  Разбирает один операнд умножения / деления.
     ///  Правило:
     ///     unary_expression = ("+" | "-"), unary_expression | exponentiation_expression
-    private RuntimeValue ParseUnaryExpression()
+    private Expression ParseUnaryExpression()
     {
         if (_tokens.Peek().Type == TokenType.MinusSign)
         {
             _tokens.Advance();
-            RuntimeValue operand = ParseUnaryExpression(); // Рекурсивно
+            Expression operand = ParseUnaryExpression(); // Рекурсивно
 
-            if (operand.Type == RuntimeValue.ValueType.Number)
-            {
-                return new RuntimeValue(RuntimeValue.ValueType.Number, -(decimal)operand.Value);
-            }
-            else
-            {
-                throw new Exception($"Unary minus cannot be applied to {operand.Type}");
-            }
+            return new UnaryOperationExpression(UnaryOperation.Minus, operand);
         }
         else if (_tokens.Peek().Type == TokenType.PlusSign)
         {
@@ -490,57 +488,35 @@ public class Parser
     ///  Правило:
     ///     exponentiation_expression = primary_expression, { ("^"), exponentiation_expression }
     /// </summary>
-    private RuntimeValue ParseExponentiationExpression()
+    private Expression ParseExponentiationExpression()
     {
-        RuntimeValue value = ParsePrimaryExpression();
+        Expression left = ParsePrimaryExpression();
 
         while (_tokens.Peek().Type == TokenType.ExponentiationSign)
         {
             _tokens.Advance();
-            RuntimeValue exponent = ParseExponentiationExpression(); // правая ассициотивность
-            value = EvaluateExponentiation(value, exponent);
+            Expression right = ParseExponentiationExpression(); // правая ассициотивность
+            left = new BinaryOperationExpression(
+                left,
+                BinaryOperation.Exponentiation,
+                right
+            );
         }
 
-        return value;
-    }
-
-    /// <summary>
-    /// Вычисляет операцию возведения в степень.
-    /// </summary>
-    private RuntimeValue EvaluateExponentiation(RuntimeValue left, RuntimeValue right)
-    {
-        if (left.Type == RuntimeValue.ValueType.Number && right.Type == RuntimeValue.ValueType.Number)
-        {
-            decimal baseValue = (decimal)left.Value;
-            decimal exponentValue = (decimal)right.Value;
-
-            if (baseValue == 0 && exponentValue <= 0)
-            {
-                throw new DivideByZeroException("Zero cannot be raised to a non-positive power");
-            }
-
-            if (exponentValue == 0)
-            {
-                return RuntimeValue.Number(1);
-            }
-
-            return RuntimeValue.Number((decimal)Math.Pow((double)baseValue, (double)exponentValue));
-        }
-
-        throw new Exception($"Exponentiation operation is not supported between {left.Type} and {right.Type}");
+        return left;
     }
 
     /// <summary>
     ///  Разбирает простейшую часть выражения.
     ///     primary_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression(MathE, Pi)
-    private RuntimeValue ParsePrimaryExpression()
+    private Expression ParsePrimaryExpression()
     {
         Token t = _tokens.Peek();
 
         if (t.Type == TokenType.OpenParenthesis)
         {
             Match(TokenType.OpenParenthesis);
-            RuntimeValue expression = ParseExpression();
+            Expression expression = ParseExpression();
             Match(TokenType.CloseParenthesis);
             return expression;
         }
@@ -548,56 +524,37 @@ public class Parser
         if (t.Type == TokenType.StringLiteral)
         {
             _tokens.Advance();
-            return RuntimeValue.String(t.Value!.ToString());
+            return new StringLiteralExpression(t.Value!.ToString());
         }
 
         if (t.Type == TokenType.NumericLiteral)
         {
             _tokens.Advance();
-            return RuntimeValue.Number(t.Value!.ToDecimal());
-        }
-
-        if (t.Type == TokenType.True)
-        {
-            _tokens.Advance();
-            return RuntimeValue.Boolean(true);
-        }
-
-        if (t.Type == TokenType.False)
-        {
-            _tokens.Advance();
-            return RuntimeValue.Boolean(false);
+            return new NumericLiteralExpression(t.Value!.ToDecimal());
         }
 
         if (t.Type == TokenType.Identifier)
         {
-            string identifier = t.Value!.ToString();
+            string identifier = Match(TokenType.Identifier).Value!.ToString();
 
             switch (identifier)
             {
                 case "MathE":
-                    _tokens.Advance();
-                    return RuntimeValue.Number((decimal)Math.E);
+                    return new NumericLiteralExpression((decimal)Math.E);
                 case "Pi":
-                    _tokens.Advance();
-                    return RuntimeValue.Number((decimal)Math.PI);
+                    return new NumericLiteralExpression((decimal)Math.PI);
                 default:
                     // func_call (встроенные функции)
-                    if (_tokens.Peek(1).Type == TokenType.OpenParenthesis)
+                    if (_tokens.Peek().Type == TokenType.OpenParenthesis)
                     {
-                        _tokens.Advance();
-                        Match(TokenType.OpenParenthesis);
-                        List<RuntimeValue> arguments = ParseExpressionList();
-                        Match(TokenType.CloseParenthesis);
-                        return RuntimeValue.Number(BuiltinFunctions.Invoke(t.Value!.ToString(), ConvertToDecimalList(arguments)));
+                        List<Expression> arguments = ParseArgumentsList();
+                        return new FunctionCallExpression(identifier, arguments);
                     }
 
-                    // получить существующую перменную
+                    // получить существующую переменную
                     else
                     {
-                        string name = Match(TokenType.Identifier).Value!.ToString();
-                        RuntimeValue variable = RuntimeValue.Number(_context.GetValue(name));
-                        return variable;
+                        return new VariableExpression(identifier);
                     }
             }
         }
@@ -605,23 +562,23 @@ public class Parser
         throw new UnexpectedLexemeException(TokenType.Identifier, t);
     }
 
-    private List<decimal> ConvertToDecimalList(List<RuntimeValue> runtimeValues)
+    private List<Expression> ParseArgumentsList()
     {
-        List<decimal> decimals = new List<decimal>();
+        Match(TokenType.OpenParenthesis);
+        List<Expression> arguments = new();
 
-        for (int i = 0; i < runtimeValues.Count; i++)
+        if (_tokens.Peek().Type != TokenType.CloseParenthesis)
         {
-            if (runtimeValues[i].Type == RuntimeValue.ValueType.Number)
+            arguments.Add(ParseExpression());
+            while (_tokens.Peek().Type == TokenType.Comma)
             {
-                decimals.Add((decimal)runtimeValues[i].Value);
-            }
-            else
-            {
-                throw new Exception($"Function argument must be number, got {runtimeValues[i].Type}");
+                Match(TokenType.Comma);
+                arguments.Add(ParseExpression());
             }
         }
 
-        return decimals;
+        Match(TokenType.CloseParenthesis);
+        return arguments;
     }
 
     /// <summary>
@@ -641,32 +598,6 @@ public class Parser
     }
 
     /// <summary>
-    /// Вычисляет арифметическую бинарную операцию.
-    /// </summary>
-    private RuntimeValue EvaluateArithmetic(RuntimeValue left, RuntimeValue right, TokenType operation)
-    {
-        if (left.Type == RuntimeValue.ValueType.Number && right.Type == RuntimeValue.ValueType.Number)
-        {
-            decimal leftNum = (decimal)left.Value;
-            decimal rightNum = (decimal)right.Value;
-
-            decimal result = operation switch
-            {
-                TokenType.PlusSign => leftNum + rightNum,
-                TokenType.MinusSign => leftNum - rightNum,
-                TokenType.MultiplySign => leftNum * rightNum,
-                TokenType.DivideSign => rightNum != 0 ? leftNum / rightNum : throw new DivideByZeroException("Division by zero"),
-                TokenType.ModuloSign => rightNum != 0 ? leftNum % rightNum : throw new DivideByZeroException("Modulo by zero"),
-                _ => 0
-            };
-
-            return RuntimeValue.Number(result);
-        }
-
-        throw new Exception($"Unsupported arithmetic operation between {left.Type} and {right.Type}");
-    }
-
-    /// <summary>
     /// Проверяет является ли токен оператором сравнения
     /// </summary>
     private bool IsComparisonOperator(TokenType type)
@@ -681,43 +612,17 @@ public class Parser
     }
 
     /// <summary>
-    /// Вычисляет операцию сравнения
-    /// </summary>
-    private RuntimeValue EvaluateComparison(RuntimeValue left, TokenType operation, RuntimeValue right)
-    {
-        if (operation == TokenType.LessThan)
-        {
-            if (left.Type == right.Type && left.Type == RuntimeValue.ValueType.Number)
-            {
-                bool result = (decimal)left.Value < (decimal)right.Value;
-                return RuntimeValue.Boolean(result);
-            }
-        }
-
-        throw new Exception($"Cannot compare {left.Type} and {right.Type} with < operator");
-    }
-
-    /// <summary>
     /// Преобразует RuntimeValue в boolean значение
     /// </summary>
-    private RuntimeValue ConvertToBooleanValue(RuntimeValue value)
-    {
-        bool boolValue = ConvertToBoolean(value);
-        return RuntimeValue.Boolean(boolValue);
-    }
-
-    /// <summary>
-    /// Преобразует RuntimeValue в boolean значение
-    /// </summary>
-    private bool ConvertToBoolean(RuntimeValue value)
-    {
-        return value.Type switch
-        {
-            RuntimeValue.ValueType.Boolean => (bool)value.Value,
-            RuntimeValue.ValueType.Number => (decimal)value.Value != 0,
-            RuntimeValue.ValueType.String => !string.IsNullOrEmpty((string)value.Value),
-            RuntimeValue.ValueType.Null => false,
-            _ => false,
-        };
-    }
+    //private bool ConvertToBoolean(RuntimeValue value)
+    //{
+    //    return value.Type switch
+    //    {
+    //        RuntimeValue.ValueType.Boolean => (bool)value.Value,
+    //        RuntimeValue.ValueType.Number => (decimal)value.Value != 0,
+    //        RuntimeValue.ValueType.String => !string.IsNullOrEmpty((string)value.Value),
+    //        RuntimeValue.ValueType.Null => false,
+    //        _ => false,
+    //    };
+    //}
 }

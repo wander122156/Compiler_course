@@ -1,4 +1,4 @@
-﻿namespace Ast;
+﻿namespace Blang.Ast;
 
 public abstract class IAstElement
 {

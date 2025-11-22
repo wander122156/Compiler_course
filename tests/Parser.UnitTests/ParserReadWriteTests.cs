@@ -53,7 +53,8 @@ public class ParserReadWriteTests
         string code = "writeln (\"sum:\", 2 + 2)";
         List<RuntimeValue> expected = [
             RuntimeValue.String("sum:"),
-            RuntimeValue.Number(4)
+            RuntimeValue.Number(4),
+            RuntimeValue.NewLine(),
         ];
 
         Parser parser = new(_context, _environment, code);
@@ -148,7 +149,7 @@ public class ParserReadWriteTests
     public void Can_parse_writeln_without_arguments()
     {
         string code = "writeln()";
-        List<RuntimeValue> expected = [RuntimeValue.Null()];
+        List<RuntimeValue> expected = [RuntimeValue.NewLine()];
 
         Parser parser = new(_context, _environment, code);
         parser.ParseProgram();

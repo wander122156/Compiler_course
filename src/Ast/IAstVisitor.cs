@@ -1,10 +1,38 @@
-﻿using Ast.Expressions;
+﻿using Blang.Ast.Declarations;
+using Blang.Ast.Expressions;
+using Blang.Ast.Statement;
 
-namespace Ast;
+namespace Blang.Ast;
 
 public interface IAstVisitor
 {
     public void Visit(BinaryOperationExpression e);
 
-    // public void Visit(другие операции);
+    public void Visit(UnaryOperationExpression e);
+
+    public void Visit(NumericLiteralExpression e);
+
+    public void Visit(StringLiteralExpression e);
+
+    public void Visit(BooleanLiteralExpression b);
+
+    public void Visit(VariableDeclaration e);
+
+    public void Visit(VariableDeclarationStatement e);
+
+    public void Visit(AssignmentExpression e);
+
+    public void Visit(VariableExpression e);
+
+    public void Visit(FunctionCallExpression f);
+
+    public void Visit(ConstantDeclaration d);
+
+    public void Visit(WriteStatement s);
+
+    public void Visit(WriteLineStatement s);
+
+    public void Visit(ReadStatement s);
+
+    public void Visit(ReadLineStatement s);
 }

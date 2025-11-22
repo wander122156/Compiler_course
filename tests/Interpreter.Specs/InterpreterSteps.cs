@@ -81,7 +81,8 @@ public class InterpreterTests
         List<RuntimeValue> expected = [
             RuntimeValue.String("Введите радиус окружности: "),
             RuntimeValue.String("Площадь окружности: "),
-            RuntimeValue.Number(314.15926535897900m), // результат последнего выражения в writeln
+            RuntimeValue.Number(314.15926535897900m),
+            RuntimeValue.NewLine(),
         ];
 
         // сравнение результататов
@@ -112,6 +113,7 @@ public class InterpreterTests
         List<RuntimeValue> expected = [
             RuntimeValue.String("Введите количество милей: "),
             RuntimeValue.Number(193.2m),
+            RuntimeValue.NewLine(),
         ];
 
         // сравнение результататов

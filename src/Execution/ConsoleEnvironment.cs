@@ -27,7 +27,7 @@ public class ConsoleEnvironment : IEnvironment
     {
         switch (value.Type)
         {
-            case RuntimeValue.ValueType.Null:
+            case RuntimeValue.ValueType.NewLine:
                 Console.WriteLine();
                 break;
             case RuntimeValue.ValueType.Number:

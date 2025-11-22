@@ -10,11 +10,35 @@ public class RuntimeValue
 
     public enum ValueType
     {
+        /// <summary>
+        /// Представляет числовое значение (decimal)
+        /// </summary>
         Number,
+
+        /// <summary>
+        /// Представляет строковое значение
+        /// </summary>
         String,
+
+        /// <summary>
+        /// Представляет логическое значение (true/false)
+        /// </summary>
         Boolean,
+
+        /// <summary>
+        /// Представляет нулевое значение (отсутствие значения)
+        /// </summary>
         Null,
+
+        /// <summary>
+        /// Представляет неопределенное значение (неинициализированная переменная)
+        /// </summary>
         Undefined,
+
+        /// <summary>
+        /// Представляет символ новой строки (используется для вывода writeln)
+        /// </summary>
+        NewLine,
     }
 
     public ValueType Type { get; }
@@ -36,6 +60,9 @@ public class RuntimeValue
     public static RuntimeValue Undefined()
         => new RuntimeValue(ValueType.Undefined, null!);
 
+    public static RuntimeValue NewLine()
+    => new RuntimeValue(ValueType.NewLine, null!);
+
     public static explicit operator decimal(RuntimeValue value)
     {
         if (value.Type != ValueType.Number)
@@ -54,5 +81,19 @@ public class RuntimeValue
         }
 
         return (string)value.Value;
+    }
+
+    public override string ToString()
+    {
+        return Type switch
+        {
+            ValueType.Number => $"Number:{Value}",
+            ValueType.String => $"String:{Value}",
+            ValueType.Boolean => $"Boolean:{Value}",
+            ValueType.NewLine => "NewLine",
+            ValueType.Null => "Null",
+            ValueType.Undefined => "Undefined",
+            _ => $"Unknown:{Type}",
+        };
     }
 }
