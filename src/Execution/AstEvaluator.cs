@@ -125,7 +125,7 @@ public class AstEvaluator : IAstVisitor
         if (d.Value != null)
         {
             d.Value.Accept(this);
-            value = (decimal)_values.Peek().Value;
+            value = (decimal)_values.Pop().Value;
         }
 
         _context.DefineVariable(d.Name, value);

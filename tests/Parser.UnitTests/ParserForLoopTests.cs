@@ -146,7 +146,7 @@ public class ParserForLoopTests
     {
         string code = @"
             num sum = 0;
-            for (num i = 1; i <= 3; i = i + 1) { sum = sum + i }
+            for (num i = 1; i <= 3; i = i + 1) { sum = sum + i };
             write(sum)
         ";
         List<RuntimeValue> expected = [RuntimeValue.Number(6)];
@@ -162,7 +162,7 @@ public class ParserForLoopTests
     public void Throws_when_accessing_loop_variable_outside_scope()
     {
         string code = @"
-            for (num i = 0; i < 3; i = i + 1) { write(i) }
+            for (num i = 0; i < 3; i = i + 1) { write(i) };
             write(i)
         ";
 

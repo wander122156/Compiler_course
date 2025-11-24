@@ -23,7 +23,8 @@ public class Context
     /// </summary>
     public decimal GetValue(string name)
     {
-        foreach (Scope s in _scopes.Reverse())
+        // foreach (Scope s in _scopes.Reverse())
+        foreach (Scope s in _scopes)
         {
             if (s.TryGetVariable(name, out decimal variable))
             {
@@ -44,7 +45,8 @@ public class Context
     /// </summary>
     public void AssignVariable(string name, decimal value)
     {
-        foreach (Scope s in _scopes.Reverse())
+        // foreach (Scope s in _scopes.Reverse())
+        foreach (Scope s in _scopes)
         {
             if (s.TryAssignVariable(name, value))
             {
