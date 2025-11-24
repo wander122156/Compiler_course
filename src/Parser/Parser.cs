@@ -67,11 +67,13 @@ public class Parser
     ///         | read_statement
     ///         | readln_statement
     ///         | while_statement
+    ///         | for_statement
     ///         | compound_statement
     ///
     /// Осталось реализовать :
     /// statement =
     ///         | while_statement
+    ///         | for_statement
     ///         | function_statement
     /// </summary>
     private IAstElement ParseStatement()
@@ -91,6 +93,8 @@ public class Parser
                 return ParseVariableDeclaration();
             case TokenType.If:
                 return ParseIfStatement();
+            case TokenType.For:
+                return ParseForLoopStatement();
             case TokenType.Write:
                 return ParseWriteStatement();
             case TokenType.Writeln:
@@ -229,7 +233,6 @@ public class Parser
     /// Разбирает объявление переменных и следующее за ним выражение.
     /// Правило:
     ///     variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
-    ///     Возвращает результат последнего присваивания
     /// </summary>
     private VariableDeclarationStatement ParseVariableDeclaration()
     {
@@ -268,8 +271,53 @@ public class Parser
     }
 
     /// <summary>
-    /// Разбирает аргументы команды If
-    ///     if_statement = "if", "(", condition, ")", statement, [ "else", statement ]
+    /// Разбирает for цикл
+    /// Правило:
+    ///     for_statement = "for", "(", for_initialization, ";", for_condition, ";", for_increment, ")", compound_statement
+    ///     for_initialization = variable_declaration | assignment
+    ///     for_condition = expression
+    ///     for_increment = assignment
+    /// </summary>
+    private ForLoopStatement ParseForLoopStatement()
+    {
+        _tokens.Advance();
+        Match(TokenType.OpenParenthesis);
+
+        IAstElement initialization;
+
+        if (_tokens.Peek().Type == TokenType.Num)
+        {
+            initialization = ParseVariableDeclaration();
+        }
+        else if (_tokens.Peek().Type == TokenType.Identifier &&
+                 _tokens.Peek(1).Type == TokenType.Assignment)
+        {
+            initialization = ParseAssignment();
+        }
+        else
+        {
+            throw new UnexpectedLexemeException(TokenType.Num, _tokens.Peek());
+        }
+
+        Match(TokenType.Semicolon);
+
+        Expression condition = ParseCondition();
+        Match(TokenType.Semicolon);
+
+        AssignmentExpression increment = ParseAssignment();
+
+        Match(TokenType.CloseParenthesis);
+
+        CompoundStatement body = ParseCompoundStatement();
+
+        return new ForLoopStatement(initialization, condition, increment, body);
+    }
+
+    /// <summary>
+    /// Разбирает if statement:
+    ///     if_statement = "if", "(", condition, ")", statement_or_block, [ "else", statement_or_block ]
+    ///     statement_or_block = compound_statement | statement
+    ///     compound_statement = "{", { statement, [ ";" ] }, "}"
     /// </summary>
     private IfElseStatement ParseIfStatement()
     {

@@ -28,6 +28,11 @@ public enum TokenType
     Const,
 
     /// <summary>
+    ///  Ключевое слово for.
+    /// </summary>
+    For,
+
+    /// <summary>
     ///  Ключевое слово while.
     /// </summary>
     While,

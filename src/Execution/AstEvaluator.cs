@@ -259,6 +259,49 @@ public class AstEvaluator : IAstVisitor
         // Если условие false и нет else - ничего не делаем
     }
 
+    public void Visit(ForLoopStatement s)
+    {
+        _context.PushScope(new Scope());
+
+        try
+        {
+            s.Initialization.Accept(this);
+
+            if (_values.Count > 0)
+            {
+                throw new Exception("ошибка после инициализации");
+            }
+
+            while (true)
+            {
+                s.Condition.Accept(this);
+                bool condition = ConvertToBoolean(_values.Pop());
+                if (!condition)
+                {
+                    break;
+                }
+
+                s.Body.Accept(this);
+
+                if (_values.Count > 0)
+                {
+                    throw new Exception("ошибка тела");
+                }
+
+                s.Increment.Accept(this);
+
+                if (_values.Count > 0)
+                {
+                    throw new Exception("ошибка инкремента");
+                }
+            }
+        }
+        finally
+        {
+            _context.PopScope();
+        }
+    }
+
     public void Visit(CompoundStatement s)
     {
         _context.PushScope(new Scope());

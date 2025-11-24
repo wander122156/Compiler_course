@@ -29,6 +29,9 @@ public class Lexer(string code)
             "else", TokenType.Else
         },
         {
+            "for", TokenType.For
+        },
+        {
             "while", TokenType.While
         },
         {

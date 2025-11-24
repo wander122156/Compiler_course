@@ -20,6 +20,62 @@ public class InterpreterTests
     }
 
     [Fact]
+    public void Can_execute_IfElseSumNums_program()
+    {
+        const string code = """
+            num a, b, sum;
+
+            write("First num: ");
+            read(a);
+            writeln();
+
+            write("Second num: ");
+            read(b);
+            writeln();
+
+            sum = a + b;
+            write("Sum is: ");
+            writeln(sum);
+
+            if (sum >= 100)
+            {
+                writeln("Sum >= 100")
+            }
+            else
+            {
+                writeln("Sum <= 100")
+            };
+
+            write("end")
+            """;
+        _environment.SetInputLines("0.1", "0.2");
+
+        // выполнение программы:
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        // получение результата
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+
+        // ожидаемый результат
+        List<RuntimeValue> expected = [
+            RuntimeValue.String("First num: "),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Second num: "),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Sum is: "),
+            RuntimeValue.Number(0.3m),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Sum <= 100"),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("end"),
+        ];
+
+        // сравнение результататов
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
     public void Can_execute_SumNums_program()
     {
         const string code = """

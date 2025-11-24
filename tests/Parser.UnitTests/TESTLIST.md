@@ -89,6 +89,46 @@
 - [x] Отсутствие скобок в write: `write "hello"` → UnexpectedLexemeException
 - [x] Отсутствие запятой в multiple read: `num a, b; read(a b)` → UnexpectedLexemeException
 
+### Тесты для For циклов
+
+#### Базовые тесты
+
+- [ ] Выполнение тела for цикла: `for (num i = 0; i < 3; i = i + 2) { write(i) }` → [0, 1, 2]
+- [ ] For цикл с одним проходом: `for (num i = 5; i < 6; i = i + 1) { write(i) }` → [5]
+- [ ] For цикл без итераций: `for (num i = 10; i < 5; i = i + 1) { write(i) }` → []
+
+#### Тесты с разными шагами
+
+- [ ] For цикл с отрицательным шагом: `for (num i = 5; i > 0; i = i - 1) { write(i) }` → [5, 4, 3, 2, 1]
+- [ ] For цикл с умножением как шагом: `for (num i = 1; i < 10; i = i * 2) { write(i) }` → [1, 2, 4, 8]
+
+- [ ] Вложенные for циклы: → [0, 1, 10, 11]
+```
+for (num i = 0; i < 2; i = i + 1) 
+{
+  for (num j = 0; j < 2; j = j + 1) 
+  {
+    write(i * 10 + j)
+  }
+}
+```
+-[ ] For цикл с внешней переменной:  → [0, 1, 2]
+```
+num count = 3;
+for (num i = 0; i < count; i = i + 1) { write(i) }
+```
+-[ ] For цикл с изменением внешней переменной: → [6]
+```
+num sum = 0;
+for (num i = 1; i <= 3; i = i + 1) { sum = sum + i }
+write(sum)
+``` 
+-[ ] Локальная переменная цикла не видна снаружи: → exeption
+```
+for (num i = 0; i < 3; i = i + 1) { write(i) }
+write(i)
+```
+  
 ## Грамматика в нотации EBNF(от аналитика, изменённая)
 
 ````
@@ -106,6 +146,7 @@ statement =
           | read_statement
           | readln_statement
           | while_statement
+          | for_statement
           | compound_statement
           | expression (временно)
 

@@ -1,6 +1,5 @@
 ﻿num a, b, sum;
 
-writeln();
 write("First num: ");
 read(a);
 writeln();
@@ -9,7 +8,17 @@ write("Second num: ");
 read(b);
 writeln();
 
-write("Sum is: ");
-
 sum = a + b;
-write(sum)
+write("Sum is: ");
+writeln(sum);
+
+if (sum >= 100)
+{
+    writeln("Sum >= 100")
+}
+else
+{
+    writeln("Sum <= 100")
+}
+
+write("end")

@@ -39,4 +39,6 @@ public interface IAstVisitor
     public void Visit(IfElseStatement s);
 
     public void Visit(CompoundStatement s);
+
+    public void Visit(ForLoopStatement s);
 }
