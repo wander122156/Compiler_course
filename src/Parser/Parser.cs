@@ -89,6 +89,7 @@ public class Parser
     ///       | compound_statement
     ///       | return__statement
     ///       | break_statement
+    ///       | continue_statement
     ///
     /// Осталось реализовать :
     /// statement =
@@ -136,6 +137,8 @@ public class Parser
                 return ParseReturnStatement();
             case TokenType.Break:
                 return ParseBreakStatement();
+            case TokenType.Continue:
+                return ParseContinueStatement();
 
             default:
                 throw new UnexpectedLexemeException(keyword.Type, keyword); // как сделать?
@@ -385,6 +388,22 @@ public class Parser
 
         _tokens.Advance();
         return new BreakStatement();
+    }
+
+    /// <summary>
+    /// Разбирает continue.
+    /// Правило:
+    ///     continue_statement = "continue" ;
+    /// </summary>
+    private ContinueStatement ParseContinueStatement()
+    {
+        if (_parserContext.Peek() != ParserContext.Loop)
+        {
+            throw new SyntaxErrorException("'continue' can only be used inside loops");
+        }
+
+        _tokens.Advance();
+        return new ContinueStatement();
     }
 
     /// <summary>

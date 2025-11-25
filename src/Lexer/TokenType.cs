@@ -38,6 +38,11 @@ public enum TokenType
     Break,
 
     /// <summary>
+    ///  Ключевое слово continue.
+    /// </summary>
+    Continue,
+
+    /// <summary>
     ///  Ключевое слово func.
     /// </summary>
     Func,

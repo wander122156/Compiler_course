@@ -18,6 +18,96 @@ public class ParserLoopsTests
     }
 
     [Fact]
+    public void Can_execute_for_loop_with_continue()
+    {
+        // Arrange
+        string code = @"
+            for (num i = 0; i < 2; i = i + 1) 
+            {
+                write(i);
+                continue;
+                write(i);   
+            }";
+        List<RuntimeValue> expected = [RuntimeValue.Number(0), RuntimeValue.Number(1)];
+
+        // Act
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        // Assert
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_do_while_loop_with_continue()
+    {
+        // Arrange
+        string code = @"
+            num i = 1;  
+            do
+            { 
+                write(i);
+                i = i + 1;
+                continue;
+                i = 10;
+            } while (i < 3)";
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(1),
+            RuntimeValue.Number(2)];
+
+        // Act
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        // Assert
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_while_loop_with_continue()
+    {
+        // Arrange
+        string code = @"
+            num i = 1;  
+            while (i < 3) 
+            { 
+                write(i);
+                i = i + 1;
+                continue;
+                i = 10;
+            }";
+        List<RuntimeValue> expected = [RuntimeValue.Number(1), RuntimeValue.Number(2)];
+
+        // Act
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        // Assert
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_for_loop_with_break()
+    {
+        string code = @"
+            for (num i = 0; i < 2; i = i + 1) 
+            {
+                write(i);
+                break;
+            }";
+        List<RuntimeValue> expected = [RuntimeValue.Number(0)];
+
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
     public void Can_execute_while_loop_with_break()
     {
         string code = @"

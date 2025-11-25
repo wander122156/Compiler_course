@@ -264,6 +264,14 @@ public class AstEvaluator : IAstVisitor
 
                 s.Body.Accept(this);
 
+                if (_context.ShouldBreak) break;
+                if (_context.ShouldContinue)
+                {
+                    _context.ResetFlowControl();
+                    s.Increment.Accept(this);
+                    continue;
+                }
+
                 s.Increment.Accept(this);
             }
         }
@@ -311,7 +319,6 @@ public class AstEvaluator : IAstVisitor
                 s.Body.Accept(this);
 
                 if (_context.ShouldBreak) break;
-                if (_context.ShouldContinue) continue;
 
                 s.Condition.Accept(this);
 
@@ -368,6 +375,11 @@ public class AstEvaluator : IAstVisitor
     public void Visit(BreakStatement s)
     {
         _context.ShouldBreak = true;
+    }
+
+    public void Visit(ContinueStatement s)
+    {
+        _context.ShouldContinue = true;
     }
 
     public void Visit(FunctionDeclaration d)

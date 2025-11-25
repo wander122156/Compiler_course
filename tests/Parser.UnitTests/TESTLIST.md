@@ -125,6 +125,24 @@ write(sum)
 for (num i = 0; i < 3; i = i + 1) { write(i) }
 write(i)
 ```
+- [x] For цикл цикл с break: → [1]
+```  
+for (num i = 0; i < 2; i = i + 1) 
+{
+    write(i);
+    break;
+       
+}
+```
+- [x] For цикл цикл с continue: → [0, 1]
+```  
+for (num i = 0; i < 2; i = i + 1) 
+{
+    write(i);
+    continue;
+    write(i);   
+}
+```
 
 ### Тесты для While циклов
 
@@ -149,6 +167,17 @@ while (true)
 { 
     write(i);
     break;
+}
+```
+- [x] While цикл с continue: → [1, 2]
+```
+num i = 1;  
+while (i < 3) 
+{ 
+    write(i);
+    i = i + 1;
+    continue;
+    i = 10;
 }
 ```
 
@@ -188,6 +217,17 @@ do
     write(i);
     break;
 } while (true)
+```
+- [x] Do-while цикл с continue: → [1, 2]
+```
+num i = 1;  
+do
+{ 
+    write(i);
+    i = i + 1;
+    continue;
+    i = 10;
+} while (i < 3) 
 ```
 
 ### Тесты для Пользовательских функций
@@ -253,8 +293,8 @@ program = statement, { ";", statement }, [ ";" ] ;
 statement = variable_declaration
           | const_defenition
           | assignment
-          | if_statement
           | function_declaration
+          | if_statement
           | write_statement 
           | writeln_statement
           | read_statement
@@ -263,8 +303,9 @@ statement = variable_declaration
           | do_while_statement
           | for_statement
           | compound_statement
-          | return__statement
+          | return_statement
           | break_statement
+          | continue_statement
 
 (* Объявления и переменные *)
 variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
@@ -292,11 +333,14 @@ for_statement = "for", "(", for_initialization, ";", for_condition, ";", for_inc
     for_condition = expression    
     for_increment = assignment;
 
+break_statement = "break" ;
+continue_statement = "continue" ;
+
+compound_statement = "{", statement, { ";", statement }, [ ";" ], "}"
+
 (* Условия *)
 condition = expression, [ comparison_operator, expression ] ;
 comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
-
-compound_statement = "{", statement, { ";", statement }, [ ";" ], "}"
 
 (* Выражения *)
 expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression } ;  

@@ -38,6 +38,9 @@ public class Lexer(string code)
             "break", TokenType.Break
         },
         {
+            "continue", TokenType.Continue
+        },
+        {
             "for", TokenType.For
         },
         {
@@ -244,7 +247,7 @@ public class Lexer(string code)
         return new Token(TokenType.NumericLiteral, new TokenValue(value));
 
         // Локальная функция для получения числа из символа цифры.
-        int GetDigitValue(char c)
+        static int GetDigitValue(char c)
         {
             return c - '0';
         }
