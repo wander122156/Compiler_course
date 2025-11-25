@@ -170,20 +170,6 @@ public class AstEvaluator : IAstVisitor
         _values.Push(RuntimeValue.Number(_context.GetValue(e.Name)));
     }
 
-    public void Visit(FunctionCallExpression e)
-    {
-        List<decimal> arguments = new();
-        foreach (Expression arg in e.Arguments)
-        {
-            arg.Accept(this);
-            arguments.Add((decimal)_values.Pop().Value);
-        }
-
-        // Вызываем встроенную функцию
-        decimal result = BuiltinFunctions.Invoke(e.FunctionName, arguments);
-        _values.Push(RuntimeValue.Number(result));
-    }
-
     public void Visit(WriteStatement s)
     {
         foreach (Expression expr in s.Expressions)
@@ -312,6 +298,52 @@ public class AstEvaluator : IAstVisitor
         }
     }
 
+    public void Visit(FunctionCallExpression e)
+    {
+        // TODO: Добавить проверку типов параметров и разный тип аргументов
+        List<decimal> arguments = new();
+
+        foreach (Expression arg in e.Arguments)
+        {
+            arg.Accept(this);
+            arguments.Add((decimal)_values.Pop().Value);
+        }
+
+        if (BuiltinFunctions.IsBuiltin(e.FunctionName))
+        {
+            decimal result = BuiltinFunctions.Invoke(e.FunctionName, arguments);
+            _values.Push(RuntimeValue.Number(result));
+        }
+        else if(_context.HasFunction(e.FunctionName))
+        {
+            FunctionDeclaration function = _context.GetFunction(e.FunctionName);
+            decimal? result = ExecuteUserFunction(function, arguments);
+
+            if (result != null)
+            {
+                _values.Push(RuntimeValue.Number(result.Value));
+            }
+
+            // иначе функция ничего не возвращает
+        }
+        else
+        {
+            throw new InvalidOperationException($"Function '{e.FunctionName}' is not defined");
+        }
+    }
+
+    public void Visit(ReturnStatement s)
+    {
+        s.ReturnValue.Accept(this);
+        RuntimeValue result = _values.Pop();
+        throw new ReturnException(result);
+    }
+
+    public void Visit(FunctionDeclaration d)
+    {
+        _context.DefineFunction(d.FuncName, d);
+    }
+
     public void Visit(CompoundStatement s)
     {
         _context.PushScope(new Scope());
@@ -321,10 +353,6 @@ public class AstEvaluator : IAstVisitor
             foreach (IAstElement statement in s.Statements)
             {
                 statement.Accept(this);
-                if (_values.Count > 0)
-                {
-                    _values.Pop();
-                }
             }
         }
         finally
@@ -343,5 +371,49 @@ public class AstEvaluator : IAstVisitor
             RuntimeValue.ValueType.Null => false,
             _ => false,
         };
+    }
+
+    private decimal? ExecuteUserFunction(FunctionDeclaration function, List<decimal> arguments)
+    {
+        if (arguments.Count != function.Parameters.Count)
+        {
+            throw new InvalidOperationException(
+                $"Function '{function.FuncName}' expects {function.Parameters.Count} arguments but got {arguments.Count}");
+        }
+
+        _context.PushScope(new Scope());
+
+        try
+        {
+            for (int i = 0; i < function.Parameters.Count; i++)
+            {
+                (string paramName, string paramType) = function.Parameters[i];
+
+                // TODO: Добавить проверку типов параметров
+                _context.DefineVariable(paramName, arguments[i]);
+            }
+
+            try
+            {
+                function.Body.Accept(this);
+
+                return null;
+            }
+            catch (ReturnException ex)
+            {
+                return (decimal)ex.Value;
+            }
+        }
+        finally
+        {
+            _context.PopScope();
+        }
+    }
+
+    public class ReturnException : Exception
+    {
+        public ReturnException(RuntimeValue value) => Value = value;
+
+        public RuntimeValue Value { get; }
     }
 }

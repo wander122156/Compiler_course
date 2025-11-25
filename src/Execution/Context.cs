@@ -1,4 +1,6 @@
-﻿namespace Blang.Execution;
+﻿using Blang.Ast.Declarations;
+
+namespace Blang.Execution;
 
 /// <summary>
 /// Контекст выполнения программы (все переменные, константы и другие символы).
@@ -7,6 +9,7 @@ public class Context
 {
     private readonly Stack<Scope> _scopes = [];
     private readonly Dictionary<string, decimal> _constants = [];
+    private readonly Dictionary<string, FunctionDeclaration> _functions = [];
 
     public void PushScope(Scope scope)
     {
@@ -16,6 +19,40 @@ public class Context
     public void PopScope()
     {
         _scopes.Pop();
+    }
+
+    /// <summary>
+    /// Регистрирует пользовательскую функцию.
+    /// </summary>
+    public void DefineFunction(string name, FunctionDeclaration function)
+    {
+        if (_functions.ContainsKey(name))
+        {
+            throw new ArgumentException($"Function '{name}' is already defined");
+        }
+
+        _functions[name] = function;
+    }
+
+    /// <summary>
+    /// Проверяет, существует ли функция с указанным именем.
+    /// </summary>
+    public bool HasFunction(string name)
+    {
+        return _functions.ContainsKey(name);
+    }
+
+    /// <summary>
+    /// Получает пользовательскую функцию по имени.
+    /// </summary>
+    public FunctionDeclaration GetFunction(string name)
+    {
+        if (_functions.ContainsKey(name))
+        {
+            return _functions[name];
+        }
+
+        throw new ArgumentException($"Function '{name}' is not defined");
     }
 
     /// <summary>

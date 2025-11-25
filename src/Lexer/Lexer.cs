@@ -29,6 +29,12 @@ public class Lexer(string code)
             "else", TokenType.Else
         },
         {
+            "func", TokenType.Func
+        },
+        {
+            "return", TokenType.Return
+        },
+        {
             "for", TokenType.For
         },
         {

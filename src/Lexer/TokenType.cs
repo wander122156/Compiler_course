@@ -28,6 +28,16 @@ public enum TokenType
     Const,
 
     /// <summary>
+    ///  Ключевое слово return.
+    /// </summary>
+    Return,
+
+    /// <summary>
+    ///  Ключевое слово func.
+    /// </summary>
+    Func,
+
+    /// <summary>
     ///  Ключевое слово for.
     /// </summary>
     For,

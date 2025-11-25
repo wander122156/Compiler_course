@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Collections.Generic;
+using System.Xml.Linq;
 
 using Blang.Ast;
 using Blang.Ast.Declarations;
@@ -72,7 +73,6 @@ public class Parser
     ///
     /// Осталось реализовать :
     /// statement =
-    ///         | function_declaration
     /// </summary>
     private IAstElement ParseStatement()
     {
@@ -95,6 +95,8 @@ public class Parser
                 return ParseForLoopStatement();
             case TokenType.While:
                 return ParseWhileLoopStatement();
+            case TokenType.Func:
+                return ParseFunctionDeclaration();
             case TokenType.Write:
                 return ParseWriteStatement();
             case TokenType.Writeln:
@@ -104,8 +106,12 @@ public class Parser
             case TokenType.Readln:
                 return ParseReadLineStatement();
 
+            // TODO: return не должен быть здесь
+            case TokenType.Return:
+                return ParseReturnStatement();
+
             default:
-                return ParseExpression();
+                throw new UnexpectedLexemeException(keyword.Type, keyword); // как сделать?
         }
     }
 
@@ -268,6 +274,62 @@ public class Parser
         {
             return null; // Нет инициализации
         }
+    }
+
+    /// <summary>
+    /// Разбирает объявление переменных и следующее за ним выражение.
+    /// Правило:
+    ///     function_declaration = "func", "num", identifier, "(", [ parameter_list ], ")", compound_statement ;
+    ///     parameter_list = "num", identifier, { ",", "num", identifier } ;
+    /// </summary>
+    private FunctionDeclaration ParseFunctionDeclaration()
+    {
+        _tokens.Advance();
+        Match(TokenType.Num);
+        string funcName = Match(TokenType.Identifier).Value!.ToString();
+
+        Match(TokenType.OpenParenthesis);
+
+        List<(string name, string type)> parameters = new();
+
+        while (_tokens.Peek().Type != TokenType.CloseParenthesis)
+        {
+            // TODO: сильно переделать типы
+            Match(TokenType.Num);
+            string paramType = "num";
+
+            string paramName = Match(TokenType.Identifier).Value!.ToString();
+            parameters.Add((paramName, paramType));
+
+            if (_tokens.Peek().Type == TokenType.Comma)
+            {
+                _tokens.Advance();
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        Match(TokenType.CloseParenthesis);
+
+        CompoundStatement body = ParseCompoundStatement();
+
+        return new FunctionDeclaration(funcName, parameters, body);
+    }
+
+    /// <summary>
+    /// Разбирает return.
+    /// Правило:
+    ///     return__statement = "return", expression ;
+    /// </summary>
+    private ReturnStatement ParseReturnStatement()
+    {
+        _tokens.Advance();
+
+        Expression result = ParseExpression();
+
+        return new ReturnStatement(result);
     }
 
     /// <summary>

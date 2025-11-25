@@ -17,6 +17,11 @@ public static class BuiltinFunctions
         },
     };
 
+    public static bool IsBuiltin(string name)
+    {
+        return Functions.ContainsKey(name);
+    }
+
     public static decimal Invoke(string name, List<decimal> arguments)
     {
         if (!Functions.TryGetValue(name, out Func<List<decimal>, decimal>? function))

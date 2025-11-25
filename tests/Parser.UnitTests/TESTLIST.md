@@ -127,20 +127,75 @@ write(i)
 ```
 ### Тесты для While циклов
 
-- [ ] Выполнение тела while цикла: `num i = 0; while (i < 3) { write(i); i = i + 1 }` → [0, 1, 2]
-- [ ] While цикл с одним проходом: `num i = 5; while (i < 6) { write(i); i = i + 1 }` → [5]
-- [ ] While цикл без итераций: `while (false) { write(1) }` → []
+- [x] Выполнение тела while цикла: `num i = 0; while (i < 3) { write(i); i = i + 1 }` → [0, 1, 2]
+- [x] While цикл с одним проходом: `num i = 5; while (i < 6) { write(i); i = i + 1 }` → [5]
+- [x] While цикл без итераций: `while (false) { write(1) }` → []
 
 #### Тесты с разными условиями
-- [ ] While цикл с отрицательным изменением: `num i = 5; while (i > 0) { write(i); i = i - 1 }` → [5, 4, 3, 2, 1]
-- [ ] Вложенные while циклы: → [0, 1, 10, 11]
-- [ ] While цикл с изменением внешней переменной: → [6]
+- [x] While цикл с отрицательным изменением: `num i = 5; while (i > 0) { write(i); i = i - 1 }` → [5, 4, 3, 2, 1]
+- [x] Вложенные while циклы: → [0, 1, 10, 11]
+- [x] While цикл с изменением внешней переменной: → [6]
 ```
 num sum = 0;
 num i = 1;  
 while (i <= 3) { sum = sum + i; i = i + 1 }
 write(sum)
 ```
+
+### Тесты для Пользовательских функций
+- [x] Простая функция без параметров: → [5]
+```
+func num getFive() { return 5 };
+write(getFive())
+``` 
+- [x] Функция с одним параметром: → [16]
+```
+func num square(num x) { return x * x };
+write(square(4))
+``` 
+- [x] Функция с несколькими параметрами: → [21]
+```
+func num multiply(num a, num b) { return a * b };
+write(multiply(3, 7))
+``` 
+- [x] Функция без возвращаемого значения (void): → ["Hello"]
+```
+func num printHello() { write("Hello") };
+printHello()
+``` 
+- [x] Локальные переменные в функциях: → [10]
+```
+func num testScope() { 
+    num x = 10 
+    return x 
+};
+write(testScope())
+``` 
+- [x] Изоляция областей видимости: → [20, 5]
+```
+num x = 5
+func num testIsolation() { 
+    num x = 20 
+    return x 
+};
+write(testIsolation(), x)
+``` 
+- [x] Параметры не конфликтуют с внешними переменными: → [50, 100]
+```
+num a = 100
+func num testParams(num a) { return a };
+write(testParams(50), a)
+``` 
+- [x] Вложенные вызовы функций: → [6]
+```
+func num add(num a, num b) { return a + b };
+func num tripleSum(num x, num y, num z) { return add(x, y) + z };
+write(tripleSum(1, 2, 3))
+``` 
+
+#### Тесты с разными условиями
+
+
 ## Грамматика в нотации EBNF(от аналитика, изменённая)
 
 ````
@@ -168,7 +223,7 @@ assignment = identifier, "=", expression ;
 
 function_declaration = "func", "num", identifier, "(", [ parameter_list ], ")", compound_statement ;
 parameter_list = "num", identifier, { ",", "num", identifier } ;
-return__statement = "return", [ expression ] ;
+return__statement = "return", expression ;
 
 (* Ввод-Вывод*)
 write_statement = "write", "( ", [ expression_list ], " )" ;
