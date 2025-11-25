@@ -95,6 +95,8 @@ public class Parser
                 return ParseIfStatement();
             case TokenType.For:
                 return ParseForLoopStatement();
+            case TokenType.While:
+                return ParseWhileLoopStatement();
             case TokenType.Write:
                 return ParseWriteStatement();
             case TokenType.Writeln:
@@ -311,6 +313,23 @@ public class Parser
         CompoundStatement body = ParseCompoundStatement();
 
         return new ForLoopStatement(initialization, condition, increment, body);
+    }
+
+    /// <summary>
+    /// Разбирает while цикл:
+    ///     while_statement = "while", "(", condition, ")", compound_statement ;
+    /// </summary>
+    private WhileLoopStatement ParseWhileLoopStatement()
+    {
+        _tokens.Advance();
+
+        Match(TokenType.OpenParenthesis);
+        Expression condition = ParseCondition();
+        Match(TokenType.CloseParenthesis);
+
+        CompoundStatement body = ParseCompoundStatement();
+
+        return new WhileLoopStatement(condition, body);
     }
 
     /// <summary>

@@ -267,11 +267,6 @@ public class AstEvaluator : IAstVisitor
         {
             s.Initialization.Accept(this);
 
-            if (_values.Count > 0)
-            {
-                throw new Exception("ошибка после инициализации");
-            }
-
             while (true)
             {
                 s.Condition.Accept(this);
@@ -283,17 +278,32 @@ public class AstEvaluator : IAstVisitor
 
                 s.Body.Accept(this);
 
-                if (_values.Count > 0)
-                {
-                    throw new Exception("ошибка тела");
-                }
-
                 s.Increment.Accept(this);
+            }
+        }
+        finally
+        {
+            _context.PopScope();
+        }
+    }
 
-                if (_values.Count > 0)
+    public void Visit(WhileLoopStatement s)
+    {
+        _context.PushScope(new Scope());
+
+        try
+        {
+            while (true)
+            {
+                s.Condition.Accept(this);
+
+                bool condition = ConvertToBoolean(_values.Pop());
+                if (!condition)
                 {
-                    throw new Exception("ошибка инкремента");
+                    break;
                 }
+
+                s.Body.Accept(this);
             }
         }
         finally

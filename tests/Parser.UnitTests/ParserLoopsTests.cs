@@ -285,10 +285,11 @@ public class ParserLoopsTests
 
         ";
         List<RuntimeValue> expected = [
-            RuntimeValue.Number(10),
-            RuntimeValue.Number(11),
-            RuntimeValue.Number(10),
-            RuntimeValue.Number(11)
+            RuntimeValue.Number(0),
+            RuntimeValue.Number(1),
+            RuntimeValue.Number(2),
+            RuntimeValue.Number(3),
+            RuntimeValue.Number(4),
         ];
 
         Parser parser = new(_context, _environment, code);
@@ -370,7 +371,7 @@ public class ParserLoopsTests
             while (j < 2) {
                 write(i * 10 + j);
                 j = j + 1
-            }
+            };
             i = i + 1
         }
     ";
