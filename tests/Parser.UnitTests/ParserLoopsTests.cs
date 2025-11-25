@@ -47,7 +47,7 @@ public class ParserLoopsTests
         do {
             write(1)
         } while (false)
-    ";
+        ";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
         Parser parser = new(_context, _environment, code);
@@ -70,7 +70,7 @@ public class ParserLoopsTests
             } while (j < 2);
             i = i + 1
         } while (i < 2)
-    ";
+        ";
         List<RuntimeValue> expected = [
             RuntimeValue.Number(0),
         RuntimeValue.Number(1),

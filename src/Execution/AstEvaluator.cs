@@ -298,6 +298,31 @@ public class AstEvaluator : IAstVisitor
         }
     }
 
+    public void Visit(DoWhileLoopStatement s)
+    {
+        _context.PushScope(new Scope());
+
+        try
+        {
+            while (true)
+            {
+                s.Body.Accept(this);
+
+                s.Condition.Accept(this);
+
+                bool condition = ConvertToBoolean(_values.Pop());
+                if (!condition)
+                {
+                    break;
+                }
+            }
+        }
+        finally
+        {
+            _context.PopScope();
+        }
+    }
+
     public void Visit(FunctionCallExpression e)
     {
         // TODO: Добавить проверку типов параметров и разный тип аргументов

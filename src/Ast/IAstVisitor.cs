@@ -44,6 +44,8 @@ public interface IAstVisitor
 
     public void Visit(WhileLoopStatement s);
 
+    public void Visit(DoWhileLoopStatement s);
+
     public void Visit(FunctionDeclaration d);
 
     public void Visit(ReturnStatement s);

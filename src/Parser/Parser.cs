@@ -67,6 +67,7 @@ public class Parser
     ///       | read_statement
     ///       | readln_statement
     ///       | while_statement
+    ///       | do_while_statement
     ///       | for_statement
     ///       | compound_statement
     ///       | return__statement
@@ -101,6 +102,8 @@ public class Parser
                 return ParseForLoopStatement();
             case TokenType.While:
                 return ParseWhileLoopStatement();
+            case TokenType.Do:
+                return ParseDoWhileLoopStatement();
             case TokenType.Func:
                 return ParseFunctionDeclaration();
             case TokenType.Write:
@@ -396,6 +399,25 @@ public class Parser
         CompoundStatement body = ParseCompoundStatement();
 
         return new WhileLoopStatement(condition, body);
+    }
+
+    /// <summary>
+    /// Разбирает do-while цикл:
+    ///     do_while_statement = "do", compound_statement, "while", "(", condition, ")" ;
+    /// </summary>
+    private DoWhileLoopStatement ParseDoWhileLoopStatement()
+    {
+        _tokens.Advance();
+
+        CompoundStatement body = ParseCompoundStatement();
+
+        Match(TokenType.While);
+
+        Match(TokenType.OpenParenthesis);
+        Expression condition = ParseCondition();
+        Match(TokenType.CloseParenthesis);
+
+        return new DoWhileLoopStatement(condition, body);
     }
 
     /// <summary>

@@ -242,6 +242,7 @@ statement = variable_declaration
           | read_statement
           | readln_statement
           | while_statement
+          | do_while_statement
           | for_statement
           | compound_statement
           | return__statement
@@ -266,6 +267,7 @@ if_statement = "if", "(", condition, ")", statement_or_block, [ "else", statemen
     statement_or_block = compound_statement | statement
 
 while_statement = "while", "(", condition, ")", compound_statement ;
+do_while_statement = "do", compound_statement, "while", "(", condition, ")" ;
 for_statement = "for", "(", for_initialization, ";", for_condition, ";", for_increment, ")", compound_statement
     for_initialization = variable_declaration | assignment    
     for_condition = expression    
