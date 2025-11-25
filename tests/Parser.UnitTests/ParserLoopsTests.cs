@@ -18,6 +18,74 @@ public class ParserLoopsTests
     }
 
     [Fact]
+    public void Can_execute_do_while_loop_minimum_one_iteration()
+    {
+        string code = @"
+        num i = 0;
+        do {
+            write(i);
+            i = i + 1
+        } while (i < 3)
+        ";
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(0),
+        RuntimeValue.Number(1),
+        RuntimeValue.Number(2)
+        ];
+
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_do_while_loop_with_false_condition()
+    {
+        string code = @"
+        do {
+            write(1)
+        } while (false)
+    ";
+        List<RuntimeValue> expected = [RuntimeValue.Number(1)];
+
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_nested_do_while_loops()
+    {
+        string code = @"
+        num i = 0;
+        do {
+            num j = 0;
+            do {
+                write(i * 10 + j);
+                j = j + 1
+            } while (j < 2);
+            i = i + 1
+        } while (i < 2)
+    ";
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(0),
+        RuntimeValue.Number(1),
+        RuntimeValue.Number(10),
+        RuntimeValue.Number(11)
+        ];
+
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
     public void Can_execute_for_loop_body()
     {
         string code = "for (num i = 0; i < 3; i = i + 1) { write(i) }";

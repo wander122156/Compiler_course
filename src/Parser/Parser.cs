@@ -82,6 +82,12 @@ public class Parser
             return ParseAssignment();
         }
 
+        if (_tokens.Peek().Type == TokenType.Identifier &&
+        _tokens.Peek(1).Type == TokenType.OpenParenthesis)
+        {
+            return ParseFunctionCallExpression();
+        }
+
         Token keyword = _tokens.Peek();
         switch (keyword.Type)
         {
@@ -710,6 +716,13 @@ public class Parser
         }
 
         throw new UnexpectedLexemeException(TokenType.Identifier, t);
+    }
+
+    private FunctionCallExpression ParseFunctionCallExpression()
+    {
+        string functionName = Match(TokenType.Identifier).Value!.ToString();
+        List<Expression> arguments = ParseArgumentsList();
+        return new FunctionCallExpression(functionName, arguments);
     }
 
     private List<Expression> ParseArgumentsList()
