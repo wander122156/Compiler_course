@@ -56,25 +56,23 @@ public class Parser
 
     /// <summary>
     /// Разбирает 1 из statement.
-    /// statement =
-    ///         | variable_declaration
-    ///         | const_defenition
-    ///         | assignment
-    ///         | if_statement
-    ///         | function_statement
-    ///         | write_statement
-    ///         | writeln_statement
-    ///         | read_statement
-    ///         | readln_statement
-    ///         | while_statement
-    ///         | for_statement
-    ///         | compound_statement
+    /// statement = variable_declaration
+    ///       | const_defenition
+    ///       | assignment
+    ///       | if_statement
+    ///       | function_declaration
+    ///       | write_statement
+    ///       | writeln_statement
+    ///       | read_statement
+    ///       | readln_statement
+    ///       | while_statement
+    ///       | for_statement
+    ///       | compound_statement
+    ///       | return__statement
     ///
     /// Осталось реализовать :
     /// statement =
-    ///         | while_statement
-    ///         | for_statement
-    ///         | function_statement
+    ///         | function_declaration
     /// </summary>
     private IAstElement ParseStatement()
     {

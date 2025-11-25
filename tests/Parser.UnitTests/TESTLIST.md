@@ -147,12 +147,11 @@ write(sum)
 program = statement, { ";", statement }, [ ";" ] ;
 
 (* ключевый слова *)
-statement =  
-          | variable_declaration
+statement = variable_declaration
           | const_defenition
           | assignment
           | if_statement
-          | function_statement
+          | function_declaration
           | write_statement 
           | writeln_statement
           | read_statement
@@ -160,7 +159,16 @@ statement =
           | while_statement
           | for_statement
           | compound_statement
-          | expression (временно)
+          | return__statement
+
+(* Объявления и переменные *)
+variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
+constant_definition = "const", "num", identifier, "=", expression ;
+assignment = identifier, "=", expression ;
+
+function_declaration = "func", "num", identifier, "(", [ parameter_list ], ")", compound_statement ;
+parameter_list = "num", identifier, { ",", "num", identifier } ;
+return__statement = "return", [ expression ] ;
 
 (* Ввод-Вывод*)
 write_statement = "write", "( ", [ expression_list ], " )" ;
@@ -168,25 +176,21 @@ writeln_statement = "writeln", "(" expression_list ")" ;
 read_statement = "read", "(", identifier, {"," ,identifier } ")" ;
 readln_statement = "readln", "(", identifier, {"," ,identifier } ")"
 
-(* Циклы*)
+(* Циклы и инструкции*)
+if_statement = "if", "(", condition, ")", statement_or_block, [ "else", statement_or_block ]
+    statement_or_block = compound_statement | statement
+
 while_statement = "while", "(", condition, ")", compound_statement ;
 for_statement = "for", "(", for_initialization, ";", for_condition, ";", for_increment, ")", compound_statement
     for_initialization = variable_declaration | assignment    
     for_condition = expression    
     for_increment = assignment;
 
-variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
-constant_definition = "const", "num", identifier, "=", expression ;
-assignment = identifier, "=", expression ;
-
-(* Ветвления *)
-if_statement = "if", "(", condition, ")", statement_or_block, [ "else", statement_or_block ]
-    statement_or_block = compound_statement | statement
-
 (* Условия *)
-compound_statement = "{", statement, { ";", statement }, [ ";" ], "}"
 condition = expression, [ comparison_operator, expression ] ;
 comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
+
+compound_statement = "{", statement, { ";", statement }, [ ";" ], "}"
 
 (* Выражения *)
 expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression } ;  
