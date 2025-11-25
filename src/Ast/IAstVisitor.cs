@@ -49,4 +49,6 @@ public interface IAstVisitor
     public void Visit(FunctionDeclaration d);
 
     public void Visit(ReturnStatement s);
+
+    public void Visit(BreakStatement s);
 }

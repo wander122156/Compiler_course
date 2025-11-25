@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Xml.Linq;
 
 using Blang.Ast;
@@ -23,13 +24,29 @@ public class Parser
     private readonly IEnvironment _environment;
     private readonly TokenStream _tokens;
     private readonly AstEvaluator _evaluator;
+    private readonly Stack<ParserContext> _parserContext = new();
 
     public Parser(Context context, IEnvironment environment, string code)
     {
         _environment = environment;
         _tokens = new TokenStream(code);
         _evaluator = new AstEvaluator(context, environment);
+        _parserContext.Push(ParserContext.Global);
     }
+
+    private enum ParserContext
+    {
+        Global,
+        Function,
+        Loop,
+        Switch,
+    }
+
+    // private void PushParserContext(ParserContext context) => _parserContext.Push(context);
+
+    // private void PopParserContext() => _parserContext.Pop();
+
+    // private ParserContext CurrentParserContext => _parserContext.Peek();
 
     /// <summary>
     /// Выполняет синтаксический разбор строк кода по правилу.
@@ -71,6 +88,7 @@ public class Parser
     ///       | for_statement
     ///       | compound_statement
     ///       | return__statement
+    ///       | break_statement
     ///
     /// Осталось реализовать :
     /// statement =
@@ -114,10 +132,10 @@ public class Parser
                 return ParseReadStatement();
             case TokenType.Readln:
                 return ParseReadLineStatement();
-
-            // TODO: return не должен быть здесь (должен быть именно в функциях)
             case TokenType.Return:
                 return ParseReturnStatement();
+            case TokenType.Break:
+                return ParseBreakStatement();
 
             default:
                 throw new UnexpectedLexemeException(keyword.Type, keyword); // как сделать?
@@ -322,23 +340,51 @@ public class Parser
 
         Match(TokenType.CloseParenthesis);
 
-        CompoundStatement body = ParseCompoundStatement();
-
-        return new FunctionDeclaration(funcName, parameters, body);
+        _parserContext.Push(ParserContext.Function);
+        try
+        {
+            CompoundStatement body = ParseCompoundStatement();
+            return new FunctionDeclaration(funcName, parameters, body);
+        }
+        finally
+        {
+            _parserContext.Pop();
+        }
     }
 
     /// <summary>
     /// Разбирает return.
     /// Правило:
-    ///     return__statement = "return", expression ;
+    ///     return_statement = "return", expression ;
     /// </summary>
     private ReturnStatement ParseReturnStatement()
     {
+        if(_parserContext.Peek() != ParserContext.Function)
+        {
+            throw new SyntaxErrorException("'return' can only be used inside functions");
+        }
+
         _tokens.Advance();
 
         Expression result = ParseExpression();
 
         return new ReturnStatement(result);
+    }
+
+    /// <summary>
+    /// Разбирает break.
+    /// Правило:
+    ///     break_statement = "break" ;
+    /// </summary>
+    private BreakStatement ParseBreakStatement()
+    {
+        if (_parserContext.Peek() != ParserContext.Loop)
+        {
+            throw new SyntaxErrorException("'break' can only be used inside loops");
+        }
+
+        _tokens.Advance();
+        return new BreakStatement();
     }
 
     /// <summary>
@@ -379,9 +425,16 @@ public class Parser
 
         Match(TokenType.CloseParenthesis);
 
-        CompoundStatement body = ParseCompoundStatement();
-
-        return new ForLoopStatement(initialization, condition, increment, body);
+        _parserContext.Push(ParserContext.Loop);
+        try
+        {
+            CompoundStatement body = ParseCompoundStatement();
+            return new ForLoopStatement(initialization, condition, increment, body);
+        }
+        finally
+        {
+            _parserContext.Pop();
+        }
     }
 
     /// <summary>
@@ -396,9 +449,16 @@ public class Parser
         Expression condition = ParseCondition();
         Match(TokenType.CloseParenthesis);
 
-        CompoundStatement body = ParseCompoundStatement();
-
-        return new WhileLoopStatement(condition, body);
+        _parserContext.Push(ParserContext.Loop);
+        try
+        {
+            CompoundStatement body = ParseCompoundStatement();
+            return new WhileLoopStatement(condition, body);
+        }
+        finally
+        {
+            _parserContext.Pop();
+        }
     }
 
     /// <summary>
@@ -409,15 +469,22 @@ public class Parser
     {
         _tokens.Advance();
 
-        CompoundStatement body = ParseCompoundStatement();
+        _parserContext.Push(ParserContext.Loop);
+        try
+        {
+            CompoundStatement body = ParseCompoundStatement();
+            Match(TokenType.While);
 
-        Match(TokenType.While);
+            Match(TokenType.OpenParenthesis);
+            Expression condition = ParseCondition();
+            Match(TokenType.CloseParenthesis);
 
-        Match(TokenType.OpenParenthesis);
-        Expression condition = ParseCondition();
-        Match(TokenType.CloseParenthesis);
-
-        return new DoWhileLoopStatement(condition, body);
+            return new DoWhileLoopStatement(condition, body);
+        }
+        finally
+        {
+            _parserContext.Pop();
+        }
     }
 
     /// <summary>

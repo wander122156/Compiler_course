@@ -18,6 +18,46 @@ public class ParserLoopsTests
     }
 
     [Fact]
+    public void Can_execute_while_loop_with_break()
+    {
+        string code = @"
+        num i = 1;  
+        while (true) 
+        { 
+            write(i);
+            break;
+        }
+        ";
+        List<RuntimeValue> expected = [RuntimeValue.Number(1)];
+
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_do_while_loop_with_break()
+    {
+        string code = @"
+        num i = 1;  
+        do 
+        { 
+            write(i);
+            break;
+        } while (true)
+        ";
+        List<RuntimeValue> expected = [RuntimeValue.Number(1)];
+
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
     public void Can_execute_do_while_loop_minimum_one_iteration()
     {
         string code = @"

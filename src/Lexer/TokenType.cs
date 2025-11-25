@@ -33,6 +33,11 @@ public enum TokenType
     Return,
 
     /// <summary>
+    ///  Ключевое слово break.
+    /// </summary>
+    Break,
+
+    /// <summary>
     ///  Ключевое слово func.
     /// </summary>
     Func,

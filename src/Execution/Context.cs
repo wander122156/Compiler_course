@@ -11,6 +11,19 @@ public class Context
     private readonly Dictionary<string, decimal> _constants = [];
     private readonly Dictionary<string, FunctionDeclaration> _functions = [];
 
+    public bool ShouldBreak { get; set; }
+
+    public bool ShouldContinue { get; set; }
+
+    public bool ShouldReturn { get; set; }
+
+    public void ResetFlowControl()
+    {
+        ShouldBreak = false;
+        ShouldContinue = false;
+        ShouldReturn = false;
+    }
+
     public void PushScope(Scope scope)
     {
         _scopes.Push(scope);

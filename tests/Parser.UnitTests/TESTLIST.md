@@ -142,9 +142,18 @@ num i = 1;
 while (i <= 3) { sum = sum + i; i = i + 1 }
 write(sum)
 ```
+- [x] While цикл с break: → [1]
+```
+num i = 1;  
+while (true) 
+{ 
+    write(i);
+    break;
+}
+```
 
 ### Тесты для Do-While циклов
-- [ ] Do-while выполняется минимум один раз: → [0, 1, 2]
+- [x] Do-while выполняется минимум один раз: → [0, 1, 2]
 ```
 num i = 0;
 do {
@@ -152,13 +161,13 @@ do {
     i = i + 1
 } while (i < 3)
 ```
-- [ ] Do-while с ложным условием (всегда один проход): → [1]
+- [x] Do-while с ложным условием (всегда один проход): → [1]
 ```
 do {
     write(1)
 } while (false)
 ``` 
-- [ ] Вложенные do-while циклы: → [0, 1, 10, 11]
+- [x] Вложенные do-while циклы: → [0, 1, 10, 11]
 ```
 num i = 0;
 do {
@@ -171,6 +180,15 @@ do {
 } 
 while (i < 2)
 ``` 
+- [x] Do-while цикл с break: → [1]
+```
+num i = 1;  
+do 
+{ 
+    write(i);
+    break;
+} while (true)
+```
 
 ### Тесты для Пользовательских функций
 - [x] Простая функция без параметров: → [5]
@@ -246,6 +264,7 @@ statement = variable_declaration
           | for_statement
           | compound_statement
           | return__statement
+          | break_statement
 
 (* Объявления и переменные *)
 variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }

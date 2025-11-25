@@ -281,15 +281,15 @@ public class AstEvaluator : IAstVisitor
         {
             while (true)
             {
-                s.Condition.Accept(this);
+                _context.ResetFlowControl();
 
+                s.Condition.Accept(this);
                 bool condition = ConvertToBoolean(_values.Pop());
-                if (!condition)
-                {
-                    break;
-                }
+                if (!condition) break;
 
                 s.Body.Accept(this);
+
+                if (_context.ShouldBreak) break;
             }
         }
         finally
@@ -306,15 +306,17 @@ public class AstEvaluator : IAstVisitor
         {
             while (true)
             {
+                _context.ResetFlowControl();
+
                 s.Body.Accept(this);
+
+                if (_context.ShouldBreak) break;
+                if (_context.ShouldContinue) continue;
 
                 s.Condition.Accept(this);
 
                 bool condition = ConvertToBoolean(_values.Pop());
-                if (!condition)
-                {
-                    break;
-                }
+                if (!condition) break;
             }
         }
         finally
@@ -360,6 +362,12 @@ public class AstEvaluator : IAstVisitor
     public void Visit(ReturnStatement s)
     {
         s.ReturnValue.Accept(this);
+        _context.ShouldReturn = true;
+    }
+
+    public void Visit(BreakStatement s)
+    {
+        _context.ShouldBreak = true;
     }
 
     public void Visit(FunctionDeclaration d)
@@ -375,9 +383,8 @@ public class AstEvaluator : IAstVisitor
         {
             foreach (IAstElement statement in s.Statements)
             {
-                if (statement is ReturnStatement)
+                if (_context.ShouldBreak || _context.ShouldContinue || _context.ShouldReturn)
                 {
-                    statement.Accept(this);
                     break;
                 }
 
@@ -424,7 +431,7 @@ public class AstEvaluator : IAstVisitor
 
             function.Body.Accept(this);
 
-            if (_values.Count > 0)
+            if (_values.Count > 0 && _context.ShouldReturn)
             {
                 return (decimal)_values.Pop();
             }

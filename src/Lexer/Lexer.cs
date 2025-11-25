@@ -35,6 +35,9 @@ public class Lexer(string code)
             "return", TokenType.Return
         },
         {
+            "break", TokenType.Break
+        },
+        {
             "for", TokenType.For
         },
         {
