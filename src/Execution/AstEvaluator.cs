@@ -360,8 +360,6 @@ public class AstEvaluator : IAstVisitor
     public void Visit(ReturnStatement s)
     {
         s.ReturnValue.Accept(this);
-        RuntimeValue result = _values.Pop();
-        throw new ReturnException(result);
     }
 
     public void Visit(FunctionDeclaration d)
@@ -377,6 +375,12 @@ public class AstEvaluator : IAstVisitor
         {
             foreach (IAstElement statement in s.Statements)
             {
+                if (statement is ReturnStatement)
+                {
+                    statement.Accept(this);
+                    break;
+                }
+
                 statement.Accept(this);
             }
         }
@@ -418,27 +422,18 @@ public class AstEvaluator : IAstVisitor
                 _context.DefineVariable(paramName, arguments[i]);
             }
 
-            try
-            {
-                function.Body.Accept(this);
+            function.Body.Accept(this);
 
-                return null;
-            }
-            catch (ReturnException ex)
+            if (_values.Count > 0)
             {
-                return (decimal)ex.Value;
+                return (decimal)_values.Pop();
             }
+
+            return null;
         }
         finally
         {
             _context.PopScope();
         }
-    }
-
-    public class ReturnException : Exception
-    {
-        public ReturnException(RuntimeValue value) => Value = value;
-
-        public RuntimeValue Value { get; }
     }
 }

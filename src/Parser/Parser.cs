@@ -115,7 +115,7 @@ public class Parser
             case TokenType.Readln:
                 return ParseReadLineStatement();
 
-            // TODO: return не должен быть здесь
+            // TODO: return не должен быть здесь (должен быть именно в функциях)
             case TokenType.Return:
                 return ParseReturnStatement();
 
