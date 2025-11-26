@@ -2,12 +2,20 @@
 
 ## 1. Factorial
 ````
+func num factorial(num n)
+{
+    if (n <= 1) 
+    {
+        return 1;
+    } 
+    else 
+    {
+        return n * factorial(n - 1);
+    }
+};
 num n;
 read(n);
-num a = 1;
-for(i = 1, i < n+1, i = i + 1){
-    a = a * i
-}
+num result = factorial(n);
 writeln(a)
 ````
 ## 2. GSD
@@ -18,7 +26,7 @@ while (b != 0) {
     temp = b;
     b = a % b;
     a = temp
-}
+};
 writeln(a)
 ````
 ## 3. SumDigits
@@ -31,6 +39,6 @@ n = abs(n);
 while(n != 0){
     sum = sum + n%10;
     n = n/10
-}
+};
 writeln(sum)
 ````

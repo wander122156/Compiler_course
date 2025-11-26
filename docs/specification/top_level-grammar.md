@@ -43,25 +43,18 @@ statement =
           | while_statement
           | compound_statement
           | expression (временно)
-          | return_statement
-          | function_declaration
 
 write_statement = "write", "( ", [ expression_list ], " )" ;
 writeln_statement = "writeln", "(" expression_list ")" ;
 read_statement = "read", "(", identifier, {"," ,identifier } ")" ;
-readln_statement = "readln", "(", identifier, {"," ,identifier } ")";
+readln_statement = "readln", "(", identifier, {"," ,identifier } ")"
 while_statement = "while", "(", condition, ")", statement ;
-if_statement = "if", "(", condition, ")", compound_statement, [ "else", ( if_statement | statement ) ];
-for_statement = "for", "(", assignment_statement, expression, assignment_statement, ")", statement ;
-return_statement = "vozvrat", [ expression ] ;
-function_declaration = "func", identifier, "(", [ parameter_list ], ")", compound_statement ;
-parameter_list = parameter, { ", ", parameter } ;
-parameter = "num", identifier ;
 
-variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] };
+variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
 constant_definition = "const", "num", identifier, "=", expression ;
 assignment = identifier, "=", expression ;
 
+if_statement = "if", "(", condition, ")", compound_statement, [ "else", statement ] ;
 
 (* Условия *)
 compound_statement = "{", { statement, [ ";" ] }, "}" ;
@@ -80,5 +73,5 @@ function_call = identifier, "(", [ expression_list ], ")" ;
 expression_list = expression, { ",", expression } ;
 
 const_expression = "Pi" | "MathE" ;
-````
 
+````
