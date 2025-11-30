@@ -28,36 +28,58 @@ else{
 
 # EBNF 
 ````
-program = { statement, [ ";" ] } ;
+program = statement, { ";", statement }, [ ";" ] ;
 
 (* ключевый слова *)
-statement =  
-          | variable_declaration
+statement = variable_declaration
           | const_defenition
           | assignment
+          | function_declaration
           | if_statement
           | write_statement 
           | writeln_statement
           | read_statement
           | readln_statement
           | while_statement
+          | do_while_statement
+          | for_statement
           | compound_statement
-          | expression (временно)
+          | return_statement
+          | break_statement
+          | continue_statement
 
-write_statement = "write", "( ", [ expression_list ], " )" ;
-writeln_statement = "writeln", "(" expression_list ")" ;
-read_statement = "read", "(", identifier, {"," ,identifier } ")" ;
-readln_statement = "readln", "(", identifier, {"," ,identifier } ")"
-while_statement = "while", "(", condition, ")", statement ;
-
+(* Объявления и переменные *)
 variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
 constant_definition = "const", "num", identifier, "=", expression ;
 assignment = identifier, "=", expression ;
 
-if_statement = "if", "(", condition, ")", compound_statement, [ "else", statement ] ;
+function_declaration = "func", "num", identifier, "(", [ parameter_list ], ")", compound_statement ;
+parameter_list = "num", identifier, { ",", "num", identifier } ;
+return__statement = "return", expression ;
+
+(* Ввод-Вывод*)
+write_statement = "write", "( ", [ expression_list ], " )" ;
+writeln_statement = "writeln", "(" expression_list ")" ;
+read_statement = "read", "(", identifier, {"," ,identifier } ")" ;
+readln_statement = "readln", "(", identifier, {"," ,identifier } ")"
+
+(* Циклы и инструкции*)
+if_statement = "if", "(", condition, ")", statement_or_block, [ "else", statement_or_block ]
+    statement_or_block = compound_statement | statement
+
+while_statement = "while", "(", condition, ")", compound_statement ;
+do_while_statement = "do", compound_statement, "while", "(", condition, ")" ;
+for_statement = "for", "(", for_initialization, ";", for_condition, ";", for_increment, ")", compound_statement
+    for_initialization = variable_declaration | assignment    
+    for_condition = expression    
+    for_increment = assignment;
+
+break_statement = "break" ;
+continue_statement = "continue" ;
+
+compound_statement = "{", statement, { ";", statement }, [ ";" ], "}"
 
 (* Условия *)
-compound_statement = "{", { statement, [ ";" ] }, "}" ;
 condition = expression, [ comparison_operator, expression ] ;
 comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 
