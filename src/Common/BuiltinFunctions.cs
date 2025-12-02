@@ -15,6 +15,9 @@ public static class BuiltinFunctions
         {
             "pow", Pow
         },
+        {
+            "floor", Floor
+        },
     };
 
     public static bool IsBuiltin(string name)
@@ -63,5 +66,15 @@ public static class BuiltinFunctions
         double exponentValue = (double)arguments[1];
         double result = Math.Pow(baseValue, exponentValue);
         return (decimal)result;
+    }
+
+    private static decimal Floor(List<decimal> arguments)
+    {
+        if (arguments.Count != 1)
+        {
+            throw new ArgumentException("Floor function requires 1 argument");
+        }
+
+        return Math.Floor(arguments[0]);
     }
 }

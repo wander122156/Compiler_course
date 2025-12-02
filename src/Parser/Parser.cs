@@ -102,6 +102,7 @@ public class Parser
             return ParseAssignment();
         }
 
+        // для вызова void функций (не в expression)
         if (_tokens.Peek().Type == TokenType.Identifier &&
         _tokens.Peek(1).Type == TokenType.OpenParenthesis)
         {
@@ -808,7 +809,7 @@ public class Parser
                 case "Pi":
                     return new NumericLiteralExpression((decimal)Math.PI);
                 default:
-                    // func_call (встроенные функции)
+                    // func_call
                     if (_tokens.Peek().Type == TokenType.OpenParenthesis)
                     {
                         List<Expression> arguments = ParseArgumentsList();

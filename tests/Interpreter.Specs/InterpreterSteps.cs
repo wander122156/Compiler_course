@@ -20,35 +20,26 @@ public class InterpreterTests
     }
 
     [Fact]
-    public void Can_execute_IfElseSumNums_program()
+    public void Can_execute_Factorial_program()
     {
         const string code = """
-            num a, b, sum;
-
-            write("First num: ");
-            read(a);
-            writeln();
-
-            write("Second num: ");
-            read(b);
-            writeln();
-
-            sum = a + b;
-            write("Sum is: ");
-            writeln(sum);
-
-            if (sum >= 100)
+            func num factorial(num n)
             {
-                writeln("Sum >= 100")
-            }
-            else
-            {
-                writeln("Sum <= 100")
+                if (n <= 1) 
+                {
+                    return 1;
+                } 
+                else 
+                {
+                    return n * factorial(n - 1);
+                }
             };
-
-            write("end")
+            num n;
+            read(n);
+            num result = factorial(n);
+            writeln(result)
             """;
-        _environment.SetInputLines("0.1", "0.2");
+        _environment.SetInputLines("5");
 
         // выполнение программы:
         Parser parser = new(_context, _environment, code);
@@ -59,16 +50,75 @@ public class InterpreterTests
 
         // ожидаемый результат
         List<RuntimeValue> expected = [
-            RuntimeValue.String("First num: "),
-            RuntimeValue.NewLine(),
-            RuntimeValue.String("Second num: "),
-            RuntimeValue.NewLine(),
-            RuntimeValue.String("Sum is: "),
-            RuntimeValue.Number(0.3m),
-            RuntimeValue.NewLine(),
-            RuntimeValue.String("Sum <= 100"),
-            RuntimeValue.NewLine(),
-            RuntimeValue.String("end"),
+            RuntimeValue.Number(120),
+            RuntimeValue.NewLine()
+        ];
+
+        // сравнение результататов
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_GSD_program()
+    {
+        const string code = """
+            num a, b, temp;
+            read(a,b);
+            while (b != 0) {
+                temp = b;
+                b = a % b;
+                a = temp
+            };
+            writeln(a)
+            """;
+        _environment.SetInputLines("49", "28");
+
+        // выполнение программы:
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        // получение результата
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+
+        // ожидаемый результат
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(7),
+            RuntimeValue.NewLine()
+        ];
+
+        // сравнение результататов
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_SumDigits_program()
+    {
+        const string code = """
+            num n;
+            num sum = 0;
+            write("Введите целое число: ");
+            readln(n);
+            n = abs(n);
+            while(n > 0){
+                sum = sum + n%10;
+                n = floor(n/10)
+            };
+            writeln(sum)
+            """;
+        _environment.SetInputLines("6123");
+
+        // выполнение программы:
+        Parser parser = new(_context, _environment, code);
+        parser.ParseProgram();
+
+        // получение результата
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+
+        // ожидаемый результат
+        List<RuntimeValue> expected = [
+            RuntimeValue.String("Введите целое число: "),
+            RuntimeValue.Number(12),
+            RuntimeValue.NewLine()
         ];
 
         // сравнение результататов
@@ -198,10 +248,9 @@ public class InterpreterTests
                 case RuntimeValue.ValueType.Number:
                     if (Math.Abs((decimal)expectedValue.Value - (decimal)actualValue.Value) >= Tolerance)
                     {
-                        Assert.Fail($"Expected does not match actual at index {i}: {expectedValue.Value} != {expectedValue.Value}");
+                        Assert.Fail($"Expected does not match actual at index {i}: {expectedValue.Value} != {actualValue.Value}");
                     }
 
-                    Assert.Equal((decimal)expectedValue.Value, (decimal)actualValue.Value, Precision);
                     break;
 
                 case RuntimeValue.ValueType.String:
