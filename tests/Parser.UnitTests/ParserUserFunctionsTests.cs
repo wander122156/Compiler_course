@@ -126,11 +126,23 @@ public class ParserUserFunctionsTests
     }
 
     [Fact]
-    public void Can_execute_nested_function_calls()
+    public void Can_execute_recursive_function_calls()
     {
-        string code = @"func num add(num a, num b) { return a + b }; func num tripleSum(num x, num y, num z) { return add(x, y) + z }; write(tripleSum(1, 2, 3))";
+        string code = @"
+            func num fir(num n) { sec(n+1) };
+            func num sec(num n) 
+            { 
+                write(n);
+                if (n < 4) fir(n) 
+            };
+
+            sec(1);
+        ";
         List<RuntimeValue> expected = [
-            RuntimeValue.Number(6),
+            RuntimeValue.Number(1),
+            RuntimeValue.Number(2),
+            RuntimeValue.Number(3),
+            RuntimeValue.Number(4),
         ];
 
         Parser parser = new(_context, _environment, code);

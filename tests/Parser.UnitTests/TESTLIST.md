@@ -274,11 +274,16 @@ num a = 100
 func num testParams(num a) { return a };
 write(testParams(50), a)
 ``` 
-- [x] Вложенные вызовы функций: → [6]
+- [x] Взаимная рекурсия функций: → [1, 2, 3, 4]
 ```
-func num add(num a, num b) { return a + b };
-func num tripleSum(num x, num y, num z) { return add(x, y) + z };
-write(tripleSum(1, 2, 3))
+func num fir(num n) { sec(n+1) };
+func num sec(num n) 
+{ 
+    write(n);
+    if (n < 4) fir(n) 
+};
+
+sec(1);
 ``` 
 
 #### Тесты с разными условиями
@@ -344,7 +349,7 @@ comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 
 (* Выражения *)
 expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression } ;  
-multiplicative_expression = unary_expression, { ("*" | "/" | "%"), unary_expression } ;
+multiplicative_expression = unary_expression, { ("*" |  "/" | "%"), unary_expression } ;
 unary_expression = ("+" | "-"), unary_expression
                     | exponentiation_expression
 exponentiation_expression = primary_expression, [ "^", exponentiation_expression ] ;
