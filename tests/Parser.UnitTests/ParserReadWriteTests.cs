@@ -71,7 +71,7 @@ public class ParserReadWriteTests
         _environment.SetInputLines("42");
 
         List<RuntimeValue> expected = [
-            RuntimeValue.Number(0),
+            RuntimeValue.Undefined(),
             RuntimeValue.Number(42)
         ];
 

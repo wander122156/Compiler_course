@@ -1,22 +1,25 @@
-﻿namespace Blang.Execution;
+﻿using Blang.Common;
+
+namespace Blang.Execution;
 
 public class Scope
 {
-    private readonly Dictionary<string, decimal> _variables = [];
+    private readonly Dictionary<string, RuntimeValue> _variables = [];
 
     /// <summary>
     /// Читает переменную из этой области видимости.
     /// Возвращает false, если переменная не объявлена в этой области видимости.
     /// </summary>
-    public bool TryGetVariable(string name, out decimal value)
+    public bool TryGetVariable(string name, out RuntimeValue value)
     {
-        if (_variables.TryGetValue(name, out decimal v))
+        if (_variables.TryGetValue(name, out RuntimeValue v))
         {
             value = v;
             return true;
         }
 
-        value = 0.0m;
+        value = RuntimeValue.Undefined();
+
         return false;
     }
 
@@ -24,7 +27,7 @@ public class Scope
     /// Присваивает переменную в этой области видимости.
     /// Возвращает false, если переменная не объявлена в этой области видимости.
     /// </summary>
-    public bool TryAssignVariable(string name, decimal value)
+    public bool TryAssignVariable(string name, RuntimeValue value)
     {
         if (_variables.ContainsKey(name))
         {
@@ -39,7 +42,7 @@ public class Scope
     /// Объявляет переменную в этой области видимости.
     /// Возвращает false, если переменная уже объявлена в этой области видимости.
     /// </summary>
-    public bool TryDefineVariable(string name, decimal value)
+    public bool TryDefineVariable(string name, RuntimeValue value)
     {
         return _variables.TryAdd(name, value);
     }

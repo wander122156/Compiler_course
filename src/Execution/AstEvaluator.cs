@@ -121,11 +121,11 @@ public class AstEvaluator : IAstVisitor
     {
         // NOTE: Вычисляем инициализирующее выражение, и затем присваиваем его значение переменной,
         //  сохраняя результат в стеке.
-        decimal value = 0m;
+        RuntimeValue value = RuntimeValue.Undefined();
         if (d.Value != null)
         {
             d.Value.Accept(this);
-            value = (decimal)_values.Pop().Value;
+            value = _values.Pop();
         }
 
         _context.DefineVariable(d.Name, value);
@@ -139,11 +139,11 @@ public class AstEvaluator : IAstVisitor
         // Объявляем все переменные в этой области видимости
         foreach (VariableDeclaration declaration in statement.Declarations)
         {
-            decimal value = 0m;
+            RuntimeValue value = RuntimeValue.Undefined();
             if (declaration.Value != null)
             {
                 declaration.Value.Accept(this);
-                value = (decimal)_values.Pop().Value;
+                value = _values.Pop();
             }
 
             _context.DefineVariable(declaration.Name, value);
@@ -153,7 +153,7 @@ public class AstEvaluator : IAstVisitor
     public void Visit(ConstantDeclaration d)
     {
         d.Value.Accept(this);
-        decimal value = (decimal)_values.Pop().Value;
+        RuntimeValue value = _values.Pop();
         _context.DefineConstant(d.Name, value);
     }
 
@@ -161,13 +161,13 @@ public class AstEvaluator : IAstVisitor
     {
         e.Value.Accept(this);
         RuntimeValue value = _values.Pop();
-        _context.AssignVariable(e.Name, (decimal)value.Value);
+        _context.AssignVariable(e.Name, value);
     }
 
     // Это получение значения существующей переменной
     public void Visit(VariableExpression e)
     {
-        _values.Push(RuntimeValue.Number(_context.GetValue(e.Name)));
+        _values.Push(_context.GetValue(e.Name));
     }
 
     public void Visit(WriteStatement s)
@@ -197,15 +197,7 @@ public class AstEvaluator : IAstVisitor
         foreach (string variableName in s.VariableNames)
         {
             RuntimeValue value = _environment.Read();
-
-            if (value.Type == RuntimeValue.ValueType.Number)
-            {
-                _context.AssignVariable(variableName, (decimal)value.Value);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Read expected number but got {value.Type}");
-            }
+            _context.AssignVariable(variableName, value);
         }
     }
 
@@ -214,15 +206,7 @@ public class AstEvaluator : IAstVisitor
         foreach (string variableName in s.VariableNames)
         {
             RuntimeValue value = _environment.Readln();
-
-            if (value.Type == RuntimeValue.ValueType.Number)
-            {
-                _context.AssignVariable(variableName, (decimal)value.Value);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Readln expected number but got {value.Type}");
-            }
+            _context.AssignVariable(variableName, value);
         }
     }
 
@@ -438,7 +422,7 @@ public class AstEvaluator : IAstVisitor
                 (string paramName, string paramType) = function.Parameters[i];
 
                 // TODO: Добавить проверку типов параметров
-                _context.DefineVariable(paramName, arguments[i]);
+                _context.DefineVariable(paramName, RuntimeValue.Number(arguments[i]));
             }
 
             function.Body.Accept(this);

@@ -1,4 +1,5 @@
 ﻿using Blang.Ast.Declarations;
+using Blang.Common;
 
 namespace Blang.Execution;
 
@@ -8,7 +9,7 @@ namespace Blang.Execution;
 public class Context
 {
     private readonly Stack<Scope> _scopes = [];
-    private readonly Dictionary<string, decimal> _constants = [];
+    private readonly Dictionary<string, RuntimeValue> _constants = [];
     private readonly Dictionary<string, FunctionDeclaration> _functions = [];
 
     public bool ShouldBreak { get; set; }
@@ -71,18 +72,17 @@ public class Context
     /// <summary>
     /// Возвращает значение переменной или константы.
     /// </summary>
-    public decimal GetValue(string name)
+    public RuntimeValue GetValue(string name)
     {
-        // foreach (Scope s in _scopes.Reverse())
         foreach (Scope s in _scopes)
         {
-            if (s.TryGetVariable(name, out decimal variable))
+            if (s.TryGetVariable(name, out RuntimeValue variable))
             {
                 return variable;
             }
         }
 
-        if (_constants.TryGetValue(name, out decimal constant))
+        if (_constants.TryGetValue(name, out RuntimeValue constant))
         {
             return constant;
         }
@@ -93,7 +93,7 @@ public class Context
     /// <summary>
     /// Присваивает (изменяет) значение переменной.
     /// </summary>
-    public void AssignVariable(string name, decimal value)
+    public void AssignVariable(string name, RuntimeValue value)
     {
         // foreach (Scope s in _scopes.Reverse())
         foreach (Scope s in _scopes)
@@ -110,7 +110,7 @@ public class Context
     /// <summary>
     /// Определяет переменную в текущей области видимости.
     /// </summary>
-    public void DefineVariable(string name, decimal value)
+    public void DefineVariable(string name, RuntimeValue value)
     {
         if (!_scopes.Peek().TryDefineVariable(name, value))
         {
@@ -121,7 +121,7 @@ public class Context
     /// <summary>
     /// Определяет константу в глобальной области видимости.
     /// </summary>
-    public void DefineConstant(string name, decimal value)
+    public void DefineConstant(string name, RuntimeValue value)
     {
         if (!_constants.TryAdd(name, value))
         {

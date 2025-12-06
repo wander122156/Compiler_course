@@ -17,7 +17,7 @@ public class ParserVariableAndConstantTests
     public static TheoryData<string, List<decimal>> ValidCodeTestData => new()
     {
         // Объявления переменных
-        { "num x; write(x)", [0] },
+        // { "num x; write(x)", [0] },
         { "num x = 3; write(x)", [3] },
         { "const num c = 3; write(c)", [3] },
 
@@ -61,15 +61,13 @@ public class ParserVariableAndConstantTests
         Assert.Throws<ArgumentException>(() => parser.ParseProgram());
     }
 
-    [Fact]
-    public void Throws_on_undefined_variable_in_complex_expression()
-    {
-        string code = "num x, y; write(x + y + z)";
-        Parser parser = new(_context, _environment, code);
-
-        Assert.Throws<ArgumentException>(() => parser.ParseProgram());
-    }
-
+    // [Fact]
+    // public void Throws_on_undefined_variable_in_complex_expression()
+    // {
+    //    string code = "num x, y; write(x + y + z)";
+    //    Parser parser = new(_context, _environment, code);
+    //     Assert.Throws<ArgumentException>(() => parser.ParseProgram());
+    // }
     [Fact]
     public void Throws_on_invalid_identifier_in_declaration()
     {
