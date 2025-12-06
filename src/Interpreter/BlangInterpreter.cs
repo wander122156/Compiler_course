@@ -14,7 +14,7 @@ public class BlangInterpreter
     }
 
     /// <summary>
-    /// Выполняет программу на языке Kaleidoscope
+    /// Выполняет программу на языке Blang
     /// </summary>
     public void Execute(string sourceCode)
     {

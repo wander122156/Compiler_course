@@ -21,14 +21,12 @@ namespace Blang.Parser;
 /// </summary>
 public class Parser
 {
-    private readonly IEnvironment _environment;
     private readonly TokenStream _tokens;
     private readonly AstEvaluator _evaluator;
     private readonly Stack<ParserContext> _parserContext = new();
 
     public Parser(Context context, IEnvironment environment, string code)
     {
-        _environment = environment;
         _tokens = new TokenStream(code);
         _evaluator = new AstEvaluator(context, environment);
         _parserContext.Push(ParserContext.Global);
@@ -42,12 +40,6 @@ public class Parser
         Switch,
     }
 
-    // private void PushParserContext(ParserContext context) => _parserContext.Push(context);
-
-    // private void PopParserContext() => _parserContext.Pop();
-
-    // private ParserContext CurrentParserContext => _parserContext.Peek();
-
     /// <summary>
     /// Выполняет синтаксический разбор строк кода по правилу.
     /// program = statement, { ";", statement }, [ ";" ]
@@ -56,6 +48,7 @@ public class Parser
     {
         do
         {
+             // нужно переделать чтобы возвращал IAstElement[]
             IAstElement node = ParseStatement();
             _evaluator.Evaluate(node);
 

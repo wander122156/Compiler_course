@@ -286,7 +286,42 @@ func num sec(num n)
 sec(1);
 ``` 
 
-#### Тесты с разными условиями
+### Тесты типов
+- [ ] Ошибка: сложение num и bool → TypeException
+ `write(true + 5) ` 
+
+- [ ] Ошибка: строка в арифметике → TypeException
+ `write("abc" * 3) ` 
+
+- [ ] Ошибка: арифметика с bool → TypeException
+ `write(5 - false) ` 
+
+- [ ] Ошибка: сравнение разных типов → TypeException
+ `write(1 == "1") ` 
+ 
+- [ ] Ошибка: сравнение num и string → TypeException
+ `if(1 < "abc") {}` 
+
+- [ ] Привидение типов к bool → [1]
+ `if ("hello") {write(1)}`
+ `if (10) {write(1)}`
+
+ - [ ] Ошибка: присваивание неверного типа → TypeException 
+ `num x;
+  x = "abc" ` 
+
+- [ ] Ошибка: неверный тип в объявлении → TypeException
+ `string s = 10 ` 
+
+- [ ] Ошибка: возврат другого типа → TypeException
+ `func num f() { return "abc" }` 
+ 
+- [ ] Ошибка: тип аргумента не совпадает → TypeException
+ `func num sqr(num x) { return x*x };
+sqr("str")` 
+
+- [ ] Ошибка: нет return в функции с типом → TypeException
+`func num f() { write(1) }`
 
 
 ## Грамматика в нотации EBNF(от аналитика, изменённая)
@@ -312,13 +347,15 @@ statement = variable_declaration
           | break_statement
           | continue_statement
 
+type = "num" | "string" | "bool" ;
+
 (* Объявления и переменные *)
-variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
-constant_definition = "const", "num", identifier, "=", expression ;
+variable_declaration = type, identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
+constant_definition = "const", type, identifier, "=", expression ;
 assignment = identifier, "=", expression ;
 
-function_declaration = "func", "num", identifier, "(", [ parameter_list ], ")", compound_statement ;
-parameter_list = "num", identifier, { ",", "num", identifier } ;
+function_declaration = "func", type, identifier, "(", [ parameter_list ], ")", compound_statement ;
+parameter_list = type, identifier, { ",", type, identifier } ;
 return__statement = "return", expression ;
 
 (* Ввод-Вывод*)
