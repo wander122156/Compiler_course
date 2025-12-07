@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Reflection;
 
 using Blang.Ast;
 using Blang.Ast.Declarations;
@@ -19,9 +20,20 @@ public class SemanticChecker : IAstVisitor
 {
     private readonly TypeContext _typeContext;
     private readonly Stack<ValueType> _types = new();
+    private readonly Stack<FunctionContext> _functionStack = new();
 
-    private ValueType _functionReturnType;
-    private bool _functionHasReturn;
+    private class FunctionContext
+    {
+        public string Name { get; set; } = "";
+
+        public ValueType ReturnType { get; set; }
+
+        public bool HasReturn { get; set; }
+    }
+
+    //private ValueType _functionReturnType;
+    //private bool _functionHasReturn;
+    //private string _functionName = "";
 
     public SemanticChecker()
     {
@@ -30,6 +42,15 @@ public class SemanticChecker : IAstVisitor
 
     public void Check(List<IAstElement> root)
     {
+        // ПЕРВЫЙ ПРОХОД: Объявляем все функции (только сигнатуры)
+        foreach (IAstElement node in root)
+        {
+            if (node is FunctionDeclaration funcDecl)
+            {
+                DeclareFunction(funcDecl);
+            }
+        }
+
         foreach (IAstElement node in root)
         {
             try
@@ -43,7 +64,21 @@ public class SemanticChecker : IAstVisitor
         }
     }
 
-    public static ValueType ParseStringToType(string typeName)
+    private void DeclareFunction(FunctionDeclaration d)
+    {
+        ValueType returnType = ParseStringToType(d.ReturnType);
+
+        List<(string, ValueType)> parameters = [];
+        foreach ((string name, string type) param in d.Parameters)
+        {
+            ValueType paramType = ParseStringToType(param.type);
+            parameters.Add((param.name, paramType));
+        }
+
+        _typeContext.DefineFunction(d.FuncName, returnType, parameters);
+    }
+
+    private static ValueType ParseStringToType(string typeName)
     {
         return typeName.ToLower() switch
         {
@@ -58,7 +93,7 @@ public class SemanticChecker : IAstVisitor
         };
     }
 
-    public static string TypeToString(ValueType type)
+    private static string TypeToString(ValueType type)
     {
         return type switch
         {
@@ -171,6 +206,7 @@ public class SemanticChecker : IAstVisitor
             case BinaryOperation.Exponentiation:
                 if (leftType != ValueType.Number || rightType != ValueType.Number)
                     throw new TypeException($"Arithmetic op requires num but got {leftType} and {leftType}");
+                _types.Push(ValueType.Number);
                 break;
 
             case BinaryOperation.LessThan:
@@ -179,12 +215,14 @@ public class SemanticChecker : IAstVisitor
             case BinaryOperation.GreaterThanOrEqual:
                 if (leftType != ValueType.Number || rightType != ValueType.Number )
                     throw new TypeException($"Comparison requires num but got {leftType} and {rightType}");
+                _types.Push(ValueType.Number);
                 break;
 
             case BinaryOperation.LooseEquality:
             case BinaryOperation.NotEqual:
                 if (leftType != rightType)
                     throw new TypeException($"Cannot compare {leftType} and {rightType}");
+                _types.Push(leftType);
                 break;
 
             default:
@@ -305,57 +343,55 @@ public class SemanticChecker : IAstVisitor
 
     public void Visit(FunctionDeclaration d)
     {
-        // Сохраняем текущий контекст функции
-        ValueType oldReturnType = _functionReturnType;
-        bool oldHasReturn = _functionHasReturn;
-
-        ValueType returnType = ParseStringToType(d.ReturnType);
-        _functionReturnType = returnType;
-        _functionHasReturn = false;
+        _functionStack.Push(new FunctionContext
+        {
+            Name = d.FuncName,
+            ReturnType = ParseStringToType(d.ReturnType),
+            HasReturn = false,
+        });
 
         // Создаем область видимости для параметров
         _typeContext.PushScope();
 
-        // Объявляем параметры
-        List<(string, ValueType)> parameters = [];
         foreach ((string name, string type) param in d.Parameters)
         {
             ValueType paramType = ParseStringToType(param.type);
-            parameters.Add((param.name, paramType));
-
             _typeContext.DefineVariableType(param.name, paramType);
         }
 
-        // Регистрируем функцию в TypeContext
-        _typeContext.DefineFunction(d.FuncName, returnType, parameters);
-
         d.Body.Accept(this);
 
+        FunctionContext currentFunc = _functionStack.Peek();
+
         // Проверяем, что не-void функция имеет return
-        if (_functionReturnType != ValueType.Void && !_functionHasReturn)
+        if (currentFunc.ReturnType != ValueType.Void && !currentFunc.HasReturn)
         {
             throw new TypeException(
-                $"Function '{d.FuncName}' must return a value of type {TypeToString(_functionReturnType)}"
+                $"Function '{currentFunc.Name}' must return a value of type {TypeToString(currentFunc.ReturnType)}"
             );
         }
 
         _typeContext.PopScope();
 
-        // Восстанавливаем предыдущий контекст
-        _functionReturnType = oldReturnType;
-        _functionHasReturn = oldHasReturn;
+        _functionStack.Pop();
     }
 
     public void Visit(ReturnStatement s)
     {
-        _functionHasReturn = true;
+        if (_functionStack.Count == 0)
+        {
+            throw new TypeException("'return' statement outside of function");
+        }
 
-        if (_functionReturnType == ValueType.Void)
+        FunctionContext currentFunc = _functionStack.Peek();
+        currentFunc.HasReturn = true;
+
+        if (currentFunc.ReturnType == ValueType.Void)
         {
             // Void функция не должна возвращать значение
             if (s.ReturnValue != null)
             {
-                throw new TypeException("Void function cannot return a value");
+                throw new TypeException($"Void function '{currentFunc.Name}' cannot return a value");
             }
         }
         else
@@ -363,16 +399,16 @@ public class SemanticChecker : IAstVisitor
             // Не-void функция должна возвращать значение
             if (s.ReturnValue == null)
             {
-                throw new TypeException("Function must return a value");
+                throw new TypeException($"Function '{currentFunc.Name}' must return a value");
             }
 
             s.ReturnValue.Accept(this);
             ValueType returnType = _types.Pop();
 
-            if (_functionReturnType != returnType)
+            if (currentFunc.ReturnType != returnType)
             {
                 throw new TypeException(
-                    $"Function returns {TypeToString(returnType)}, expected {TypeToString(_functionReturnType)}"
+                    $"Function '{currentFunc.Name}' returns {TypeToString(returnType)}, expected {TypeToString(currentFunc.ReturnType)}"
                 );
             }
         }
@@ -385,14 +421,14 @@ public class SemanticChecker : IAstVisitor
             CheckBuiltinFunctionCall(e);
             return;
         }
-        else if (_typeContext.HasFunction(e.FunctionName))
+
+        if (!_typeContext.HasFunction(e.FunctionName))
         {
-            TypeContext.FunctionInfo funcInfo = _typeContext.GetFunctionInfo(e.FunctionName);
-            CheckFunctionCall(e, funcInfo);
-            return;
+            throw new TypeException($"Function '{e.FunctionName}' is not defined");
         }
 
-        throw new TypeException($"Function '{e.FunctionName}' is not defined");
+        TypeContext.FunctionInfo funcInfo = _typeContext.GetFunctionInfo(e.FunctionName);
+        CheckFunctionCall(e, funcInfo);
     }
 
     public void Visit(WriteStatement s)
@@ -463,12 +499,17 @@ public class SemanticChecker : IAstVisitor
     {
         BuiltinTypeChecker.FunctionTypeInfo typeInfo = BuiltinTypeChecker.GetTypeInfo(e.FunctionName);
 
-        // Проверяем количество аргументов
-        if (e.Arguments.Count != typeInfo.ParameterTypes.Count)
+        if (!BuiltinTypeChecker.CheckArgumentCount(e.FunctionName, e.Arguments.Count))
         {
+            string expected;
+            if (typeInfo.MinArguments > 0)
+                expected = $"at least {typeInfo.MinArguments}";
+            else
+                expected = $"{typeInfo.ParameterTypes.Count}";
+
             throw new TypeException(
-                $"Builtin function '{e.FunctionName}' expects {typeInfo.ParameterTypes.Count} arguments, got {e.Arguments.Count}"
-            );
+                    $"Builtin function '{e.FunctionName}' expects {expected} arguments, got {e.Arguments.Count}"
+                );
         }
 
         // Проверяем типы аргументов (все должны быть Number)

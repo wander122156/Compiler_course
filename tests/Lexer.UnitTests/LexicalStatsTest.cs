@@ -32,11 +32,11 @@ public class LexicalStatsTest
                 """,
                 """
                 Keywords: 3
-                Identifiers: 4
+                Identifiers: 3
                 Number literals: 0
                 String literals: 3
                 Operators: 0
-                Other lexemes: 13
+                Other lexemes: 14
                 """
             },
             {

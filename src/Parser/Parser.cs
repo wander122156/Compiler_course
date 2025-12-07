@@ -109,6 +109,8 @@ public class Parser
             case TokenType.Const:
                 return ParseConstantDefinition();
             case TokenType.Num:
+            case TokenType.String:
+            case TokenType.Bool:
                 return ParseVariableDeclaration();
             case TokenType.If:
                 return ParseIfStatement();
@@ -268,6 +270,7 @@ public class Parser
     private VariableDeclarationStatement ParseVariableDeclaration()
     {
         string varType = ConvertTokenToType(_tokens.Peek().Type);
+        _tokens.Advance();
 
         List<VariableDeclaration> declarations = new();
 
@@ -311,6 +314,7 @@ public class Parser
     {
         Match(TokenType.Func);
         string returnType = ConvertTokenToType(_tokens.Peek().Type);
+        _tokens.Advance();
         string funcName = Match(TokenType.Identifier).Value!.ToString();
         Match(TokenType.OpenParenthesis);
 
@@ -319,6 +323,7 @@ public class Parser
         while (_tokens.Peek().Type != TokenType.CloseParenthesis)
         {
             string paramType = ConvertTokenToType(_tokens.Peek().Type);
+            _tokens.Advance();
 
             string paramName = Match(TokenType.Identifier).Value!.ToString();
             parameters.Add((paramName, paramType));
@@ -876,12 +881,12 @@ public class Parser
 
     private string ConvertTokenToType(TokenType type)
     {
-        _tokens.Advance();
         return type switch
         {
             TokenType.Num => "num",
             TokenType.String => "string",
             TokenType.Bool => "bool",
+            TokenType.Void => "void",
             _ => throw new UnexpectedLexemeException(TokenType.Num, _tokens.Peek())
         };
     }

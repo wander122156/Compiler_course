@@ -1,6 +1,7 @@
 ﻿using Blang.Common;
 using Blang.Execution;
 using Blang.Interpreter;
+using Blang.Semantic;
 
 namespace Blang.Parser.UnitTests;
 
@@ -66,7 +67,7 @@ public class ParserUserFunctionsTests
     [Fact]
     public void Can_execute_function_without_return_value()
     {
-        string code = @"func num printHello() { write(""Hello"") }; printHello()";
+        string code = @"func void printHello() { write(""Hello"") }; printHello()";
         List<RuntimeValue> expected = [
             RuntimeValue.String("Hello"),
         ];
@@ -76,6 +77,16 @@ public class ParserUserFunctionsTests
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Throws_on_void_function_with_return()
+    {
+        string code = @"func void printHello() { write(""Hello""); return 1 }; printHello()";
+
+        BlangInterpreter blang = new(_environment);
+
+        Assert.Throws<TypeException>(() => blang.Execute(code));
     }
 
     [Fact]
@@ -129,8 +140,8 @@ public class ParserUserFunctionsTests
     public void Can_execute_recursive_function_calls()
     {
         string code = @"
-            func num fir(num n) { sec(n+1) };
-            func num sec(num n) 
+            func void fir(num n) { sec(n+1) };
+            func void sec(num n) 
             { 
                 write(n);
                 if (n < 4) fir(n) 

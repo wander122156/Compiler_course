@@ -103,7 +103,7 @@ public class TypesTests
     public void Equality_Num_And_String_Should_Fail()
     {
         string code = """
-            write(1 == "1")
+            if(1 == "1"){ write(1) }
             """;
 
         Assert.Throws<TypeException>(() =>

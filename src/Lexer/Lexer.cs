@@ -17,6 +17,9 @@ public class Lexer(string code)
             "false", TokenType.False
         },
         {
+            "void", TokenType.Void
+        },
+        {
             "num", TokenType.Num
         },
         {

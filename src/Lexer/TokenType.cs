@@ -13,6 +13,11 @@ public enum TokenType
     False,
 
     /// <summary>
+    ///  Тип void.
+    /// </summary>
+    Void,
+
+    /// <summary>
     ///  Тип num.
     /// </summary>
     Num,

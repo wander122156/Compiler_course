@@ -45,7 +45,7 @@ public class TypeContext
                 return type;
         }
 
-        throw new TypeException($"Variable '{name}' is not defined");
+        throw new ArgumentException($"Variable '{name}' is not defined");
     }
 
     public void DefineFunction(

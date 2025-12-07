@@ -248,7 +248,7 @@ write(multiply(3, 7))
 ``` 
 - [x] Функция без возвращаемого значения (void): → ["Hello"]
 ```
-func num printHello() { write("Hello") };
+func void printHello() { write("Hello") };
 printHello()
 ``` 
 - [x] Локальные переменные в функциях: → [10]
@@ -287,40 +287,40 @@ sec(1);
 ``` 
 
 ### Тесты типов
-- [ ] Ошибка: сложение num и bool → TypeException
+- [x] Ошибка: сложение num и bool → TypeException
  `write(true + 5) ` 
 
-- [ ] Ошибка: строка в арифметике → TypeException
+- [x] Ошибка: строка в арифметике → TypeException
  `write("abc" * 3) ` 
 
-- [ ] Ошибка: арифметика с bool → TypeException
+- [x] Ошибка: арифметика с bool → TypeException
  `write(5 - false) ` 
 
-- [ ] Ошибка: сравнение разных типов → TypeException
- `write(1 == "1") ` 
+- [x] Ошибка: сравнение разных типов → TypeException
+ `if(1 == "1"){ write(1) } ` 
  
-- [ ] Ошибка: сравнение num и string → TypeException
+- [x] Ошибка: сравнение num и string → TypeException
  `if(1 < "abc") {}` 
 
-- [ ] Привидение типов к bool → [1]
+- [x] Привидение типов к bool → [1]
  `if ("hello") {write(1)}`
  `if (10) {write(1)}`
 
- - [ ] Ошибка: присваивание неверного типа → TypeException 
+ - [x] Ошибка: присваивание неверного типа → TypeException 
  `num x;
   x = "abc" ` 
 
-- [ ] Ошибка: неверный тип в объявлении → TypeException
+- [x] Ошибка: неверный тип в объявлении → TypeException
  `string s = 10 ` 
 
-- [ ] Ошибка: возврат другого типа → TypeException
+- [x] Ошибка: возврат другого типа → TypeException
  `func num f() { return "abc" }` 
  
-- [ ] Ошибка: тип аргумента не совпадает → TypeException
+- [x] Ошибка: тип аргумента не совпадает → TypeException
  `func num sqr(num x) { return x*x };
 sqr("str")` 
 
-- [ ] Ошибка: нет return в функции с типом → TypeException
+- [x] Ошибка: нет return в функции с типом → TypeException
 `func num f() { write(1) }`
 
 

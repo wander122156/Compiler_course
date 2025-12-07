@@ -4,14 +4,14 @@ namespace Blang.Semantic;
 
 public static class BuiltinTypeChecker
 {
-    public record FunctionTypeInfo(ValueType ReturnType, List<ValueType> ParameterTypes);
+    public record FunctionTypeInfo(ValueType ReturnType, List<ValueType> ParameterTypes, int MinArguments = -1);
 
     private static readonly Dictionary<string, FunctionTypeInfo> TypeInfo = new()
     {
         // ТОЛЬКО математические функции
         { "abs", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
-        { "min", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }) },
-        { "max", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }) },
+        { "min", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }, MinArguments: 1) },
+        { "max", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }, MinArguments: 1) },
         { "pow", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }) },
         { "floor", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
         { "sqrt", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
@@ -27,5 +27,21 @@ public static class BuiltinTypeChecker
             return info;
 
         throw new TypeException($"Unknown builtin function: {name}");
+    }
+
+    public static bool CheckArgumentCount(string name, int argCount)
+    {
+        if (!TypeInfo.TryGetValue(name, out FunctionTypeInfo? info))
+            return false;
+
+        // Если указан MinArguments, проверяем минимальное количество
+        if (info.MinArguments > 0 && argCount < info.MinArguments)
+            return false;
+
+        // Если не указан Min, проверяем точное совпадение
+        if (info.MinArguments == -1)
+            return argCount == info.ParameterTypes.Count;
+
+        return true;
     }
 }
