@@ -3,13 +3,19 @@
 namespace Blang.Ast.Declarations;
 public sealed class VariableDeclaration : Declaration
 {
-    public VariableDeclaration(string name, Expression? value)
+    public VariableDeclaration(
+        string name,
+        string declaredTypeName,
+        Expression? value)
     {
         Name = name;
+        DeclaredTypeName = declaredTypeName;
         Value = value;
     }
 
     public string Name { get; }
+
+    public string DeclaredTypeName { get; }
 
     public Expression? Value { get; }
 

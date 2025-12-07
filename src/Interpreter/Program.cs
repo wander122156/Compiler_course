@@ -26,7 +26,8 @@ public static class Program
 
             string sourceCode = File.ReadAllText(filePath);
 
-            BlangInterpreter interpreter = new BlangInterpreter();
+            ConsoleEnvironment environment = new();
+            BlangInterpreter interpreter = new(environment);
             interpreter.Execute(sourceCode);
 
             return 0;

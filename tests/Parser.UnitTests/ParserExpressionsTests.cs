@@ -1,5 +1,6 @@
 ﻿using Blang.Common;
 using Blang.Execution;
+using Blang.Interpreter;
 
 namespace Blang.Parser.UnitTests;
 
@@ -52,8 +53,8 @@ public class ParserExpressionsTests
     {
         string code = $"num result = {expression}; write(result)";
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         RuntimeValue result = Assert.Single(_environment.Results);
         Assert.Equal(expected, (decimal)result.Value, Precision);

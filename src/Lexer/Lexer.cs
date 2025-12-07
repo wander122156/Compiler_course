@@ -20,6 +20,12 @@ public class Lexer(string code)
             "num", TokenType.Num
         },
         {
+            "string", TokenType.String
+        },
+        {
+            "bool", TokenType.Bool
+        },
+        {
             "const", TokenType.Const
         },
         {

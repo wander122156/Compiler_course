@@ -1,5 +1,6 @@
 ﻿using Blang.Common;
 using Blang.Execution;
+using Blang.Interpreter;
 
 namespace Blang.Parser.UnitTests;
 
@@ -31,8 +32,8 @@ public class ParserLoopsTests
         List<RuntimeValue> expected = [RuntimeValue.Number(0), RuntimeValue.Number(1)];
 
         // Act
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         // Assert
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
@@ -57,8 +58,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(2)];
 
         // Act
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         // Assert
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
@@ -81,8 +82,8 @@ public class ParserLoopsTests
         List<RuntimeValue> expected = [RuntimeValue.Number(1), RuntimeValue.Number(2)];
 
         // Act
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         // Assert
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
@@ -100,8 +101,8 @@ public class ParserLoopsTests
             }";
         List<RuntimeValue> expected = [RuntimeValue.Number(0)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -120,8 +121,8 @@ public class ParserLoopsTests
         ";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -140,8 +141,8 @@ public class ParserLoopsTests
         ";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -163,8 +164,8 @@ public class ParserLoopsTests
         RuntimeValue.Number(2)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -180,8 +181,8 @@ public class ParserLoopsTests
         ";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -208,8 +209,8 @@ public class ParserLoopsTests
         RuntimeValue.Number(11)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -225,8 +226,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(2)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -238,8 +239,8 @@ public class ParserLoopsTests
         string code = "for (num i = 5; i < 6; i = i + 1) { write(i) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(5)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -251,8 +252,8 @@ public class ParserLoopsTests
         string code = "for (num i = 10; i < 5; i = i + 1) { write(i) }";
         List<RuntimeValue> expected = [];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -270,8 +271,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(1)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -288,8 +289,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(8)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -312,8 +313,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(11)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -332,8 +333,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(2)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -349,8 +350,8 @@ public class ParserLoopsTests
         ";
         List<RuntimeValue> expected = [RuntimeValue.Number(6)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -364,9 +365,9 @@ public class ParserLoopsTests
             write(i)
         ";
 
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<ArgumentException>(() => parser.ParseProgram());
+        Assert.Throws<ArgumentException>(() => blang.Execute(code));
     }
 
     [Fact]
@@ -379,8 +380,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(4)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -397,8 +398,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(7)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -418,8 +419,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(4)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -439,8 +440,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(3)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -463,8 +464,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(11)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -490,8 +491,8 @@ public class ParserLoopsTests
             RuntimeValue.Number(4),
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -507,8 +508,8 @@ public class ParserLoopsTests
         RuntimeValue.Number(2)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -520,8 +521,8 @@ public class ParserLoopsTests
         string code = "num i = 5; while (i < 6) { write(i); i = i + 1 }";
         List<RuntimeValue> expected = [RuntimeValue.Number(5)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -533,8 +534,8 @@ public class ParserLoopsTests
         string code = "while (false) { write(1) }";
         List<RuntimeValue> expected = [];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -552,8 +553,8 @@ public class ParserLoopsTests
         RuntimeValue.Number(1)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -580,8 +581,8 @@ public class ParserLoopsTests
         RuntimeValue.Number(11)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -598,8 +599,8 @@ public class ParserLoopsTests
     ";
         List<RuntimeValue> expected = [RuntimeValue.Number(6)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -609,63 +610,63 @@ public class ParserLoopsTests
     public void Throws_on_missing_opening_parenthesis()
     {
         string code = "for num i = 0; i < 10; i = i + 1) {}";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_missing_closing_parenthesis()
     {
         string code = "for (num i = 0; i < 10; i = i + 1 {}";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_missing_semicolon_between_conditions()
     {
         string code = "for (num i = 0 i < 10; i = i + 1) {}";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_invalid_initialization_expression()
     {
         string code = "for (num i = ; i < 10; i = i + 1) {}";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_invalid_condition_expression()
     {
         string code = "for (num i = 0; ; i = i + 1) {}";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_invalid_increment_expression()
     {
         string code = "for (num i = 0; i < 10; ) {}";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_using_undeclared_variable_in_condition()
     {
         string code = "for (num i = 0; j < 10; i = i + 1) {}";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<ArgumentException>(() => parser.ParseProgram());
+        Assert.Throws<ArgumentException>(() => blang.Execute(code));
     }
 
     private void AssertResults(List<RuntimeValue> expected, IReadOnlyList<RuntimeValue> actual)

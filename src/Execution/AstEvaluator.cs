@@ -11,13 +11,13 @@ public class AstEvaluator : IAstVisitor
     private readonly IEnvironment _environment;
     private readonly Stack<RuntimeValue> _values = [];
 
-    public AstEvaluator(Context context, IEnvironment environment)
+    public AstEvaluator(IEnvironment environment)
     {
-        _context = context;
+        _context = new Context();
         _environment = environment;
     }
 
-    public void Evaluate(IAstElement node)
+    public void Evaluate(List<IAstElement> root)
     {
         if (_values.Count > 0)
         {
@@ -26,7 +26,10 @@ public class AstEvaluator : IAstVisitor
             );
         }
 
-        node.Accept(this);
+        foreach (IAstElement node in root)
+        {
+            node.Accept(this);
+        }
     }
 
     public void Visit(BinaryOperationExpression e)

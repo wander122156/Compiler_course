@@ -1,5 +1,6 @@
 ﻿using Blang.Common;
 using Blang.Execution;
+using Blang.Interpreter;
 
 namespace Blang.Parser.UnitTests;
 
@@ -7,13 +8,10 @@ public class ParserReadWriteTests
 {
     private const int Precision = 5;
     private static readonly decimal Tolerance = (decimal)Math.Pow(0.1, Precision);
-
-    private readonly Context _context;
     private readonly FakeEnvironment _environment;
 
     public ParserReadWriteTests()
     {
-        _context = new Context();
         _environment = new FakeEnvironment();
     }
 
@@ -23,8 +21,8 @@ public class ParserReadWriteTests
         string code = "write (\"hello\")";
         List<RuntimeValue> expected = [RuntimeValue.String("hello")];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -40,8 +38,8 @@ public class ParserReadWriteTests
             RuntimeValue.String("Blang")
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -57,8 +55,8 @@ public class ParserReadWriteTests
             RuntimeValue.NewLine(),
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -75,8 +73,8 @@ public class ParserReadWriteTests
             RuntimeValue.Number(42)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -94,8 +92,8 @@ public class ParserReadWriteTests
             RuntimeValue.Number(30)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -112,8 +110,8 @@ public class ParserReadWriteTests
             RuntimeValue.Number(200)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -125,8 +123,8 @@ public class ParserReadWriteTests
         string code = "write(2 * 3 + 1)";
         List<RuntimeValue> expected = [RuntimeValue.Number(7)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -138,8 +136,8 @@ public class ParserReadWriteTests
         string code = "num x = 5; write(x * 2)";
         List<RuntimeValue> expected = [RuntimeValue.Number(10)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -151,8 +149,8 @@ public class ParserReadWriteTests
         string code = "writeln()";
         List<RuntimeValue> expected = [RuntimeValue.NewLine()];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -166,8 +164,8 @@ public class ParserReadWriteTests
 
         List<RuntimeValue> expected = [RuntimeValue.Number(3.14m)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -181,8 +179,8 @@ public class ParserReadWriteTests
 
         List<RuntimeValue> expected = [RuntimeValue.Number(123.456m)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -209,8 +207,8 @@ public class ParserReadWriteTests
             RuntimeValue.Number(40)
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -220,36 +218,36 @@ public class ParserReadWriteTests
     public void Throws_on_read_undefined_variable()
     {
         string code = "read(undefinedVar)";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<ArgumentException>(() => parser.ParseProgram());
+        Assert.Throws<ArgumentException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_write_undefined_variable()
     {
         string code = "write(undefinedVar)";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<ArgumentException>(() => parser.ParseProgram());
+        Assert.Throws<ArgumentException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_missing_parenthesis_in_write()
     {
         string code = "write \"hello\"";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_missing_comma_in_multiple_read()
     {
         string code = "num a, b; read(a b)";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     private void AssertResults(List<RuntimeValue> expected, IReadOnlyList<RuntimeValue> actual)

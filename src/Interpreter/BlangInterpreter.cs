@@ -1,16 +1,16 @@
-﻿using Blang.Common;
+﻿using Blang.Ast.Statement;
+using Blang.Common;
 using Blang.Execution;
+using Blang.Semantic;
 
 namespace Blang.Interpreter;
 public class BlangInterpreter
 {
-    private readonly Context _context;
     private readonly IEnvironment _environment;
 
-    public BlangInterpreter()
+    public BlangInterpreter(IEnvironment environment)
     {
-        _context = new Context();
-        _environment = new ConsoleEnvironment();
+        _environment = environment;
     }
 
     /// <summary>
@@ -23,8 +23,16 @@ public class BlangInterpreter
             throw new ArgumentException("Source code cannot be null or empty", nameof(sourceCode));
         }
 
-        // Создаем парсер и выполняем программу
-        Parser.Parser parser = new(_context, _environment, sourceCode);
-        parser.ParseProgram();
+        TypeContext typeContext = new();
+        Context context = new();
+
+        Parser.Parser parser = new(sourceCode);
+        List<Ast.IAstElement> program = parser.ParseProgram();
+
+        SemanticChecker semanticChecker = new();
+        semanticChecker.Check(program);
+
+        AstEvaluator evaluator = new(_environment);
+        evaluator.Evaluate(program);
     }
 }

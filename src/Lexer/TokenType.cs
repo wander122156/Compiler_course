@@ -23,6 +23,11 @@ public enum TokenType
     String,
 
     /// <summary>
+    ///  Тип bool.
+    /// </summary>
+    Bool,
+
+    /// <summary>
     ///  Ключевое слово const.
     /// </summary>
     Const,

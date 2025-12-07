@@ -1,5 +1,6 @@
 ﻿using Blang.Common;
 using Blang.Execution;
+using Blang.Interpreter;
 
 namespace Blang.Parser.UnitTests;
 
@@ -25,8 +26,8 @@ public class ParserUserFunctionsTests
             RuntimeValue.Number(5),
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -40,8 +41,8 @@ public class ParserUserFunctionsTests
             RuntimeValue.Number(16),
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -55,8 +56,8 @@ public class ParserUserFunctionsTests
             RuntimeValue.Number(21),
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -70,8 +71,8 @@ public class ParserUserFunctionsTests
             RuntimeValue.String("Hello"),
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -85,8 +86,8 @@ public class ParserUserFunctionsTests
             RuntimeValue.Number(10),
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -101,8 +102,8 @@ public class ParserUserFunctionsTests
             RuntimeValue.Number(5),
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -117,8 +118,8 @@ public class ParserUserFunctionsTests
             RuntimeValue.Number(100),
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -144,8 +145,8 @@ public class ParserUserFunctionsTests
             RuntimeValue.Number(4),
         ];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);

@@ -1,5 +1,6 @@
 ﻿using Blang.Common;
 using Blang.Execution;
+using Blang.Interpreter;
 using Blang.Parser;
 
 namespace Interpreter.Specs;
@@ -42,8 +43,8 @@ public class InterpreterTests
         _environment.SetInputLines("5");
 
         // выполнение программы:
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         // получение результата
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
@@ -74,8 +75,8 @@ public class InterpreterTests
         _environment.SetInputLines("49", "28");
 
         // выполнение программы:
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         // получение результата
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
@@ -108,8 +109,8 @@ public class InterpreterTests
         _environment.SetInputLines("6123");
 
         // выполнение программы:
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         // получение результата
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
@@ -145,8 +146,8 @@ public class InterpreterTests
         _environment.SetInputLines("0.1", "0.2");
 
         // выполнение программы:
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         // получение результата
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
@@ -177,8 +178,8 @@ public class InterpreterTests
         _environment.SetInputLines("10");
 
         // выполнение программы:
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         // получение результата
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
@@ -209,8 +210,8 @@ public class InterpreterTests
         _environment.SetInputLines("120");
 
         // выполнение программы:
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         // получение результата
         IReadOnlyList<RuntimeValue> actual = _environment.Results;

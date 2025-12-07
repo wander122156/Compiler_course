@@ -1,5 +1,6 @@
 ﻿using Blang.Common;
 using Blang.Execution;
+using Blang.Interpreter;
 using Blang.Parser;
 
 namespace Blang.Semantic.UnitTests;
@@ -28,8 +29,8 @@ public class TypesTests
         List<RuntimeValue> expected = [
             RuntimeValue.Number(1),
         ];
-        Parser.Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -45,8 +46,8 @@ public class TypesTests
         List<RuntimeValue> expected = [
             RuntimeValue.Number(1),
         ];
-        Parser.Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -62,8 +63,8 @@ public class TypesTests
 
         Assert.Throws<TypeException>(() =>
         {
-            Parser.Parser parser = new(_context, _environment, code);
-            parser.ParseProgram();
+            BlangInterpreter blang = new(_environment);
+            blang.Execute(code);
         });
     }
 
@@ -77,8 +78,8 @@ public class TypesTests
 
         Assert.Throws<TypeException>(() =>
         {
-            Parser.Parser parser = new(_context, _environment, code);
-            parser.ParseProgram();
+            BlangInterpreter blang = new(_environment);
+            blang.Execute(code);
         });
     }
 
@@ -92,8 +93,8 @@ public class TypesTests
 
         Assert.Throws<TypeException>(() =>
         {
-            Parser.Parser parser = new(_context, _environment, code);
-            parser.ParseProgram();
+            BlangInterpreter blang = new(_environment);
+            blang.Execute(code);
         });
     }
 
@@ -107,8 +108,8 @@ public class TypesTests
 
         Assert.Throws<TypeException>(() =>
         {
-            Parser.Parser parser = new(_context, _environment, code);
-            parser.ParseProgram();
+            BlangInterpreter blang = new(_environment);
+            blang.Execute(code);
         });
     }
 
@@ -122,8 +123,8 @@ public class TypesTests
 
         Assert.Throws<TypeException>(() =>
         {
-            Parser.Parser parser = new(_context, _environment, code);
-            parser.ParseProgram();
+            BlangInterpreter blang = new(_environment);
+            blang.Execute(code);
         });
     }
 
@@ -138,8 +139,8 @@ public class TypesTests
 
         Assert.Throws<TypeException>(() =>
         {
-            Parser.Parser parser = new(_context, _environment, code);
-            parser.ParseProgram();
+            BlangInterpreter blang = new(_environment);
+            blang.Execute(code);
         });
     }
 
@@ -153,8 +154,8 @@ public class TypesTests
 
         Assert.Throws<TypeException>(() =>
         {
-            Parser.Parser parser = new(_context, _environment, code);
-            parser.ParseProgram();
+            BlangInterpreter blang = new(_environment);
+            blang.Execute(code);
         });
     }
 
@@ -168,8 +169,8 @@ public class TypesTests
 
         Assert.Throws<TypeException>(() =>
         {
-            Parser.Parser parser = new(_context, _environment, code);
-            parser.ParseProgram();
+            BlangInterpreter blang = new(_environment);
+            blang.Execute(code);
         });
     }
 
@@ -184,8 +185,8 @@ public class TypesTests
 
         Assert.Throws<TypeException>(() =>
         {
-            Parser.Parser parser = new(_context, _environment, code);
-            parser.ParseProgram();
+            BlangInterpreter blang = new(_environment);
+            blang.Execute(code);
         });
     }
 
@@ -199,8 +200,8 @@ public class TypesTests
 
         Assert.Throws<TypeException>(() =>
         {
-            Parser.Parser parser = new(_context, _environment, code);
-            parser.ParseProgram();
+            BlangInterpreter blang = new(_environment);
+            blang.Execute(code);
         });
     }
 

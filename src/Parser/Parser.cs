@@ -22,13 +22,11 @@ namespace Blang.Parser;
 public class Parser
 {
     private readonly TokenStream _tokens;
-    private readonly AstEvaluator _evaluator;
     private readonly Stack<ParserContext> _parserContext = new();
 
-    public Parser(Context context, IEnvironment environment, string code)
+    public Parser(string code)
     {
         _tokens = new TokenStream(code);
-        _evaluator = new AstEvaluator(context, environment);
         _parserContext.Push(ParserContext.Global);
     }
 
@@ -44,13 +42,14 @@ public class Parser
     /// Выполняет синтаксический разбор строк кода по правилу.
     /// program = statement, { ";", statement }, [ ";" ]
     /// </summary>
-    public void ParseProgram()
+    public List<IAstElement> ParseProgram()
     {
+        List<IAstElement> astNodes = new();
         do
         {
              // нужно переделать чтобы возвращал IAstElement[]
-            IAstElement node = ParseStatement();
-            _evaluator.Evaluate(node);
+            IAstElement statement = ParseStatement();
+            astNodes.Add(statement);
 
             if (_tokens.Peek().Type == TokenType.Semicolon)
             {
@@ -63,6 +62,8 @@ public class Parser
             }
         }
         while (_tokens.Peek().Type != TokenType.EndOfFile);
+
+        return astNodes;
     }
 
     /// <summary>
@@ -262,18 +263,18 @@ public class Parser
     /// <summary>
     /// Разбирает объявление переменных и следующее за ним выражение.
     /// Правило:
-    ///     variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
+    ///     variable_declaration = "type", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
     /// </summary>
     private VariableDeclarationStatement ParseVariableDeclaration()
     {
-        Match(TokenType.Num);
+        string varType = ConvertTokenToType(_tokens.Peek().Type);
 
         List<VariableDeclaration> declarations = new();
 
         // Первая переменная
         string firstName = Match(TokenType.Identifier).Value!.ToString();
         Expression? firstValue = ParseOptionalAssignment();
-        declarations.Add(new VariableDeclaration(firstName, firstValue));
+        declarations.Add(new VariableDeclaration(firstName, varType, firstValue));
 
         // Остальные переменные
         while (_tokens.Peek().Type == TokenType.Comma)
@@ -281,7 +282,7 @@ public class Parser
             Match(TokenType.Comma);
             string name = Match(TokenType.Identifier).Value!.ToString();
             Expression? value = ParseOptionalAssignment();
-            declarations.Add(new VariableDeclaration(name, value));
+            declarations.Add(new VariableDeclaration(name, varType, value));
         }
 
         return new VariableDeclarationStatement(declarations);
@@ -303,24 +304,21 @@ public class Parser
     /// <summary>
     /// Разбирает объявление переменных и следующее за ним выражение.
     /// Правило:
-    ///     function_declaration = "func", "num", identifier, "(", [ parameter_list ], ")", compound_statement ;
-    ///     parameter_list = "num", identifier, { ",", "num", identifier } ;
+    ///     function_declaration = "func", "type", identifier, "(", [ parameter_list ], ")", compound_statement ;
+    ///     parameter_list = "type", identifier, { ",", "type", identifier } ;
     /// </summary>
     private FunctionDeclaration ParseFunctionDeclaration()
     {
-        _tokens.Advance();
-        Match(TokenType.Num);
+        Match(TokenType.Func);
+        string returnType = ConvertTokenToType(_tokens.Peek().Type);
         string funcName = Match(TokenType.Identifier).Value!.ToString();
-
         Match(TokenType.OpenParenthesis);
 
         List<(string name, string type)> parameters = new();
 
         while (_tokens.Peek().Type != TokenType.CloseParenthesis)
         {
-            // TODO: сильно переделать типы
-            Match(TokenType.Num);
-            string paramType = "num";
+            string paramType = ConvertTokenToType(_tokens.Peek().Type);
 
             string paramName = Match(TokenType.Identifier).Value!.ToString();
             parameters.Add((paramName, paramType));
@@ -341,7 +339,7 @@ public class Parser
         try
         {
             CompoundStatement body = ParseCompoundStatement();
-            return new FunctionDeclaration(funcName, parameters, body);
+            return new FunctionDeclaration(funcName, returnType, parameters, body);
         }
         finally
         {
@@ -874,5 +872,17 @@ public class Parser
                type == TokenType.GreaterThanOrEqual ||
                type == TokenType.LessThan ||
                type == TokenType.LessThanOrEqual;
+    }
+
+    private string ConvertTokenToType(TokenType type)
+    {
+        _tokens.Advance();
+        return type switch
+        {
+            TokenType.Num => "num",
+            TokenType.String => "string",
+            TokenType.Bool => "bool",
+            _ => throw new UnexpectedLexemeException(TokenType.Num, _tokens.Peek())
+        };
     }
 }

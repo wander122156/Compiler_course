@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\src\Execution\Execution.csproj" />
     <ProjectReference Include="..\..\src\Parser\Parser.csproj" />
     <ProjectReference Include="..\..\src\Semantic\Semantic.csproj" />
+    <ProjectReference Include="..\..\src\Interpreter\Interpreter.csproj" />
   </ItemGroup>
   
 </Project>

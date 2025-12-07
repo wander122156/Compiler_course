@@ -1,5 +1,6 @@
 ﻿using Blang.Common;
 using Blang.Execution;
+using Blang.Interpreter;
 
 namespace Blang.Parser.UnitTests;
 
@@ -23,8 +24,8 @@ public class ParserIfElseTests
         string code = "if (true) {}";
         List<RuntimeValue> expected = [];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -36,8 +37,8 @@ public class ParserIfElseTests
         string code = "if (true) { write(1 + 5 - 3) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(3)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -49,8 +50,8 @@ public class ParserIfElseTests
         string code = "if (false) { write(1 + 5 - 3) }";
         List<RuntimeValue> expected = [];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -62,8 +63,8 @@ public class ParserIfElseTests
         string code = "if (3 < 5) { write(1) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -75,8 +76,8 @@ public class ParserIfElseTests
         string code = "if (1 + 2 * 6^2 < 321) { write(1) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -88,8 +89,8 @@ public class ParserIfElseTests
         string code = "if (true) { write(1) } else { write(2) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -101,8 +102,8 @@ public class ParserIfElseTests
         string code = "if (false) { write(1) } else { write(2) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(2)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -114,8 +115,8 @@ public class ParserIfElseTests
         string code = "if (true) { if (false) { write(1) } else { write(2) } }";
         List<RuntimeValue> expected = [RuntimeValue.Number(2)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -127,8 +128,8 @@ public class ParserIfElseTests
         string code = "num x = 10; if (x > 5) { write(1) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -140,8 +141,8 @@ public class ParserIfElseTests
         string code = "if (5 == 5) { write(1) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -153,8 +154,8 @@ public class ParserIfElseTests
         string code = "if (5 != 3) { write(1) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -166,8 +167,8 @@ public class ParserIfElseTests
         string code = "if (5 >= 5) { write(1) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -179,8 +180,8 @@ public class ParserIfElseTests
         string code = "if (3 <= 5) { write(1) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(1)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -192,8 +193,8 @@ public class ParserIfElseTests
         string code = "if (true) { write(1); write(2) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(1), RuntimeValue.Number(2)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -205,8 +206,8 @@ public class ParserIfElseTests
         string code = "if (false) { write(1); write(2) } else { write(3); write(4) }";
         List<RuntimeValue> expected = [RuntimeValue.Number(3), RuntimeValue.Number(4)];
 
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -216,27 +217,27 @@ public class ParserIfElseTests
     public void Throws_on_missing_condition_parenthesis()
     {
         string code = "if true) { write(1) }";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_missing_opening_brace()
     {
         string code = "if (true) write(1) }";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_invalid_condition_expression()
     {
         string code = "if (true false) { write(1) }";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     private void AssertResults(List<RuntimeValue> expected, IReadOnlyList<RuntimeValue> actual)

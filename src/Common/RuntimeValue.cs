@@ -39,6 +39,11 @@ public class RuntimeValue
         /// Представляет символ новой строки (используется для вывода writeln)
         /// </summary>
         NewLine,
+
+        /// <summary>
+        /// Представляет символ новой строки (используется для вывода writeln)
+        /// </summary>
+        Void,
     }
 
     public ValueType Type { get; }
@@ -63,6 +68,9 @@ public class RuntimeValue
     public static RuntimeValue NewLine()
     => new RuntimeValue(ValueType.NewLine, null!);
 
+    public static RuntimeValue Void()
+        => new RuntimeValue(ValueType.Void, null!);
+
     public static explicit operator decimal(RuntimeValue value)
     {
         if (value.Type != ValueType.Number)
@@ -81,19 +89,5 @@ public class RuntimeValue
         }
 
         return (string)value.Value;
-    }
-
-    public override string ToString()
-    {
-        return Type switch
-        {
-            ValueType.Number => $"Number:{Value}",
-            ValueType.String => $"String:{Value}",
-            ValueType.Boolean => $"Boolean:{Value}",
-            ValueType.NewLine => "NewLine",
-            ValueType.Null => "Null",
-            ValueType.Undefined => "Undefined",
-            _ => $"Unknown:{Type}",
-        };
     }
 }

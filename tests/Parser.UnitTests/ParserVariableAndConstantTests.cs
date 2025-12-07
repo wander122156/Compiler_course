@@ -1,5 +1,6 @@
 ﻿using Blang.Common;
 using Blang.Execution;
+using Blang.Interpreter;
 
 namespace Blang.Parser.UnitTests;
 
@@ -44,8 +45,8 @@ public class ParserVariableAndConstantTests
     [MemberData(nameof(ValidCodeTestData))]
     public void Can_parse_valid_code(string code, List<decimal> expected)
     {
-        Parser parser = new(_context, _environment, code);
-        parser.ParseProgram();
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
@@ -56,52 +57,52 @@ public class ParserVariableAndConstantTests
     public void Throws_on_undefined_variable_without_declarations()
     {
         string code = "write(x + 1)";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<ArgumentException>(() => parser.ParseProgram());
+        Assert.Throws<ArgumentException>(() => blang.Execute(code));
     }
 
     // [Fact]
     // public void Throws_on_undefined_variable_in_complex_expression()
     // {
     //    string code = "num x, y; write(x + y + z)";
-    //    Parser parser = new(_context, _environment, code);
-    //     Assert.Throws<ArgumentException>(() => parser.ParseProgram());
+    //    BlangInterpreter blang = new(_environment)
+    //     Assert.Throws<ArgumentException>(() => blang.Execute(code));
     // }
     [Fact]
     public void Throws_on_invalid_identifier_in_declaration()
     {
         string code = "num 123";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_missing_identifier_in_const_declaration()
     {
         string code = "const num = 5";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_missing_expression_in_assignment()
     {
         string code = "num x = ;";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<UnexpectedLexemeException>(() => parser.ParseProgram());
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     [Fact]
     public void Throws_on_assignment_to_undefined_variable()
     {
         string code = "x = 5";
-        Parser parser = new(_context, _environment, code);
+        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<ArgumentException>(() => parser.ParseProgram());
+        Assert.Throws<ArgumentException>(() => blang.Execute(code));
     }
 
     private void AssertResults(List<decimal> expected, IReadOnlyList<RuntimeValue> actual)
