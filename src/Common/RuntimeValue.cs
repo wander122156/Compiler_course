@@ -90,4 +90,14 @@ public class RuntimeValue
 
         return (string)value.Value;
     }
+
+    public static explicit operator bool(RuntimeValue value)
+    {
+        if (value.Type != ValueType.Boolean)
+        {
+            throw new InvalidCastException($"Cannot convert {value.Type} to bool");
+        }
+
+        return (bool)value.Value;
+    }
 }

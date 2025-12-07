@@ -287,6 +287,20 @@ sec(1);
 ``` 
 
 ### Тесты типов
+- [x] Привидение типов к bool → [1]
+ `if ("hello") {write(1)}`
+ `if (10) {write(1)}`
+
+- [x] Вывод bool -> [true, false]
+ `write(true); write(false)` 
+
+- [x] Чтение string -> ["qwerty"]
+ ```
+ string s;
+ read(s);
+ write(s);
+ ```
+
 - [x] Ошибка: сложение num и bool → TypeException
  `write(true + 5) ` 
 
@@ -301,10 +315,6 @@ sec(1);
  
 - [x] Ошибка: сравнение num и string → TypeException
  `if(1 < "abc") {}` 
-
-- [x] Привидение типов к bool → [1]
- `if ("hello") {write(1)}`
- `if (10) {write(1)}`
 
  - [x] Ошибка: присваивание неверного типа → TypeException 
  `num x;

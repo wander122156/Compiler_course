@@ -4,14 +4,14 @@ namespace Blang.Semantic;
 
 public static class BuiltinTypeChecker
 {
-    public record FunctionTypeInfo(ValueType ReturnType, List<ValueType> ParameterTypes, int MinArguments = -1);
+    public record FunctionTypeInfo(ValueType returnType, List<ValueType> parameterTypes, int minArguments = -1);
 
     private static readonly Dictionary<string, FunctionTypeInfo> TypeInfo = new()
     {
         // ТОЛЬКО математические функции
         { "abs", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
-        { "min", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }, MinArguments: 1) },
-        { "max", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }, MinArguments: 1) },
+        { "min", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }, minArguments: 1) },
+        { "max", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }, minArguments: 1) },
         { "pow", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }) },
         { "floor", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
         { "sqrt", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
@@ -35,12 +35,12 @@ public static class BuiltinTypeChecker
             return false;
 
         // Если указан MinArguments, проверяем минимальное количество
-        if (info.MinArguments > 0 && argCount < info.MinArguments)
+        if (info.minArguments > 0 && argCount < info.minArguments)
             return false;
 
         // Если не указан Min, проверяем точное совпадение
-        if (info.MinArguments == -1)
-            return argCount == info.ParameterTypes.Count;
+        if (info.minArguments == -1)
+            return argCount == info.parameterTypes.Count;
 
         return true;
     }

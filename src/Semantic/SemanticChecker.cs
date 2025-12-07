@@ -1,12 +1,7 @@
-﻿using System.Linq;
-using System.Reflection;
-
-using Blang.Ast;
+﻿using Blang.Ast;
 using Blang.Ast.Declarations;
 using Blang.Ast.Expressions;
 using Blang.Ast.Statement;
-using Blang.Common;
-using Blang.Execution;
 
 using ValueType = Blang.Common.RuntimeValue.ValueType;
 
@@ -21,19 +16,6 @@ public class SemanticChecker : IAstVisitor
     private readonly TypeContext _typeContext;
     private readonly Stack<ValueType> _types = new();
     private readonly Stack<FunctionContext> _functionStack = new();
-
-    private class FunctionContext
-    {
-        public string Name { get; set; } = "";
-
-        public ValueType ReturnType { get; set; }
-
-        public bool HasReturn { get; set; }
-    }
-
-    //private ValueType _functionReturnType;
-    //private bool _functionHasReturn;
-    //private string _functionName = "";
 
     public SemanticChecker()
     {
@@ -62,50 +44,6 @@ public class SemanticChecker : IAstVisitor
                 throw;
             }
         }
-    }
-
-    private void DeclareFunction(FunctionDeclaration d)
-    {
-        ValueType returnType = ParseStringToType(d.ReturnType);
-
-        List<(string, ValueType)> parameters = [];
-        foreach ((string name, string type) param in d.Parameters)
-        {
-            ValueType paramType = ParseStringToType(param.type);
-            parameters.Add((param.name, paramType));
-        }
-
-        _typeContext.DefineFunction(d.FuncName, returnType, parameters);
-    }
-
-    private static ValueType ParseStringToType(string typeName)
-    {
-        return typeName.ToLower() switch
-        {
-            "num" => ValueType.Number,
-            "string" => ValueType.String,
-            "bool" => ValueType.Boolean,
-            "void" => ValueType.Void,
-            "undefined" => ValueType.Undefined,
-            "null" => ValueType.Null,
-            "newline" => ValueType.NewLine,
-            _ => throw new TypeException($"Unknown type: '{typeName}'")
-        };
-    }
-
-    private static string TypeToString(ValueType type)
-    {
-        return type switch
-        {
-            ValueType.Number => "number",
-            ValueType.String => "string",
-            ValueType.Boolean => "boolean",
-            ValueType.Void => "void",
-            ValueType.Undefined => "undefined",
-            ValueType.Null => "null",
-            ValueType.NewLine => "newline",
-            _ => "unknown"
-        };
     }
 
     public void Visit(NumericLiteralExpression e) => _types.Push(ValueType.Number);
@@ -343,12 +281,10 @@ public class SemanticChecker : IAstVisitor
 
     public void Visit(FunctionDeclaration d)
     {
-        _functionStack.Push(new FunctionContext
-        {
-            Name = d.FuncName,
-            ReturnType = ParseStringToType(d.ReturnType),
-            HasReturn = false,
-        });
+        _functionStack.Push(new FunctionContext(
+            d.FuncName,
+            ParseStringToType(d.ReturnType)
+        ));
 
         // Создаем область видимости для параметров
         _typeContext.PushScope();
@@ -502,10 +438,10 @@ public class SemanticChecker : IAstVisitor
         if (!BuiltinTypeChecker.CheckArgumentCount(e.FunctionName, e.Arguments.Count))
         {
             string expected;
-            if (typeInfo.MinArguments > 0)
-                expected = $"at least {typeInfo.MinArguments}";
+            if (typeInfo.minArguments > 0)
+                expected = $"at least {typeInfo.minArguments}";
             else
-                expected = $"{typeInfo.ParameterTypes.Count}";
+                expected = $"{typeInfo.parameterTypes.Count}";
 
             throw new TypeException(
                     $"Builtin function '{e.FunctionName}' expects {expected} arguments, got {e.Arguments.Count}"
@@ -557,5 +493,49 @@ public class SemanticChecker : IAstVisitor
 
         // 3. Возвращаем тип, который возвращает функция
         _types.Push(funcInfo.returnType);
+    }
+
+    private void DeclareFunction(FunctionDeclaration d)
+    {
+        ValueType returnType = ParseStringToType(d.ReturnType);
+
+        List<(string, ValueType)> parameters = [];
+        foreach ((string name, string type) param in d.Parameters)
+        {
+            ValueType paramType = ParseStringToType(param.type);
+            parameters.Add((param.name, paramType));
+        }
+
+        _typeContext.DefineFunction(d.FuncName, returnType, parameters);
+    }
+
+    private static ValueType ParseStringToType(string typeName)
+    {
+        return typeName.ToLower() switch
+        {
+            "num" => ValueType.Number,
+            "string" => ValueType.String,
+            "bool" => ValueType.Boolean,
+            "void" => ValueType.Void,
+            "undefined" => ValueType.Undefined,
+            "null" => ValueType.Null,
+            "newline" => ValueType.NewLine,
+            _ => throw new TypeException($"Unknown type: '{typeName}'")
+        };
+    }
+
+    private static string TypeToString(ValueType type)
+    {
+        return type switch
+        {
+            ValueType.Number => "num",
+            ValueType.String => "string",
+            ValueType.Boolean => "bool",
+            ValueType.Void => "void",
+            ValueType.Undefined => "undefined",
+            ValueType.Null => "null",
+            ValueType.NewLine => "newline",
+            _ => "unknown"
+        };
     }
 }

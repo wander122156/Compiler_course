@@ -53,6 +53,48 @@ public class TypesTests
         AssertResults(expected, actual);
     }
 
+    [Fact]
+    public void Write_Boolean_Values()
+    {
+        string code = """
+        write(true);
+        write(false);
+        """;
+
+        List<RuntimeValue> expected = [
+            RuntimeValue.Boolean(true),
+            RuntimeValue.Boolean(false),
+        ];
+
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Read_String_Values()
+    {
+        string code = """
+        string s;
+        read(s);
+        write(s);
+        """;
+
+        List<RuntimeValue> expected = [
+        RuntimeValue.String("qwerty"),
+        ];
+
+        _environment.SetInputLines("qwerty");
+
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
     // Ошибка: сложение num и bool → TypeException
     [Fact]
     public void Addition_Num_And_Bool_Should_Fail()

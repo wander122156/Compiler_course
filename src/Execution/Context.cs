@@ -76,13 +76,13 @@ public class Context
     {
         foreach (Scope s in _scopes)
         {
-            if (s.TryGetVariable(name, out RuntimeValue variable))
+            if (s.TryGetVariable(name, out RuntimeValue? variable))
             {
-                return variable;
+                return variable!;
             }
         }
 
-        if (_constants.TryGetValue(name, out RuntimeValue constant))
+        if (_constants.TryGetValue(name, out RuntimeValue? constant))
         {
             return constant;
         }

@@ -17,6 +17,9 @@ public class ConsoleEnvironment : IEnvironment
             case RuntimeValue.ValueType.String:
                 Console.Write((string)value.Value);
                 break;
+            case RuntimeValue.ValueType.Boolean:
+                Console.Write((bool)value.Value);
+                break;
 
             default:
                 throw new InvalidOperationException($"Unsupported type for write: {value.Type}");
@@ -35,6 +38,9 @@ public class ConsoleEnvironment : IEnvironment
                 break;
             case RuntimeValue.ValueType.String:
                 Console.WriteLine((string)value.Value);
+                break;
+            case RuntimeValue.ValueType.Boolean:
+                Console.WriteLine((bool)value.Value);
                 break;
 
             default:
@@ -66,8 +72,6 @@ public class ConsoleEnvironment : IEnvironment
             // по дефолту читаем как строку
             return new RuntimeValue(RuntimeValue.ValueType.String, input);
         }
-
-        // else остальные типы
     }
 
     public RuntimeValue Readln()
@@ -83,7 +87,5 @@ public class ConsoleEnvironment : IEnvironment
             // по дефолту читаем как строку
             return new RuntimeValue(RuntimeValue.ValueType.String, input);
         }
-
-        // else остальные типы
     }
 }
