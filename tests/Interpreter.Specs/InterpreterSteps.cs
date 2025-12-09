@@ -24,21 +24,35 @@ public class InterpreterTests
     public void Can_execute_Factorial_program()
     {
         const string code = """
-            func num factorial(num n)
-            {
-                if (n <= 1) 
-                {
+            func num factorial(num n) {
+                if (n <= 1) {
                     return 1;
-                } 
-                else 
-                {
-                    return n * factorial(n - 1);
-                }
+                };
+                return n * factorial(n - 1);
             };
-            num n;
-            read(n);
-            num result = factorial(n);
-            writeln(result)
+
+            num fnumber;
+            write("Введите число (от 0 до 10): ");
+            readln(fnumber);
+
+            if (fnumber < 0) {
+                writeln("Ошибка: факториал отрицательного числа не определен!");
+            } else {
+                if (fnumber > 10) {
+                    writeln("Ошибка: число слишком большое для вычисления!");
+                } else {
+                    num result = 1;
+                    num i = 1;
+
+                    while (i <= fnumber) {
+                        result = result * i;
+                        i = i + 1;
+                    };
+
+                    writeln("Факториал ", fnumber, " (через цикл) = ", result);
+                    writeln("Факториал ", fnumber, " (через рекурсию) = ", factorial(fnumber));
+                };
+            };
             """;
         _environment.SetInputLines("5");
 
@@ -51,8 +65,17 @@ public class InterpreterTests
 
         // ожидаемый результат
         List<RuntimeValue> expected = [
+            RuntimeValue.String("Введите число (от 0 до 10): "),
+            RuntimeValue.String("Факториал "),
+            RuntimeValue.Number(5),
+            RuntimeValue.String(" (через цикл) = "),
             RuntimeValue.Number(120),
-            RuntimeValue.NewLine()
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Факториал "),
+            RuntimeValue.Number(5),
+            RuntimeValue.String(" (через рекурсию) = "),
+            RuntimeValue.Number(120),
+            RuntimeValue.NewLine(),
         ];
 
         // сравнение результататов

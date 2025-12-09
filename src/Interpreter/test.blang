@@ -1,24 +1,38 @@
-﻿num a, b, sum;
+﻿func num factorial(num n) {
+    if (n <= 1) {
+        return 1;
+    };
+    return n * factorial(n - 1);
+};
 
-write("First num: ");
-read(a);
-writeln();
+writeln("ПРОГРАММА ДЛЯ ВЫЧИСЛЕНИЯ ФАКТОРИАЛА");
 
-write("Second num: ");
-read(b);
-writeln();
+num fnumber;
+write("Введите число (от 0 до 10): ");
+readln(fnumber);
 
-sum = a + b;
-write("Sum is: ");
-writeln(sum);
+if (fnumber < 0) {
+    writeln("Ошибка: факториал отрицательного числа не определен!");
+} else {
+    if (fnumber > 10) {
+        writeln("Ошибка: число слишком большое для вычисления!");
+    } else {
+        num result = 1;
+        num i = 1;
+        
+        while (i <= fnumber) {
+            result = result * i;
+            i = i + 1;
+        };
+        
+        writeln("Факториал ", fnumber, " (через цикл) = ", result);
+        writeln("Факториал ", fnumber, " (через рекурсию) = ", factorial(fnumber));
+        writeln("Первые ", fnumber, " чисел факториала:");
+        
+        for (num j = 0; j <= fnumber; j = j + 1) {
+            write(j, "! = ", factorial(j), "  ");
+        };
+    };
+};
 
-if (sum >= 100)
-{
-    writeln("Sum >= 100")
-}
-else
-{
-    writeln("Sum <= 100")
-}
-
-write("end")
+writeln("Программа завершена!");

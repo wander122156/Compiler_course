@@ -321,31 +321,38 @@ public class AstEvaluator : IAstVisitor
 
     public void Visit(FunctionCallExpression e)
     {
-        // TODO: Добавить проверку типов параметров и разный тип аргументов
-        List<decimal> arguments = new();
-
-        foreach (Expression arg in e.Arguments)
-        {
-            arg.Accept(this);
-            arguments.Add((decimal)_values.Pop().Value);
-        }
-
         if (BuiltinFunctions.IsBuiltin(e.FunctionName))
         {
+            List<decimal> arguments = new();
+            foreach (Expression arg in e.Arguments)
+            {
+                arg.Accept(this);
+                arguments.Add((decimal)_values.Pop().Value);
+            }
+
             decimal result = BuiltinFunctions.Invoke(e.FunctionName, arguments);
             _values.Push(RuntimeValue.Number(result));
         }
-        else if(_context.HasFunction(e.FunctionName))
+        else if (_context.HasFunction(e.FunctionName))
         {
+            // Обработка пользовательских функций
             FunctionDeclaration function = _context.GetFunction(e.FunctionName);
-            decimal? result = ExecuteUserFunction(function, arguments);
+
+            // Собираем аргументы
+            List<RuntimeValue> arguments = new();
+            foreach (Expression arg in e.Arguments)
+            {
+                arg.Accept(this);
+                arguments.Add(_values.Pop());
+            }
+
+            // Выполняем функцию
+            RuntimeValue? result = ExecuteUserFunction(function, arguments);
 
             if (result != null)
             {
-                _values.Push(RuntimeValue.Number(result.Value));
+                _values.Push(result);  // Кладем результат в стек
             }
-
-            // иначе функция ничего не возвращает
         }
         else
         {
@@ -408,7 +415,7 @@ public class AstEvaluator : IAstVisitor
         };
     }
 
-    private decimal? ExecuteUserFunction(FunctionDeclaration function, List<decimal> arguments)
+    private RuntimeValue? ExecuteUserFunction(FunctionDeclaration function, List<RuntimeValue> arguments)
     {
         if (arguments.Count != function.Parameters.Count)
         {
@@ -420,19 +427,22 @@ public class AstEvaluator : IAstVisitor
 
         try
         {
+            int stackBefore = _values.Count;
+
             for (int i = 0; i < function.Parameters.Count; i++)
             {
                 (string paramName, string paramType) = function.Parameters[i];
 
-                // TODO: Добавить проверку типов параметров
-                _context.DefineVariable(paramName, RuntimeValue.Number(arguments[i]));
+                _context.DefineVariable(paramName, arguments[i]);
             }
 
             function.Body.Accept(this);
 
-            if (_values.Count > 0 && _context.ShouldReturn)
+            if (_context.ShouldReturn && _values.Count > stackBefore)
             {
-                return (decimal)_values.Pop();
+                RuntimeValue result = _values.Pop();
+                _context.ResetFlowControl();  // Сбрасываем флаг return
+                return result;
             }
 
             return null;
