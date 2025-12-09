@@ -311,13 +311,13 @@ write(findFirstEven());
 ```
 
 ### Тесты типов
-- [ ] Привидение типов к bool → [1]
+- [x] Привидение типов к bool → [1]
  `if ("hello") {write(1)}`
  `if (10) {write(1)}`
  `if ("") {write(2)} else {write(1)}`
  `if (0) {write(2)} else {write(1)}`
  
-- [ ] Сравнение строк → [1]
+- [x] Сравнение строк → [1]
  `if ("hello" == "hello") { write(1) }`
  `if ("abc" != "def") { write(1) }}`
 

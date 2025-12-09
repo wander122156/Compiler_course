@@ -21,7 +21,7 @@ public class TypesTests
 
     // Приведение типов к bool
     [Fact]
-    public void If_String_Condition_Convert_to_bool()
+    public void If_String_Condition_Convert_to_bool_true()
     {
         string code = """
             if ("hello") { write(1) }
@@ -37,10 +37,43 @@ public class TypesTests
     }
 
     [Fact]
-    public void If_Number_Condition_Convert_to_bool()
+    public void If_Number_Condition_Convert_to_bool_true()
     {
         string code = """
             if (10) { write(1) }
+            """;
+
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(1),
+        ];
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void If_String_Condition_Convert_to_bool_false()
+    {
+        string code = """
+            if ("") {write(2)} else {write(1)}
+            """;
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(1),
+        ];
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void If_Number_Condition_Convert_to_bool_false()
+    {
+        string code = """
+            if (0) {write(2)} else {write(1)}
             """;
 
         List<RuntimeValue> expected = [
