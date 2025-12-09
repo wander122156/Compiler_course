@@ -55,7 +55,7 @@ public class TypeContext
     {
         if (_functions.ContainsKey(name))
         {
-            throw new TypeException($"Function '{name}' is already defined");
+            throw new ArgumentException($"Function '{name}' is already defined");
         }
 
         _functions[name] = new FunctionInfo(returnType, parameters);
@@ -70,9 +70,4 @@ public class TypeContext
     }
 
     public bool HasFunction(string name) => _functions.ContainsKey(name);
-
-    public ValueType GetFunctionReturnType(string name)
-    {
-        return GetFunctionInfo(name).returnType;
-    }
 }

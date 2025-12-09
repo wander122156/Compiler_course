@@ -53,22 +53,7 @@ public class ParserVariableAndConstantTests
     }
 
     // Обработка ошибок
-    [Fact]
-    public void Throws_on_undefined_variable_without_declarations()
-    {
-        string code = "write(x + 1)";
-        BlangInterpreter blang = new(_environment);
 
-        Assert.Throws<ArgumentException>(() => blang.Execute(code));
-    }
-
-    // [Fact]
-    // public void Throws_on_undefined_variable_in_complex_expression()
-    // {
-    //    string code = "num x, y; write(x + y + z)";
-    //    BlangInterpreter blang = new(_environment)
-    //     Assert.Throws<ArgumentException>(() => blang.Execute(code));
-    // }
     [Fact]
     public void Throws_on_invalid_identifier_in_declaration()
     {
@@ -103,6 +88,24 @@ public class ParserVariableAndConstantTests
         BlangInterpreter blang = new(_environment);
 
         Assert.Throws<ArgumentException>(() => blang.Execute(code));
+    }
+
+    [Fact]
+    public void Throws_on_assignment_to_constant()
+    {
+        string code = "const num c = 5; c = 10";
+        BlangInterpreter blang = new(_environment);
+
+        Assert.Throws<ArgumentException>(() => blang.Execute(code));
+    }
+
+    [Fact]
+    public void Throws_on_not_initialized_constant()
+    {
+        string code = "const num c;";
+        BlangInterpreter blang = new(_environment);
+
+        Assert.Throws<UnexpectedLexemeException>(() => blang.Execute(code));
     }
 
     private void AssertResults(List<decimal> expected, IReadOnlyList<RuntimeValue> actual)

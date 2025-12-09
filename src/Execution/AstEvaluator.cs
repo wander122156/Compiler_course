@@ -410,7 +410,6 @@ public class AstEvaluator : IAstVisitor
             RuntimeValue.ValueType.Boolean => (bool)value.Value,
             RuntimeValue.ValueType.Number => (decimal)value.Value != 0,
             RuntimeValue.ValueType.String => !string.IsNullOrEmpty((string)value.Value),
-            RuntimeValue.ValueType.Null => false,
             _ => false,
         };
     }

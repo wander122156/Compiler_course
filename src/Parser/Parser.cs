@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Data;
-using System.Xml.Linq;
+﻿using System.Data;
 
 using Blang.Ast;
 using Blang.Ast.Declarations;
@@ -9,8 +7,6 @@ using Blang.Ast.Statement;
 using Blang.Common;
 using Blang.Execution;
 using Blang.Lexer;
-
-using static Blang.Ast.Expressions.BinaryOperationExpression;
 
 using Expression = Blang.Ast.Expressions.Expression;
 
@@ -22,20 +18,12 @@ namespace Blang.Parser;
 public class Parser
 {
     private readonly TokenStream _tokens;
-    private readonly Stack<ParserContext> _parserContext = new();
+    private readonly ParserContextTracker _context = new();
 
     public Parser(string code)
     {
         _tokens = new TokenStream(code);
-        _parserContext.Push(ParserContext.Global);
-    }
-
-    private enum ParserContext
-    {
-        Global,
-        Function,
-        Loop,
-        Switch,
+        _context = new ParserContextTracker();
     }
 
     /// <summary>
@@ -47,7 +35,6 @@ public class Parser
         List<IAstElement> astNodes = new();
         do
         {
-             // нужно переделать чтобы возвращал IAstElement[]
             IAstElement statement = ParseStatement();
             astNodes.Add(statement);
 
@@ -340,7 +327,7 @@ public class Parser
 
         Match(TokenType.CloseParenthesis);
 
-        _parserContext.Push(ParserContext.Function);
+        _context.Enter(ParserContext.Function);
         try
         {
             CompoundStatement body = ParseCompoundStatement();
@@ -348,7 +335,7 @@ public class Parser
         }
         finally
         {
-            _parserContext.Pop();
+            _context.Exit();
         }
     }
 
@@ -359,7 +346,7 @@ public class Parser
     /// </summary>
     private ReturnStatement ParseReturnStatement()
     {
-        if(_parserContext.Peek() != ParserContext.Function)
+        if(!_context.IsInFunction())
         {
             throw new SyntaxErrorException("'return' can only be used inside functions");
         }
@@ -378,7 +365,7 @@ public class Parser
     /// </summary>
     private BreakStatement ParseBreakStatement()
     {
-        if (_parserContext.Peek() != ParserContext.Loop)
+        if (!_context.IsInLoop())
         {
             throw new SyntaxErrorException("'break' can only be used inside loops");
         }
@@ -394,7 +381,7 @@ public class Parser
     /// </summary>
     private ContinueStatement ParseContinueStatement()
     {
-        if (_parserContext.Peek() != ParserContext.Loop)
+        if (!_context.IsInLoop())
         {
             throw new SyntaxErrorException("'continue' can only be used inside loops");
         }
@@ -441,7 +428,7 @@ public class Parser
 
         Match(TokenType.CloseParenthesis);
 
-        _parserContext.Push(ParserContext.Loop);
+        _context.Enter(ParserContext.Loop);
         try
         {
             CompoundStatement body = ParseCompoundStatement();
@@ -449,7 +436,7 @@ public class Parser
         }
         finally
         {
-            _parserContext.Pop();
+            _context.Exit();
         }
     }
 
@@ -465,7 +452,7 @@ public class Parser
         Expression condition = ParseCondition();
         Match(TokenType.CloseParenthesis);
 
-        _parserContext.Push(ParserContext.Loop);
+        _context.Enter(ParserContext.Loop);
         try
         {
             CompoundStatement body = ParseCompoundStatement();
@@ -473,7 +460,7 @@ public class Parser
         }
         finally
         {
-            _parserContext.Pop();
+            _context.Exit();
         }
     }
 
@@ -485,7 +472,7 @@ public class Parser
     {
         _tokens.Advance();
 
-        _parserContext.Push(ParserContext.Loop);
+        _context.Enter(ParserContext.Loop);
         try
         {
             CompoundStatement body = ParseCompoundStatement();
@@ -499,7 +486,7 @@ public class Parser
         }
         finally
         {
-            _parserContext.Pop();
+            _context.Exit();
         }
     }
 

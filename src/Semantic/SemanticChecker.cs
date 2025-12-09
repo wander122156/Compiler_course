@@ -518,7 +518,6 @@ public class SemanticChecker : IAstVisitor
             "bool" => ValueType.Boolean,
             "void" => ValueType.Void,
             "undefined" => ValueType.Undefined,
-            "null" => ValueType.Null,
             "newline" => ValueType.NewLine,
             _ => throw new TypeException($"Unknown type: '{typeName}'")
         };
@@ -533,7 +532,6 @@ public class SemanticChecker : IAstVisitor
             ValueType.Boolean => "bool",
             ValueType.Void => "void",
             ValueType.Undefined => "undefined",
-            ValueType.Null => "null",
             ValueType.NewLine => "newline",
             _ => "unknown"
         };

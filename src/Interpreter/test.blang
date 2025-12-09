@@ -1,38 +1,90 @@
-﻿func num factorial(num n) {
-    if (n <= 1) {
-        return 1;
-    };
-    return n * factorial(n - 1);
-};
+﻿num userAge;
+string userName;
+bool isAdult;
 
-writeln("ПРОГРАММА ДЛЯ ВЫЧИСЛЕНИЯ ФАКТОРИАЛА");
+write("Введите ваше имя: ");
+readln(userName);
 
-num fnumber;
-write("Введите число (от 0 до 10): ");
-readln(fnumber);
+write("Введите ваш возраст: ");
+readln(userAge);
 
-if (fnumber < 0) {
-    writeln("Ошибка: факториал отрицательного числа не определен!");
+if (userAge >= 18) {
+    isAdult = true;
+    writeln("Привет, ", userName, "! Вы совершеннолетний.");
 } else {
-    if (fnumber > 10) {
-        writeln("Ошибка: число слишком большое для вычисления!");
+    isAdult = false;
+    writeln("Привет, ", userName, "! Вы несовершеннолетний.");
+};
+
+bool hasLongName;
+num nameLength;
+
+func num countStringLength(string text) {
+    num length = 0;
+    
+    if (text == "Иван") {
+        length = 4;
     } else {
-        num result = 1;
-        num i = 1;
-        
-        while (i <= fnumber) {
-            result = result * i;
-            i = i + 1;
+        if (text == "Мария") {
+            length = 5;
+        } else {
+            if (text == "Александр") {
+                length = 9;
+            } else {
+                length = 5;
+            };
         };
-        
-        writeln("Факториал ", fnumber, " (через цикл) = ", result);
-        writeln("Факториал ", fnumber, " (через рекурсию) = ", factorial(fnumber));
-        writeln("Первые ", fnumber, " чисел факториала:");
-        
-        for (num j = 0; j <= fnumber; j = j + 1) {
-            write(j, "! = ", factorial(j), "  ");
-        };
+    };
+    
+    return length;
+};
+
+nameLength = countStringLength(userName);
+
+if (nameLength > 5) {
+    hasLongName = true;
+    writeln("У вас длинное имя (", nameLength, " букв)");
+} else {
+    hasLongName = false;
+    writeln("У вас короткое имя (", nameLength, " букв)");
+};
+
+if (isAdult == true) {
+    if (hasLongName == true) {
+        writeln("Отлично! Вы взрослый человек с длинным именем.");
+    } else {
+        writeln("Вы взрослый, но с коротким именем.");
+    };
+} else {
+    if (hasLongName == true) {
+        writeln("Вы несовершеннолетний, но с длинным именем.");
+    } else {
+        writeln("Вы несовершеннолетний с коротким именем.");
     };
 };
 
-writeln("Программа завершена!");
+num birthYear = 2024 - userAge;
+writeln("Вы родились примерно в ", birthYear, " году");
+
+string adultStatus;
+if (isAdult == true) {
+    adultStatus = "совершеннолетний";
+} else {
+    adultStatus = "несовершеннолетний";
+};
+
+string nameType;
+if (hasLongName == true) {
+    nameType = "длинное";
+} else {
+    nameType = "короткое";
+};
+
+writeln();
+writeln("=== ОТЧЕТ ===");
+writeln("Имя: ", userName);
+writeln("Возраст: ", userAge);
+writeln("Статус: ", adultStatus);
+writeln("Тип имени: ", nameType, " (", nameLength, " букв)");
+writeln("Год рождения: ~", birthYear);
+writeln("=============");

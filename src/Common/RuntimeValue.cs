@@ -26,11 +26,6 @@ public class RuntimeValue
         Boolean,
 
         /// <summary>
-        /// Представляет нулевое значение (отсутствие значения)
-        /// </summary>
-        Null,
-
-        /// <summary>
         /// Представляет неопределенное значение (неинициализированная переменная)
         /// </summary>
         Undefined,
@@ -58,9 +53,6 @@ public class RuntimeValue
 
     public static RuntimeValue Boolean(bool value)
         => new RuntimeValue(ValueType.Boolean, value);
-
-    public static RuntimeValue Null()
-        => new RuntimeValue(ValueType.Null, null!);
 
     public static RuntimeValue Undefined()
         => new RuntimeValue(ValueType.Undefined, null!);

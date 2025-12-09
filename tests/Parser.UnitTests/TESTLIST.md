@@ -79,6 +79,8 @@
 ### Константы
 - [x] Объявление константы: `const num c = 3` → 3
 - [x] Переменная перекрывает константу: `const num c = 3.14159; num c = 2; 4.0 * c * 4.0` → 3.14159, 2, 50.26548
+- [x] Попытка изменить константу `const num c = 5; c = 10` → ArgumentException
+- [x] Использование неинициализированной константы `const num c;` → UnexpectedLexemeException
 
 ### Обработка ошибок
 - [x] Неопределенная переменная без объявлений: `x + 1` → ArgumentException
@@ -285,12 +287,41 @@ func num sec(num n)
 
 sec(1);
 ``` 
+- [x] Переопределение функции: → ArgumentException при втором объявлении
+```
+func num test() { return 1; };
+func num test() { return 2; };
+```
+- [x] Вызов функции с неправильным количеством аргументов: → TypeException
+```
+func num add(num a, num b) { return a + b; };
+write(add(1));
+```
+- [x] Return в контексте парсинга for цикла: → [2]
+```
+func num findFirstEven() {
+    for (num i = 1; i <= 10; i = i + 1) {
+        if (i % 2 == 0) {
+            return i;
+        };
+    };
+    return 0;
+};
+write(findFirstEven());
+```
 
 ### Тесты типов
-- [x] Привидение типов к bool → [1]
+- [ ] Привидение типов к bool → [1]
  `if ("hello") {write(1)}`
  `if (10) {write(1)}`
+ `if ("") {write(2)} else {write(1)}`
+ `if (0) {write(2)} else {write(1)}`
+ 
+- [ ] Сравнение строк → [1]
+ `if ("hello" == "hello") { write(1) }`
+ `if ("abc" != "def") { write(1) }}`
 
+ 
 - [x] Вывод bool -> [true, false]
  `write(true); write(false)` 
 
@@ -300,7 +331,7 @@ sec(1);
  read(s);
  write(s);
  ```
-
+ 
 - [x] Ошибка: сложение num и bool → TypeException
  `write(true + 5) ` 
 

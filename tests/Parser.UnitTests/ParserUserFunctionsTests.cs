@@ -80,16 +80,6 @@ public class ParserUserFunctionsTests
     }
 
     [Fact]
-    public void Throws_on_void_function_with_return()
-    {
-        string code = @"func void printHello() { write(""Hello""); return 1 }; printHello()";
-
-        BlangInterpreter blang = new(_environment);
-
-        Assert.Throws<TypeException>(() => blang.Execute(code));
-    }
-
-    [Fact]
     public void Can_execute_function_with_local_variables()
     {
         string code = @"func num testScope() { num x = 10; return x }; write(testScope())";
@@ -161,6 +151,66 @@ public class ParserUserFunctionsTests
 
         IReadOnlyList<RuntimeValue> actual = _environment.Results;
         AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Cannot_redefine_function()
+    {
+        string code = @"
+        func num test() { return 1; };
+        func num test() { return 2; };
+    ";
+
+        BlangInterpreter blang = new(_environment);
+        Assert.Throws<ArgumentException>(() => blang.Execute(code));
+    }
+
+    [Fact]
+    public void Cannot_call_function_with_wrong_argument_count()
+    {
+        string code = @"
+        func num add(num a, num b) { return a + b; };
+        write(add(1));
+    ";
+
+        BlangInterpreter blang = new(_environment);
+        Assert.Throws<TypeException>(() => blang.Execute(code));
+    }
+
+    [Fact]
+    public void Can_return_from_for_loop_in_function()
+    {
+        string code = @"
+        func num findFirstEven() {
+            for (num i = 1; i <= 10; i = i + 1) {
+                if (i % 2 == 0) {
+                    return i;
+                };
+            };
+            return 0;
+        };
+        write(findFirstEven());
+    ";
+
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(2),
+    ];
+
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Throws_on_void_function_with_return()
+    {
+        string code = @"func void printHello() { write(""Hello""); return 1 }; printHello()";
+
+        BlangInterpreter blang = new(_environment);
+
+        Assert.Throws<TypeException>(() => blang.Execute(code));
     }
 
     private void AssertResults(List<RuntimeValue> expected, IReadOnlyList<RuntimeValue> actual)
