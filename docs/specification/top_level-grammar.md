@@ -48,13 +48,15 @@ statement = variable_declaration
           | break_statement
           | continue_statement
 
+type = "num" | "string" | "bool" ;
+
 (* Объявления и переменные *)
-variable_declaration = "num", identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
-constant_definition = "const", "num", identifier, "=", expression ;
+variable_declaration = type, identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
+constant_definition = "const", type, identifier, "=", expression ;
 assignment = identifier, "=", expression ;
 
-function_declaration = "func", "num", identifier, "(", [ parameter_list ], ")", compound_statement ;
-parameter_list = "num", identifier, { ",", "num", identifier } ;
+function_declaration = "func", type, identifier, "(", [ parameter_list ], ")", compound_statement ;
+parameter_list = type, identifier, { ",", type, identifier } ;
 return__statement = "return", expression ;
 
 (* Ввод-Вывод*)
@@ -85,7 +87,7 @@ comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 
 (* Выражения *)
 expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression } ;  
-multiplicative_expression = unary_expression, { ("*" | "/" | "%"), unary_expression } ;
+multiplicative_expression = unary_expression, { ("*" |  "/" | "%"), unary_expression } ;
 unary_expression = ("+" | "-"), unary_expression
                     | exponentiation_expression
 exponentiation_expression = primary_expression, [ "^", exponentiation_expression ] ;

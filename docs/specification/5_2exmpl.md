@@ -2,21 +2,35 @@
 
 ## 1. Factorial
 ````
-func num factorial(num n)
-{
-    if (n <= 1) 
-    {
+func num factorial(num n) {
+    if (n <= 1) {
         return 1;
-    } 
-    else 
-    {
-        return n * factorial(n - 1);
-    }
+    };
+    return n * factorial(n - 1);
 };
-num n;
-read(n);
-num result = factorial(n);
-writeln(a)
+
+num fnumber;
+write("Введите число (от 0 до 10): ");
+readln(fnumber);
+
+if (fnumber < 0) {
+    writeln("Ошибка: факториал отрицательного числа не определен!");
+} else {
+    if (fnumber > 10) {
+        writeln("Ошибка: число слишком большое для вычисления!");
+    } else {
+        num result = 1;
+        num i = 1;
+
+        while (i <= fnumber) {
+            result = result * i;
+            i = i + 1;
+        };
+
+        writeln("Факториал ", fnumber, " (через цикл) = ", result);
+        writeln("Факториал ", fnumber, " (через рекурсию) = ", factorial(fnumber));
+    };
+};
 ````
 ## 2. GSD
 ````
