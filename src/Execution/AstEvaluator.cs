@@ -34,63 +34,26 @@ public class AstEvaluator : IAstVisitor
 
     public void Visit(BinaryOperationExpression e)
     {
-        e.Left.Accept(this);
-        e.Right.Accept(this);
-        decimal right = (decimal)_values.Pop().Value;
-        decimal left = (decimal)_values.Pop().Value;
+        _values.Push(EvaluationUtil.ApplyBinaryOperation(e.Operation, EvaluateLeft, EvaluateRight));
+        return;
 
-        switch (e.Operation)
+        RuntimeValue EvaluateLeft()
         {
-            case BinaryOperation.Plus:
-                _values.Push(RuntimeValue.Number(left + right));
-                break;
-            case BinaryOperation.Minus:
-                _values.Push(RuntimeValue.Number(left - right));
-                break;
-            case BinaryOperation.Multiply:
-                _values.Push(RuntimeValue.Number(left * right));
-                break;
-            case BinaryOperation.Divide:
-                _values.Push(RuntimeValue.Number(right != 0 ? left / right : throw new DivideByZeroException("Division by zero")));
-                break;
-            case BinaryOperation.Modulo:
-                _values.Push(RuntimeValue.Number(right != 0 ? left % right : throw new DivideByZeroException("Modulo by zero")));
-                break;
-            case BinaryOperation.Exponentiation:
-                if (left == 0 && right <= 0)
-                {
-                    throw new DivideByZeroException("Zero cannot be raised to a non-positive power");
-                }
+            e.Left.Accept(this);
+            return _values.Pop();
+        }
 
-                _values.Push(RuntimeValue.Number((decimal)Math.Pow((double)left, (double)right)));
-                break;
-            case BinaryOperation.LessThan:
-                _values.Push(RuntimeValue.Boolean(left < right));
-                break;
-            case BinaryOperation.GreaterThan:
-                _values.Push(RuntimeValue.Boolean(left > right));
-                break;
-            case BinaryOperation.LessThanOrEqual:
-                _values.Push(RuntimeValue.Boolean(left <= right));
-                break;
-            case BinaryOperation.GreaterThanOrEqual:
-                _values.Push(RuntimeValue.Boolean(left >= right));
-                break;
-            case BinaryOperation.LooseEquality:
-                _values.Push(RuntimeValue.Boolean(left == right));
-                break;
-            case BinaryOperation.NotEqual:
-                _values.Push(RuntimeValue.Boolean(left != right));
-                break;
-            default:
-                throw new NotImplementedException($"Unknown binary operation {e.Operation}");
+        RuntimeValue EvaluateRight()
+        {
+            e.Right.Accept(this);
+            return _values.Pop();
         }
     }
 
     public void Visit(UnaryOperationExpression e)
     {
         e.Operand.Accept(this);
-        decimal value = (decimal)_values.Pop().Value;
+        decimal value = (decimal)_values.Pop();
 
         switch (e.Operation)
         {
@@ -327,7 +290,7 @@ public class AstEvaluator : IAstVisitor
             foreach (Expression arg in e.Arguments)
             {
                 arg.Accept(this);
-                arguments.Add((decimal)_values.Pop().Value);
+                arguments.Add((decimal)_values.Pop());
             }
 
             decimal result = BuiltinFunctions.Invoke(e.FunctionName, arguments);

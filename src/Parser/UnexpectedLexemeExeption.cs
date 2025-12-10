@@ -9,5 +9,10 @@ public class UnexpectedLexemeException : Exception
         : base($"Unexpected lexeme {actual} where expected {expected}")
     {
     }
+
+    public UnexpectedLexemeException(TokenType expected)
+        : base($"Unexpected lexeme {expected}")
+    {
+    }
 }
 #pragma warning restore RCS1194

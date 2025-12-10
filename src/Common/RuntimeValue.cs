@@ -92,4 +92,40 @@ public class RuntimeValue
 
         return (bool)value.Value;
     }
+
+    /// <summary>
+    /// Возвращает значение как строку либо бросает исключение.
+    /// </summary>
+    public string AsString()
+    {
+        return Value switch
+        {
+            string s => s,
+            _ => throw new InvalidOperationException($"Value {Value} is not a string"),
+        };
+    }
+
+    /// <summary>
+    /// Возвращает значение как decimal число либо бросает исключение.
+    /// </summary>
+    public decimal AsDecimal()
+    {
+        return Value switch
+        {
+            decimal i => i,
+            _ => throw new InvalidOperationException($"Value {Value} is not an number"),
+        };
+    }
+
+    /// <summary>
+    /// Возвращает значение как boolean либо бросает исключение.
+    /// </summary>
+    public bool AsBool()
+    {
+        return Value switch
+        {
+            bool s => s,
+            _ => throw new InvalidOperationException($"Value {Value} is not a boolean"),
+        };
+    }
 }

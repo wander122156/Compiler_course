@@ -63,7 +63,7 @@ if (isAdult == true) {
     };
 };
 
-num birthYear = 2024 - userAge;
+num birthYear = 2025 - userAge;
 writeln("Вы родились примерно в ", birthYear, " году");
 
 string adultStatus;
@@ -86,5 +86,5 @@ writeln("Имя: ", userName);
 writeln("Возраст: ", userAge);
 writeln("Статус: ", adultStatus);
 writeln("Тип имени: ", nameType, " (", nameLength, " букв)");
-writeln("Год рождения: ~", birthYear);
+writeln("Год рождения примерно :", birthYear);
 writeln("=============");

@@ -18,7 +18,6 @@ public class ParserVariableAndConstantTests
     public static TheoryData<string, List<decimal>> ValidCodeTestData => new()
     {
         // Объявления переменных
-        // { "num x; write(x)", [0] },
         { "num x = 3; write(x)", [3] },
         { "const num c = 3; write(c)", [3] },
 
@@ -53,7 +52,6 @@ public class ParserVariableAndConstantTests
     }
 
     // Обработка ошибок
-
     [Fact]
     public void Throws_on_invalid_identifier_in_declaration()
     {

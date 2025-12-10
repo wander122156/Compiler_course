@@ -21,6 +21,163 @@ public class InterpreterTests
     }
 
     [Fact]
+    public void Can_execute_User_Age_program()
+    {
+        const string code = """
+            num userAge;
+            string userName;
+            bool isAdult;
+
+            write("Введите ваше имя: ");
+            readln(userName);
+
+            write("Введите ваш возраст: ");
+            readln(userAge);
+
+            if (userAge >= 18) {
+                isAdult = true;
+                writeln("Привет, ", userName, "! Вы совершеннолетний.");
+            } else {
+                isAdult = false;
+                writeln("Привет, ", userName, "! Вы несовершеннолетний.");
+            };
+
+            bool hasLongName;
+            num nameLength;
+
+            func num countStringLength(string text) {
+                num length = 0;
+
+                if (text == "Иван") 
+                {
+                    length = 4;
+                } 
+                else 
+                {
+                    if (text == "Мария") 
+                    {
+                        length = 5;
+                    } 
+                    else 
+                    {
+                        if (text == "Александр") {
+                            length = 9;
+                        } else {
+                            length = 5;
+                        };
+                    };
+                };
+
+                return length;
+            };
+
+            nameLength = countStringLength(userName);
+
+            if (nameLength > 5) {
+                hasLongName = true;
+                writeln("У вас длинное имя (", nameLength, " букв)");
+            } else {
+                hasLongName = false;
+                writeln("У вас короткое имя (", nameLength, " букв)");
+            };
+
+            if (isAdult == true) {
+                if (hasLongName == true) {
+                    writeln("Отлично! Вы взрослый человек с длинным именем.");
+                } else {
+                    writeln("Вы взрослый, но с коротким именем.");
+                };
+            } else {
+                if (hasLongName == true) {
+                    writeln("Вы несовершеннолетний, но с длинным именем.");
+                } else {
+                    writeln("Вы несовершеннолетний с коротким именем.");
+                };
+            };
+
+            num birthYear = 2025 - userAge;
+            writeln("Вы родились примерно в ", birthYear, " году");
+
+            string adultStatus;
+            if (isAdult == true) {
+                adultStatus = "совершеннолетний";
+            } else {
+                adultStatus = "несовершеннолетний";
+            };
+
+            string nameType;
+            if (hasLongName == true) {
+                nameType = "длинное";
+            } else {
+                nameType = "короткое";
+            };
+
+            writeln();
+            writeln("=== ОТЧЕТ ===");
+            writeln("Имя: ", userName);
+            writeln("Возраст: ", userAge);
+            writeln("Статус: ", adultStatus);
+            writeln("Тип имени: ", nameType, " (", nameLength, " букв)");
+            writeln("Год рождения примерно:", birthYear);
+            writeln("=============");
+            """;
+        _environment.SetInputLines("Егор", "18");
+
+        // выполнение программы:
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        // получение результата
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+
+        // ожидаемый результат
+        List<RuntimeValue> expected = [
+            RuntimeValue.String("Введите ваше имя: "),
+            RuntimeValue.String("Введите ваш возраст: "),
+            RuntimeValue.String("Привет, "),
+            RuntimeValue.String("Егор"),
+            RuntimeValue.String("! Вы совершеннолетний."),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("У вас короткое имя ("),
+            RuntimeValue.Number(5),
+            RuntimeValue.String(" букв)"),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Вы взрослый, но с коротким именем."),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Вы родились примерно в "),
+            RuntimeValue.Number(2007),
+            RuntimeValue.String(" году"),
+            RuntimeValue.NewLine(),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("=== ОТЧЕТ ==="),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Имя: "),
+            RuntimeValue.String("Егор"),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Возраст: "),
+            RuntimeValue.Number(18),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Статус: "),
+            RuntimeValue.String("совершеннолетний"),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Тип имени: "),
+            RuntimeValue.String("короткое"),
+            RuntimeValue.String(" ("),
+            RuntimeValue.Number(5),
+            RuntimeValue.String(" букв)"),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("Год рождения примерно:"),
+            RuntimeValue.Number(2007),
+            RuntimeValue.NewLine(),
+            RuntimeValue.String("============="),
+            RuntimeValue.NewLine(),
+        ];
+
+        // сравнение результататов
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
     public void Can_execute_Factorial_program()
     {
         const string code = """

@@ -125,7 +125,7 @@ public class Parser
                 return ParseContinueStatement();
 
             default:
-                throw new UnexpectedLexemeException(keyword.Type, keyword); // как сделать?
+                throw new UnexpectedLexemeException(keyword.Type); // как сделать?
         }
     }
 
@@ -416,7 +416,7 @@ public class Parser
         }
         else
         {
-            throw new UnexpectedLexemeException(TokenType.Num, _tokens.Peek());
+            throw new UnexpectedLexemeException(_tokens.Peek().Type);
         }
 
         Match(TokenType.Semicolon);
@@ -807,7 +807,7 @@ public class Parser
             }
         }
 
-        throw new UnexpectedLexemeException(TokenType.Identifier, t);
+        throw new UnexpectedLexemeException(t.Type);
     }
 
     private FunctionCallExpression ParseFunctionCallExpression()
