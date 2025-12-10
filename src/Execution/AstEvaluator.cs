@@ -179,11 +179,10 @@ public class AstEvaluator : IAstVisitor
     public void Visit(IfElseStatement s)
     {
         s.Condition.Accept(this);
-        RuntimeValue conditionValue = _values.Pop();
 
-        bool isTrue = ConvertToBoolean(conditionValue);
+        bool condition = _values.Pop().ConvertToBoolean();
 
-        if (isTrue)
+        if (condition)
         {
             s.ThenBranch.Accept(this);
         }
@@ -206,7 +205,7 @@ public class AstEvaluator : IAstVisitor
             while (true)
             {
                 s.Condition.Accept(this);
-                bool condition = ConvertToBoolean(_values.Pop());
+                bool condition = _values.Pop().ConvertToBoolean();
                 if (!condition)
                 {
                     break;
@@ -242,7 +241,7 @@ public class AstEvaluator : IAstVisitor
                 _context.ResetFlowControl();
 
                 s.Condition.Accept(this);
-                bool condition = ConvertToBoolean(_values.Pop());
+                bool condition = _values.Pop().ConvertToBoolean();
                 if (!condition) break;
 
                 s.Body.Accept(this);
@@ -272,7 +271,7 @@ public class AstEvaluator : IAstVisitor
 
                 s.Condition.Accept(this);
 
-                bool condition = ConvertToBoolean(_values.Pop());
+                bool condition = _values.Pop().ConvertToBoolean();
                 if (!condition) break;
             }
         }
@@ -364,17 +363,6 @@ public class AstEvaluator : IAstVisitor
         {
             _context.PopScope();
         }
-    }
-
-    private bool ConvertToBoolean(RuntimeValue value)
-    {
-        return value.Type switch
-        {
-            RuntimeValue.ValueType.Boolean => (bool)value.Value,
-            RuntimeValue.ValueType.Number => (decimal)value.Value != 0,
-            RuntimeValue.ValueType.String => !string.IsNullOrEmpty((string)value.Value),
-            _ => false,
-        };
     }
 
     private RuntimeValue? ExecuteUserFunction(FunctionDeclaration function, List<RuntimeValue> arguments)

@@ -94,6 +94,20 @@ public class RuntimeValue
     }
 
     /// <summary>
+    /// Вовращает значение преобразованное к bool.
+    /// </summary>
+    public bool ConvertToBoolean()
+    {
+        return Type switch
+        {
+            ValueType.Boolean => (bool)Value,
+            ValueType.Number => (decimal)Value != 0,
+            ValueType.String => !string.IsNullOrEmpty((string)Value),
+            _ => false,
+        };
+    }
+
+    /// <summary>
     /// Возвращает значение как строку либо бросает исключение.
     /// </summary>
     public string AsString()
