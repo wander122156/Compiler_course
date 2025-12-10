@@ -119,7 +119,7 @@ public class ParserVariableAndConstantTests
 
         for (int i = 0; i < expected.Count; i++)
         {
-            Assert.Equal(expected[i], (decimal)actual[i].Value, 5);
+            Assert.Equal(expected[i], (decimal)actual[i], 5);
         }
     }
 }

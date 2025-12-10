@@ -1,5 +1,4 @@
-﻿using Blang.Ast.Statement;
-using Blang.Common;
+﻿using Blang.Common;
 using Blang.Execution;
 using Blang.Semantic;
 
@@ -22,9 +21,6 @@ public class BlangInterpreter
         {
             throw new ArgumentException("Source code cannot be null or empty", nameof(sourceCode));
         }
-
-        TypeContext typeContext = new();
-        Context context = new();
 
         Parser.Parser parser = new(sourceCode);
         List<Ast.IAstElement> program = parser.ParseProgram();

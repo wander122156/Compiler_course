@@ -81,14 +81,14 @@ public class InterpreterTests
                 writeln("У вас короткое имя (", nameLength, " букв)");
             };
 
-            if (isAdult == true) {
-                if (hasLongName == true) {
+            if (isAdult) {
+                if (hasLongName) {
                     writeln("Отлично! Вы взрослый человек с длинным именем.");
                 } else {
                     writeln("Вы взрослый, но с коротким именем.");
                 };
             } else {
-                if (hasLongName == true) {
+                if (hasLongName) {
                     writeln("Вы несовершеннолетний, но с длинным именем.");
                 } else {
                     writeln("Вы несовершеннолетний с коротким именем.");
@@ -99,14 +99,14 @@ public class InterpreterTests
             writeln("Вы родились примерно в ", birthYear, " году");
 
             string adultStatus;
-            if (isAdult == true) {
+            if (isAdult) {
                 adultStatus = "совершеннолетний";
             } else {
                 adultStatus = "несовершеннолетний";
             };
 
             string nameType;
-            if (hasLongName == true) {
+            if (hasLongName) {
                 nameType = "длинное";
             } else {
                 nameType = "короткое";

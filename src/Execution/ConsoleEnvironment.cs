@@ -12,13 +12,16 @@ public class ConsoleEnvironment : IEnvironment
         switch (value.Type)
         {
             case RuntimeValue.ValueType.Number:
-                Console.Write((decimal)value.Value);
+                Console.Write((decimal)value);
                 break;
             case RuntimeValue.ValueType.String:
-                Console.Write((string)value.Value);
+                Console.Write((string)value);
                 break;
             case RuntimeValue.ValueType.Boolean:
-                Console.Write((bool)value.Value);
+                Console.Write((bool)value);
+                break;
+            case RuntimeValue.ValueType.Undefined:
+                Console.Write("undefined");
                 break;
 
             default:
@@ -34,13 +37,13 @@ public class ConsoleEnvironment : IEnvironment
                 Console.WriteLine();
                 break;
             case RuntimeValue.ValueType.Number:
-                Console.WriteLine((decimal)value.Value);
+                Console.WriteLine((decimal)value);
                 break;
             case RuntimeValue.ValueType.String:
-                Console.WriteLine((string)value.Value);
+                Console.WriteLine((string)value);
                 break;
             case RuntimeValue.ValueType.Boolean:
-                Console.WriteLine((bool)value.Value);
+                Console.WriteLine((bool)value);
                 break;
 
             default:

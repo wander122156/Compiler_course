@@ -234,7 +234,7 @@ public class ParserUserFunctionsTests
             switch (expectedValue.Type)
             {
                 case RuntimeValue.ValueType.Number:
-                    if (Math.Abs((decimal)expectedValue.Value - (decimal)actualValue.Value) >= Tolerance)
+                    if (Math.Abs((decimal)expectedValue - (decimal)actualValue) >= Tolerance)
                     {
                         Assert.Fail($"Expected does not match actual at index {i}: {expectedValue.Value} != {actualValue.Value}");
                     }
@@ -242,11 +242,11 @@ public class ParserUserFunctionsTests
                     break;
 
                 case RuntimeValue.ValueType.String:
-                    Assert.Equal((string)expectedValue.Value, (string)actualValue.Value);
+                    Assert.Equal((string)expectedValue, (string)actualValue);
                     break;
 
                 case RuntimeValue.ValueType.Boolean:
-                    Assert.Equal((bool)expectedValue.Value, (bool)actualValue.Value);
+                    Assert.Equal((bool)expectedValue, (bool)actualValue);
                     break;
             }
         }

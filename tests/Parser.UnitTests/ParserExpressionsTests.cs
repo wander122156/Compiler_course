@@ -57,6 +57,6 @@ public class ParserExpressionsTests
         blang.Execute(code);
 
         RuntimeValue result = Assert.Single(_environment.Results);
-        Assert.Equal(expected, (decimal)result.Value, Precision);
+        Assert.Equal(expected, (decimal)result, Precision);
     }
 }
