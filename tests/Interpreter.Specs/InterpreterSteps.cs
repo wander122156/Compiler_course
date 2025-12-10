@@ -21,6 +21,100 @@ public class InterpreterTests
     }
 
     [Fact]
+    public void Can_execute_CountVowels_program()
+    {
+        const string code = """
+            num n;
+            while (true) {
+                read(n);
+                if (n == 0) {
+                    break
+                };  
+                if (n % 15 == 0) {
+                    writeln("FizzBuzz")
+                } else {
+                    if (n % 3 == 0) {
+                        writeln("Fizz")
+                    } else {
+                        if (n % 5 == 0) {
+                            writeln("Buzz")
+                        } else {
+                            writeln(n)
+                        };
+                    };
+                };
+            }
+            """;
+        _environment.SetInputLines("5");
+
+        // выполнение программы:
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        // получение результата
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+
+        // ожидаемый результат
+        List<RuntimeValue> expected = [
+            RuntimeValue.String("Buzz"),
+            RuntimeValue.NewLine(),
+        ];
+
+        // сравнение результататов
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void Can_execute_IsLeapYear_program()
+    {
+        const string code = """
+            write("Введите год: ");
+            num year;
+            readln(year);
+
+            bool isLeap = false;
+
+            if (year % 400 == 0) {
+                isLeap = true;
+            } else {
+                if (year % 100 == 0) {
+                    isLeap = false;
+                } else {
+                    if (year % 4 == 0) {
+                        isLeap = true;
+                    } else {
+                        isLeap = false;
+                    };
+                };
+            };
+
+            if (isLeap) {
+                writeln("yes");
+            } else {
+                writeln("no");
+            };
+            """;
+        _environment.SetInputLines("2026");
+
+        // выполнение программы:
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        // получение результата
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+
+        // ожидаемый результат
+        List<RuntimeValue> expected = [
+            RuntimeValue.String("Введите год: "),
+            RuntimeValue.String("no"),
+            RuntimeValue.NewLine(),
+        ];
+
+        // сравнение результататов
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
     public void Can_execute_User_Age_program()
     {
         const string code = """
