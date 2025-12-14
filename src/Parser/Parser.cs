@@ -4,8 +4,6 @@ using Blang.Ast;
 using Blang.Ast.Declarations;
 using Blang.Ast.Expressions;
 using Blang.Ast.Statement;
-using Blang.Common;
-using Blang.Execution;
 using Blang.Lexer;
 
 using Expression = Blang.Ast.Expressions.Expression;
@@ -142,7 +140,7 @@ public class Parser
 
         variableNames.Add(Match(TokenType.Identifier).Value!.ToString());
 
-        while(_tokens.Peek().Type == TokenType.Comma)
+        while (_tokens.Peek().Type == TokenType.Comma)
         {
             _tokens.Advance();
             variableNames.Add(Match(TokenType.Identifier).Value!.ToString());
@@ -256,6 +254,7 @@ public class Parser
     /// </summary>
     private VariableDeclarationStatement ParseVariableDeclaration()
     {
+        // TODO: исправить что переменная может быть типа void
         string varType = ConvertTokenToType(_tokens.Peek().Type);
         _tokens.Advance();
 
@@ -346,7 +345,7 @@ public class Parser
     /// </summary>
     private ReturnStatement ParseReturnStatement()
     {
-        if(!_context.IsInFunction())
+        if (!_context.IsInFunction())
         {
             throw new SyntaxErrorException("'return' can only be used inside functions");
         }

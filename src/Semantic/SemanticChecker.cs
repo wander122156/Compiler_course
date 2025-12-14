@@ -24,7 +24,7 @@ public class SemanticChecker : IAstVisitor
 
     public void Check(List<IAstElement> root)
     {
-        // ПЕРВЫЙ ПРОХОД: Объявляем все функции (только сигнатуры)
+        // Объявляем все функции (только сигнатуры)
         foreach (IAstElement node in root)
         {
             if (node is FunctionDeclaration funcDecl)
@@ -151,7 +151,7 @@ public class SemanticChecker : IAstVisitor
             case BinaryOperation.GreaterThan:
             case BinaryOperation.LessThanOrEqual:
             case BinaryOperation.GreaterThanOrEqual:
-                if (leftType != ValueType.Number || rightType != ValueType.Number )
+                if (leftType != ValueType.Number || rightType != ValueType.Number)
                     throw new TypeException($"Comparison requires num but got {leftType} and {rightType}");
                 _types.Push(ValueType.Number);
                 break;
@@ -263,7 +263,7 @@ public class SemanticChecker : IAstVisitor
         ValueType conditionType = _types.Pop();
 
         if (conditionType != ValueType.Boolean &&
-            conditionType != ValueType.Number )
+            conditionType != ValueType.Number)
         {
             throw new TypeException(
                 $"Loop condition must be boolean or number, got {conditionType}"
