@@ -44,6 +44,8 @@ public class ParserExpressionsTests
             { "max(1, 3)", 3m },
             { "abs(-4)", 4m },
             { "pow(5, 3)", 125m },
+            { "length(\"four\")", 4m },
+            { "length(\"\")", 0m },
         };
     }
 

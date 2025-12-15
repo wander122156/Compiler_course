@@ -1,23 +1,14 @@
 ﻿namespace Blang.Common;
 public static class BuiltinFunctions
 {
-    private static readonly Dictionary<string, Func<List<decimal>, decimal>> Functions = new()
+    private static readonly Dictionary<string, Func<List<RuntimeValue>, RuntimeValue>> Functions = new()
     {
-        {
-            "abs", Abs
-        },
-        {
-            "min", Min
-        },
-        {
-            "max", Max
-        },
-        {
-            "pow", Pow
-        },
-        {
-            "floor", Floor
-        },
+        { "abs", Abs },
+        { "min", Min },
+        { "max", Max },
+        { "pow", Pow },
+        { "floor", Floor },
+        { "length", Length },
     };
 
     public static bool IsBuiltin(string name)
@@ -25,9 +16,9 @@ public static class BuiltinFunctions
         return Functions.ContainsKey(name);
     }
 
-    public static decimal Invoke(string name, List<decimal> arguments)
+    public static RuntimeValue Invoke(string name, List<RuntimeValue> arguments)
     {
-        if (!Functions.TryGetValue(name, out Func<List<decimal>, decimal>? function))
+        if (!Functions.TryGetValue(name, out Func<List<RuntimeValue>, RuntimeValue>? function))
         {
             throw new ArgumentException($"Unknown builtin function {name}");
         }
@@ -35,46 +26,84 @@ public static class BuiltinFunctions
         return function(arguments);
     }
 
-    private static decimal Abs(List<decimal> arguments)
+    private static RuntimeValue Abs(List<RuntimeValue> arguments)
     {
         if (arguments.Count != 1)
         {
             throw new ArgumentException("ABS function requires 1 argument");
         }
 
-        return Math.Abs(arguments[0]);
+        return RuntimeValue.Number(Math.Abs((decimal)arguments[0]));
     }
 
-    private static decimal Min(List<decimal> arguments)
+    private static RuntimeValue Min(List<RuntimeValue> arguments)
     {
-        return arguments.Min();
+        if (arguments.Count == 0)
+        {
+            throw new ArgumentException("MIN function requires at least 1 argument");
+        }
+
+        decimal min = (decimal)arguments[0];
+        for (int i = 1; i < arguments.Count; i++)
+        {
+            decimal current = (decimal)arguments[i];
+            if (current < min) min = current;
+        }
+
+        return RuntimeValue.Number(min);
     }
 
-    private static decimal Max(List<decimal> arguments)
+    private static RuntimeValue Max(List<RuntimeValue> arguments)
     {
-        return arguments.Max();
+        if (arguments.Count == 0)
+        {
+            throw new ArgumentException("MAX function requires at least 1 argument");
+        }
+
+        decimal max = (decimal)arguments[0];
+        for (int i = 1; i < arguments.Count; i++)
+        {
+            decimal current = (decimal)arguments[i];
+            if (current > max) max = current;
+        }
+
+        return RuntimeValue.Number(max);
     }
 
-    private static decimal Pow(List<decimal> arguments)
+    private static RuntimeValue Pow(List<RuntimeValue> arguments)
     {
         if (arguments.Count != 2)
         {
             throw new ArgumentException("POW function requires 2 arguments");
         }
 
-        double baseValue = (double)arguments[0];
-        double exponentValue = (double)arguments[1];
+        double baseValue = Convert.ToDouble(arguments[0].Value);
+        double exponentValue = Convert.ToDouble(arguments[1].Value);
         double result = Math.Pow(baseValue, exponentValue);
-        return (decimal)result;
+
+        return RuntimeValue.Number(Convert.ToDecimal(result));
     }
 
-    private static decimal Floor(List<decimal> arguments)
+    private static RuntimeValue Floor(List<RuntimeValue> arguments)
     {
         if (arguments.Count != 1)
         {
-            throw new ArgumentException("Floor function requires 1 argument");
+            throw new ArgumentException("FLOOR function requires 1 argument");
         }
 
-        return Math.Floor(arguments[0]);
+        return RuntimeValue.Number(Math.Floor((decimal)arguments[0]));
+    }
+
+    private static RuntimeValue Length(List<RuntimeValue> arguments)
+    {
+        if (arguments.Count != 1)
+        {
+            throw new ArgumentException("LENGTH function requires 1 argument");
+        }
+
+        RuntimeValue arg = arguments[0];
+
+        string str = (string)arg;
+        return RuntimeValue.Number(str.Length);
     }
 }

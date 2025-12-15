@@ -17,6 +17,7 @@ public static class BuiltinTypeChecker
         { "sqrt", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
         { "sin", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
         { "cos", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
+        { "length", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.String }) },
     };
 
     public static bool IsBuiltin(string name) => TypeInfo.ContainsKey(name);

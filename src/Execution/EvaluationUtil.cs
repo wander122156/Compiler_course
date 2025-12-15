@@ -106,8 +106,8 @@ public static class EvaluationUtil
         Func<decimal, decimal, decimal> operation
     )
     {
-        decimal left = evaluateLeft().AsDecimal();
-        decimal right = evaluateRight().AsDecimal();
+        decimal left = (decimal)evaluateLeft();
+        decimal right = (decimal)evaluateRight();
         return RuntimeValue.Number(operation(left, right));
     }
 
@@ -134,13 +134,13 @@ public static class EvaluationUtil
         return (left.Type, right.Type) switch
         {
             (RuntimeValue.ValueType.Number, RuntimeValue.ValueType.Number) =>
-                RuntimeValue.Boolean(compareDecimals(left.AsDecimal(), right.AsDecimal())),
+                RuntimeValue.Boolean(compareDecimals((decimal)left, (decimal)right)),
 
             (RuntimeValue.ValueType.String, RuntimeValue.ValueType.String) =>
-                RuntimeValue.Boolean(compareStrings(left.AsString(), right.AsString())),
+                RuntimeValue.Boolean(compareStrings((string)left, (string)right)),
 
             (RuntimeValue.ValueType.Boolean, RuntimeValue.ValueType.Boolean) =>
-                RuntimeValue.Boolean(compareBooleans(left.AsBool(), right.AsBool())),
+                RuntimeValue.Boolean(compareBooleans((bool)left, (bool)right)),
 
             _ => throw new InvalidOperationException($"Values are not comparable: {left.Type} and {right.Type}")
         };

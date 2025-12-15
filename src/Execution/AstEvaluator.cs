@@ -285,15 +285,15 @@ public class AstEvaluator : IAstVisitor
     {
         if (BuiltinFunctions.IsBuiltin(e.FunctionName))
         {
-            List<decimal> arguments = new();
+            List<RuntimeValue> arguments = new();
             foreach (Expression arg in e.Arguments)
             {
                 arg.Accept(this);
-                arguments.Add((decimal)_values.Pop());
+                arguments.Add(_values.Pop());
             }
 
-            decimal result = BuiltinFunctions.Invoke(e.FunctionName, arguments);
-            _values.Push(RuntimeValue.Number(result));
+            RuntimeValue result = BuiltinFunctions.Invoke(e.FunctionName, arguments);
+            _values.Push(result);
         }
         else if (_context.HasFunction(e.FunctionName))
         {

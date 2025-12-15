@@ -1,4 +1,6 @@
-﻿using Blang.Ast;
+﻿using System.Security.AccessControl;
+
+using Blang.Ast;
 using Blang.Ast.Declarations;
 using Blang.Ast.Expressions;
 using Blang.Ast.Statement;
@@ -448,21 +450,23 @@ public class SemanticChecker : IAstVisitor
                 );
         }
 
-        // Проверяем типы аргументов (все должны быть Number)
         for (int i = 0; i < e.Arguments.Count; i++)
         {
             e.Arguments[i].Accept(this);
             ValueType argType = _types.Pop();
 
-            if (argType != ValueType.Number)
+            ValueType expectedType = typeInfo.parameterTypes[i % typeInfo.parameterTypes.Count];
+
+            if (argType != expectedType)
             {
                 throw new TypeException(
-                    $"Argument {i + 1} of '{e.FunctionName}' expects number, got {TypeToString(argType)}"
+                    $"Argument {i + 1} of '{e.FunctionName}' expects {TypeToString(expectedType)}, got {TypeToString(argType)}"
                 );
             }
         }
 
-        _types.Push(ValueType.Number);
+        // Тип return
+        _types.Push(typeInfo.returnType);
     }
 
     private void CheckFunctionCall(FunctionCallExpression e, TypeContext.FunctionInfo funcInfo)
