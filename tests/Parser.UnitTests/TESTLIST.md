@@ -317,10 +317,15 @@ write(findFirstEven());
  `if ("") {write(2)} else {write(1)}`
  `if (0) {write(2)} else {write(1)}`
  
-- [x] Сравнение строк → [1]
- `if ("hello" == "hello") { write(1) }`
- `if ("abc" != "def") { write(1) }}`
-
+- [x] Сравнение строк → [1, 2, 4, 5, 6]
+ ```
+ if ("apple" == "apple") { write(1) };
+ if ("apple" != "apples") { write(2) };
+ if ("apple" < "apple") { write(3) };
+ if ("apples" > "apple") { write(4) };
+ if ("apples" >= "apple") { write(5) };
+ if ("apple" <= "apples") { write(6) };
+ ```
  
 - [x] Вывод bool -> [true, false]
  `write(true); write(false)` 

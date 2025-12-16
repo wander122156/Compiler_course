@@ -9,13 +9,10 @@ public class TypesTests
 {
     private const int Precision = 5;
     private static readonly decimal Tolerance = (decimal)Math.Pow(0.1, Precision);
-
-    private readonly Context _context;
     private readonly FakeEnvironment _environment;
 
     public TypesTests()
     {
-        _context = new Context();
         _environment = new FakeEnvironment();
     }
 
@@ -79,6 +76,33 @@ public class TypesTests
         List<RuntimeValue> expected = [
             RuntimeValue.Number(1),
         ];
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
+    public void CompareStrings()
+    {
+        string code = """
+        if ("apple" == "apple") { write(1) };
+        if ("apple" != "apples") { write(2) };
+        if ("apple" < "apple") { write(3) };
+        if ("apples" > "apple") { write(4) };
+        if ("apples" >= "apple") { write(5) };
+        if ("apple" <= "apples") { write(6) };
+        """;
+
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(1),
+            RuntimeValue.Number(2),
+            RuntimeValue.Number(4),
+            RuntimeValue.Number(5),
+            RuntimeValue.Number(6),
+        ];
+
         BlangInterpreter blang = new(_environment);
         blang.Execute(code);
 
@@ -166,7 +190,6 @@ public class TypesTests
         });
     }
 
-    // Ошибка: строка в арифметике → TypeException
     [Fact]
     public void String_In_Arithmetic_Should_Fail()
     {
@@ -181,7 +204,6 @@ public class TypesTests
         });
     }
 
-    // Ошибка: арифметика с bool → TypeException
     [Fact]
     public void Arithmetic_With_Bool_Should_Fail()
     {
@@ -196,7 +218,6 @@ public class TypesTests
         });
     }
 
-    // Ошибка: сравнение разных типов → TypeException
     [Fact]
     public void Equality_Num_And_String_Should_Fail()
     {
@@ -211,7 +232,6 @@ public class TypesTests
         });
     }
 
-    // Ошибка: сравнение num и string → TypeException
     [Fact]
     public void Less_Num_And_String_Should_Fail()
     {
@@ -226,7 +246,6 @@ public class TypesTests
         });
     }
 
-    // Ошибка: присваивание неверного типа
     [Fact]
     public void Assignment_Wrong_Type_Should_Fail()
     {
@@ -242,7 +261,6 @@ public class TypesTests
         });
     }
 
-    // Ошибка: неверный тип в объявлении
     [Fact]
     public void Declaration_Wrong_Type_Should_Fail()
     {
@@ -257,7 +275,6 @@ public class TypesTests
         });
     }
 
-    // Ошибка: возврат другого типа
     [Fact]
     public void Return_Wrong_Type_Should_Fail()
     {
@@ -272,7 +289,6 @@ public class TypesTests
         });
     }
 
-    // Ошибка: тип аргумента не совпадает
     [Fact]
     public void Function_Arg_Wrong_Type_Should_Fail()
     {
@@ -288,7 +304,6 @@ public class TypesTests
         });
     }
 
-    // Ошибка: нет return в функции с типом
     [Fact]
     public void Function_No_Return_Should_Fail()
     {
