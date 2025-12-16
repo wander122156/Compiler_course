@@ -4,7 +4,7 @@ num a;
 num b;
 readln(a);
 readln(b);
-writeln(a+b)
+writeln(a+b);
 
 ````
 
@@ -12,23 +12,23 @@ writeln(a+b)
 num b;
 read(b);
 if( b > 0){
-    writeln("Число положительное")
+    writeln("Число положительное");
 }
 else{
-    writeln("Число отрицательное")
-}
+    writeln("Число отрицательное");
+};
 ````
 Ключевые особенности:
 - Блоки кода отделяются фигурными скобками
 - Программа состоит из выражений и объявлений
 - Явное определение переменной 
 - Нельзя объявлять переменные с одинаковыми именами 
-- Инструкция заканчивается знаком ";", исключениями являются случаи, когда строчка единственная в блоке кода и последняя в блоке кода
-  
+- Инструкция заканчивается знаком ";"
 
 # EBNF 
 ````
 program = statement, { ";", statement }, [ ";" ] ;
+type = "num" | "string" | "bool" ;
 
 (* ключевый слова *)
 statement = variable_declaration
@@ -48,10 +48,9 @@ statement = variable_declaration
           | break_statement
           | continue_statement
 
-type = "num" | "string" | "bool" ;
 
 (* Объявления и переменные *)
-variable_declaration = type, identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
+variable_declaration = type, identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] } ;
 constant_definition = "const", type, identifier, "=", expression ;
 assignment = identifier, "=", expression ;
 
@@ -63,15 +62,15 @@ return__statement = "return", expression ;
 write_statement = "write", "( ", [ expression_list ], " )" ;
 writeln_statement = "writeln", "(" expression_list ")" ;
 read_statement = "read", "(", identifier, {"," ,identifier } ")" ;
-readln_statement = "readln", "(", identifier, {"," ,identifier } ")"
+readln_statement = "readln", "(", identifier, {"," ,identifier } ")" ;
 
 (* Циклы и инструкции*)
-if_statement = "if", "(", condition, ")", statement_or_block, [ "else", statement_or_block ]
-    statement_or_block = compound_statement | statement
+if_statement = "if", "(", condition, ")", statement_or_block, [ "else", statement_or_block ] ;
+    statement_or_block = compound_statement | statement ;
 
 while_statement = "while", "(", condition, ")", compound_statement ;
 do_while_statement = "do", compound_statement, "while", "(", condition, ")" ;
-for_statement = "for", "(", for_initialization, ";", for_condition, ";", for_increment, ")", compound_statement
+for_statement = "for", "(", for_initialization, ";", for_condition, ";", for_increment, ")", compound_statement ;
     for_initialization = variable_declaration | assignment    
     for_condition = expression    
     for_increment = assignment;
@@ -79,7 +78,7 @@ for_statement = "for", "(", for_initialization, ";", for_condition, ";", for_inc
 break_statement = "break" ;
 continue_statement = "continue" ;
 
-compound_statement = "{", statement, { ";", statement }, [ ";" ], "}"
+compound_statement = "{", statement, { ";", statement }, [ ";" ], "}" ;
 
 (* Условия *)
 condition = expression, [ comparison_operator, expression ] ;
@@ -89,7 +88,7 @@ comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression } ;  
 multiplicative_expression = unary_expression, { ("*" |  "/" | "%"), unary_expression } ;
 unary_expression = ("+" | "-"), unary_expression
-                    | exponentiation_expression
+                    | exponentiation_expression ;
 exponentiation_expression = primary_expression, [ "^", exponentiation_expression ] ;
 primary_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression ;
 

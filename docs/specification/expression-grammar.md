@@ -56,14 +56,14 @@
 | 5                     | '*', '/', '%'        |
 | 4                     | '+', '-'             |
 | 3                     | '>', '<', '>=', '<=' |
-| 2                     | '==', '=', '!='      |
-| 1                     | 'And'                |
-| 0                     | 'Or'                 |
+| 2                     | '==', '!='      |
+| 1                     | 'and'                |
+| 0                     | 'or'                 |
 
 ## Грамматика в нотации EBNF
 
 ````
-program = { statement, [ ";" ] } ;
+program = statement, { ";", statement }, [ ";" ] ;
 
 (* ключевый слова *)
 statement =
@@ -74,7 +74,7 @@ if_statement = "if", "(", condition, ")", compound_statement, [ "else", statemen
 (* Условия *)
 compound_statement = "{", { statement, [ ";" ] }, "}" ;
 condition = expression, [ comparison_operator, expression ] ;
-comparison_operator = "<" ;
+comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 
 (* Выражения *)
 expression = term_expression, { ("+" | "-"), term_expression } ;  
@@ -91,7 +91,6 @@ expression_list = expression, { ",", expression } ;
 
 (* Список *)
 list_of_numbers = number, { ",", number };
-expression_list = expression, { ",", expression };
 
 ````
 

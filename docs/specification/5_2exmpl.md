@@ -39,9 +39,9 @@ read(a,b);
 while (b != 0) {
     temp = b;
     b = a % b;
-    a = temp
+    a = temp;
 };
-writeln(a)
+writeln(a);
 ````
 ## 3. SumDigits
 ````
@@ -52,7 +52,7 @@ readln(n);
 n = abs(n);
 while(n != 0){
     sum = sum + n%10;
-    n = n/10
+    n = n/10;
 };
-writeln(sum)
+writeln(sum);
 ````

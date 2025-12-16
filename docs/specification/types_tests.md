@@ -1,21 +1,21 @@
-# CountVowels
+# FizzBuzz
 ```
 num n;
 while (true) {
     read(n);
     if (n == 0) {
-        break
+        break;
     };  
     if (n % 15 == 0) {
-        writeln("FizzBuzz")
+        writeln("FizzBuzz");
     } else {
         if (n % 3 == 0) {
-            writeln("Fizz")
+            writeln("Fizz");
         } else {
             if (n % 5 == 0) {
-                writeln("Buzz")
+                writeln("Buzz");
             } else {
-                writeln(n)
+                writeln(n);
             };
         };
     };
