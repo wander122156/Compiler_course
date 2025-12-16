@@ -128,6 +128,29 @@ public class TypesTests
         AssertResults(expected, actual);
     }
 
+    [Fact]
+    public void Concat_String_Values()
+    {
+        string code = """
+        string abc = "ab" + "c";
+        write(abc);
+        string fg = "fg";
+        string abcfg = abc + fg;
+        write(abcfg);
+        """;
+
+        List<RuntimeValue> expected = [
+        RuntimeValue.String("abc"),
+        RuntimeValue.String("abcfg"),
+        ];
+
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
     // Ошибка: сложение num и bool → TypeException
     [Fact]
     public void Addition_Num_And_Bool_Should_Fail()

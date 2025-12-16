@@ -136,38 +136,8 @@ public class SemanticChecker : IAstVisitor
         e.Right.Accept(this);
         ValueType rightType = _types.Pop();
 
-        switch (e.Operation)
-        {
-            case BinaryOperation.Plus:
-            case BinaryOperation.Minus:
-            case BinaryOperation.Multiply:
-            case BinaryOperation.Divide:
-            case BinaryOperation.Modulo:
-            case BinaryOperation.Exponentiation:
-                if (leftType != ValueType.Number || rightType != ValueType.Number)
-                    throw new TypeException($"Arithmetic op requires num but got {leftType} and {leftType}");
-                _types.Push(ValueType.Number);
-                break;
-
-            case BinaryOperation.LessThan:
-            case BinaryOperation.GreaterThan:
-            case BinaryOperation.LessThanOrEqual:
-            case BinaryOperation.GreaterThanOrEqual:
-                if (leftType != ValueType.Number || rightType != ValueType.Number)
-                    throw new TypeException($"Comparison requires num but got {leftType} and {rightType}");
-                _types.Push(ValueType.Number);
-                break;
-
-            case BinaryOperation.LooseEquality:
-            case BinaryOperation.NotEqual:
-                if (leftType != rightType)
-                    throw new TypeException($"Cannot compare {leftType} and {rightType}");
-                _types.Push(leftType);
-                break;
-
-            default:
-                throw new TypeException($"Unknown binary operation {e.Operation}");
-        }
+        ValueType resultType = CheckBinaryOperation(e.Operation, leftType, rightType);
+        _types.Push(resultType);
     }
 
     public void Visit(UnaryOperationExpression e)
@@ -538,6 +508,37 @@ public class SemanticChecker : IAstVisitor
             ValueType.Undefined => "undefined",
             ValueType.NewLine => "newline",
             _ => "unknown"
+        };
+    }
+
+    private ValueType CheckBinaryOperation(BinaryOperation op, ValueType left, ValueType right)
+    {
+        return (op, left, right) switch
+        {
+            (BinaryOperation.Plus, ValueType.Number, ValueType.Number) => ValueType.Number,
+            (BinaryOperation.Plus, ValueType.String, ValueType.String) => ValueType.String,
+
+            (BinaryOperation.Minus, ValueType.Number, ValueType.Number) => ValueType.Number,
+            (BinaryOperation.Multiply, ValueType.Number, ValueType.Number) => ValueType.Number,
+            (BinaryOperation.Divide, ValueType.Number, ValueType.Number) => ValueType.Number,
+            (BinaryOperation.Modulo, ValueType.Number, ValueType.Number) => ValueType.Number,
+            (BinaryOperation.Exponentiation, ValueType.Number, ValueType.Number) => ValueType.Number,
+
+            (BinaryOperation.LooseEquality, ValueType l, ValueType r) when l == r => ValueType.Boolean,
+            (BinaryOperation.NotEqual, ValueType l, ValueType r) when l == r => ValueType.Boolean,
+
+            (BinaryOperation.LessThan, ValueType.Number, ValueType.Number) => ValueType.Boolean,
+            (BinaryOperation.LessThan, ValueType.String, ValueType.String) => ValueType.Boolean,
+            (BinaryOperation.GreaterThan, ValueType.Number, ValueType.Number) => ValueType.Boolean,
+            (BinaryOperation.GreaterThan, ValueType.String, ValueType.String ) => ValueType.Boolean,
+            (BinaryOperation.LessThanOrEqual, ValueType.Number, ValueType.Number) => ValueType.Boolean,
+            (BinaryOperation.LessThanOrEqual, ValueType.String, ValueType.String ) => ValueType.Boolean,
+            (BinaryOperation.GreaterThanOrEqual, ValueType.Number, ValueType.Number) => ValueType.Boolean,
+            (BinaryOperation.GreaterThanOrEqual, ValueType.String, ValueType.String ) => ValueType.Boolean,
+
+            _ => throw new TypeException(
+                $"Operator {op} cannot be applied to types {left} and {right}"
+            )
         };
     }
 }

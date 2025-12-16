@@ -15,11 +15,7 @@ public static class EvaluationUtil
     {
         return operation switch
         {
-            BinaryOperation.Plus => ApplyArithmeticOperation(
-                    evaluateLeft,
-                    evaluateRight,
-                    (i1, i2) => i1 + i2
-                ),
+            BinaryOperation.Plus => ApplyPlusOperation(evaluateLeft, evaluateRight),
             BinaryOperation.Minus => ApplyArithmeticOperation(
                 evaluateLeft,
                 evaluateRight,
@@ -50,49 +46,70 @@ public static class EvaluationUtil
                     return (decimal)Math.Pow((double)i1, (double)i2);
                 }
             ),
-            BinaryOperation.LooseEquality => ApplyComparisonOperation(
+            BinaryOperation.LooseEquality => ApplyEqualityOperation(
                 evaluateLeft,
                 evaluateRight,
                 (i1, i2) => i1 == i2,
                 (s1, s2) => s1 == s2,
                 (b1, b2) => b1 == b2
             ),
-            BinaryOperation.NotEqual => ApplyComparisonOperation(
+            BinaryOperation.NotEqual => ApplyEqualityOperation(
                 evaluateLeft,
                 evaluateRight,
                 (i1, i2) => i1 != i2,
                 (s1, s2) => s1 != s2,
-                (b1, b2) => b1 == b2
+                (b1, b2) => b1 != b2
             ),
             BinaryOperation.LessThan => ApplyComparisonOperation(
                 evaluateLeft,
                 evaluateRight,
                 (i1, i2) => i1 < i2,
-                (s1, s2) => string.CompareOrdinal(s1, s2) < 0,
-                (b1, b2) => b1 == b2
+                (s1, s2) => string.CompareOrdinal(s1, s2) < 0
             ),
             BinaryOperation.GreaterThan => ApplyComparisonOperation(
                 evaluateLeft,
                 evaluateRight,
                 (i1, i2) => i1 > i2,
-                (s1, s2) => string.CompareOrdinal(s1, s2) > 0,
-                (b1, b2) => b1 == b2
+                (s1, s2) => string.CompareOrdinal(s1, s2) > 0
             ),
             BinaryOperation.LessThanOrEqual => ApplyComparisonOperation(
                 evaluateLeft,
                 evaluateRight,
                 (i1, i2) => i1 <= i2,
-                (s1, s2) => string.CompareOrdinal(s1, s2) <= 0,
-                (b1, b2) => b1 == b2
+                (s1, s2) => string.CompareOrdinal(s1, s2) <= 0
             ),
             BinaryOperation.GreaterThanOrEqual => ApplyComparisonOperation(
                 evaluateLeft,
                 evaluateRight,
                 (i1, i2) => i1 >= i2,
-                (s1, s2) => string.CompareOrdinal(s1, s2) >= 0,
-                (b1, b2) => b1 == b2
+                (s1, s2) => string.CompareOrdinal(s1, s2) >= 0
             ),
             _ => throw new NotImplementedException($"Unknown binary operation {operation}"),
+        };
+    }
+
+    /// <summary>
+    /// Выполняет операцию сложения чисел или конкатенации строк)
+    /// </summary>
+    private static RuntimeValue ApplyPlusOperation(
+        Func<RuntimeValue> evaluateLeft,
+        Func<RuntimeValue> evaluateRight)
+    {
+        RuntimeValue left = evaluateLeft();
+        RuntimeValue right = evaluateRight();
+
+        // Проверяем типы и выполняем соответствующую операцию
+        return (left.Type, right.Type) switch
+        {
+            (RuntimeValue.ValueType.Number, RuntimeValue.ValueType.Number) =>
+                RuntimeValue.Number((decimal)left + (decimal)right),
+
+            (RuntimeValue.ValueType.String, RuntimeValue.ValueType.String) =>
+                RuntimeValue.String((string)left + (string)right),
+
+            _ => throw new InvalidOperationException(
+                $"Operator '+' cannot be applied to types {left.Type} and {right.Type}. " +
+                "Use with numbers or strings only.")
         };
     }
 
@@ -106,16 +123,25 @@ public static class EvaluationUtil
         Func<decimal, decimal, decimal> operation
     )
     {
-        decimal left = (decimal)evaluateLeft();
-        decimal right = (decimal)evaluateRight();
-        return RuntimeValue.Number(operation(left, right));
+        RuntimeValue left = evaluateLeft();
+        RuntimeValue right = evaluateRight();
+
+        if (left.Type != RuntimeValue.ValueType.Number || right.Type != RuntimeValue.ValueType.Number)
+        {
+            throw new InvalidOperationException(
+                $"Arithmetic operation requires numbers, got {left.Type} and {right.Type}");
+        }
+
+        decimal leftNum = (decimal)left;
+        decimal rightNum = (decimal)right;
+
+        return RuntimeValue.Number(operation(leftNum, rightNum));
     }
 
     /// <summary>
-    /// Сравнивает два операнда, если они оба являются числами, строками или bool.
-    /// Иначе бросает исключение.
+    /// Проверяет равенство/неравенство для чисел, строк и булевых значений
     /// </summary>
-    private static RuntimeValue ApplyComparisonOperation(
+    private static RuntimeValue ApplyEqualityOperation(
         Func<RuntimeValue> evaluateLeft,
         Func<RuntimeValue> evaluateRight,
         Func<decimal, decimal, bool> compareDecimals,
@@ -128,7 +154,8 @@ public static class EvaluationUtil
 
         if (left.Type != right.Type)
         {
-            throw new InvalidOperationException($"Cannot compare values of different types: {left.Type} and {right.Type}");
+            throw new InvalidOperationException(
+                $"Cannot compare values of different types: {left.Type} and {right.Type}");
         }
 
         return (left.Type, right.Type) switch
@@ -142,7 +169,44 @@ public static class EvaluationUtil
             (RuntimeValue.ValueType.Boolean, RuntimeValue.ValueType.Boolean) =>
                 RuntimeValue.Boolean(compareBooleans((bool)left, (bool)right)),
 
-            _ => throw new InvalidOperationException($"Values are not comparable: {left.Type} and {right.Type}")
+            _ => throw new InvalidOperationException(
+                $"Cannot check equality for types {left.Type} and {right.Type}")
+        };
+    }
+
+    /// <summary>
+    /// Сравнивает два операнда (<, >, <=, >=) для чисел и строк
+    /// </summary>
+    private static RuntimeValue ApplyComparisonOperation(
+        Func<RuntimeValue> evaluateLeft,
+        Func<RuntimeValue> evaluateRight,
+        Func<decimal, decimal, bool> compareDecimals,
+        Func<string, string, bool> compareStrings
+    )
+    {
+        RuntimeValue left = evaluateLeft();
+        RuntimeValue right = evaluateRight();
+
+        if (left.Type != right.Type)
+        {
+            throw new InvalidOperationException(
+                $"Cannot compare values of different types: {left.Type} and {right.Type}");
+        }
+
+        return (left.Type, right.Type) switch
+        {
+            (RuntimeValue.ValueType.Number, RuntimeValue.ValueType.Number) =>
+                RuntimeValue.Boolean(compareDecimals((decimal)left, (decimal)right)),
+
+            (RuntimeValue.ValueType.String, RuntimeValue.ValueType.String) =>
+                RuntimeValue.Boolean(compareStrings((string)left, (string)right)),
+
+            (RuntimeValue.ValueType.Boolean, RuntimeValue.ValueType.Boolean) =>
+                throw new InvalidOperationException(
+                    $"Comparison operators (<, >, <=, >=) are not supported for boolean values"),
+
+            _ => throw new InvalidOperationException(
+                $"Cannot compare values of type {left.Type}")
         };
     }
 }

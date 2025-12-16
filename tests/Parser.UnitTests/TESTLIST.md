@@ -331,6 +331,15 @@ write(findFirstEven());
  read(s);
  write(s);
  ```
+
+ - [x] Конккатенация string -> ["abc", "abcfg"]
+ ```
+ string abc = "ab" + "c";
+ write(abc);
+ string fg = "fg";
+ string abcfg = abc + fg;
+ write(abcfg);
+ ```
  
 - [x] Ошибка: сложение num и bool → TypeException
  `write(true + 5) ` 
