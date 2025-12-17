@@ -1,5 +1,4 @@
 ﻿using Blang.Common;
-using Blang.Execution;
 using Blang.Interpreter;
 using Blang.Parser;
 
@@ -11,12 +10,10 @@ public class InterpreterTests
     private const int Precision = 5;
     private static readonly decimal Tolerance = (decimal)Math.Pow(0.1, Precision);
 
-    private readonly Context _context;
     private readonly FakeEnvironment _environment;
 
     public InterpreterTests()
     {
-        _context = new Context();
         _environment = new FakeEnvironment();
     }
 

@@ -295,10 +295,8 @@ public class AstEvaluator : IAstVisitor
         }
         else if (_context.HasFunction(e.FunctionName))
         {
-            // Обработка пользовательских функций
             FunctionDeclaration function = _context.GetFunction(e.FunctionName);
 
-            // Собираем аргументы
             List<RuntimeValue> arguments = new();
             foreach (Expression arg in e.Arguments)
             {
@@ -306,7 +304,6 @@ public class AstEvaluator : IAstVisitor
                 arguments.Add(_values.Pop());
             }
 
-            // Выполняем функцию
             RuntimeValue? result = ExecuteUserFunction(function, arguments);
 
             if (result != null)

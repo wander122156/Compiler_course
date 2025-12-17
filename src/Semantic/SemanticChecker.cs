@@ -1,6 +1,4 @@
-﻿using System.Security.AccessControl;
-
-using Blang.Ast;
+﻿using Blang.Ast;
 using Blang.Ast.Declarations;
 using Blang.Ast.Expressions;
 using Blang.Ast.Statement;
@@ -83,7 +81,7 @@ public class SemanticChecker : IAstVisitor
             }
         }
 
-        _typeContext.DefineVariableType(d.Name, declaredType); // ?
+        _typeContext.DefineVariableType(d.Name, declaredType);
     }
 
     public void Visit(VariableDeclarationStatement s)
@@ -108,7 +106,7 @@ public class SemanticChecker : IAstVisitor
                 }
             }
 
-            _typeContext.DefineVariableType(declaration.Name, declaredType); // ?
+            _typeContext.DefineVariableType(declaration.Name, declaredType);
         }
     }
 
@@ -541,11 +539,11 @@ public class SemanticChecker : IAstVisitor
             (BinaryOperation.LessThan, ValueType.Number, ValueType.Number) => ValueType.Boolean,
             (BinaryOperation.LessThan, ValueType.String, ValueType.String) => ValueType.Boolean,
             (BinaryOperation.GreaterThan, ValueType.Number, ValueType.Number) => ValueType.Boolean,
-            (BinaryOperation.GreaterThan, ValueType.String, ValueType.String ) => ValueType.Boolean,
+            (BinaryOperation.GreaterThan, ValueType.String, ValueType.String) => ValueType.Boolean,
             (BinaryOperation.LessThanOrEqual, ValueType.Number, ValueType.Number) => ValueType.Boolean,
-            (BinaryOperation.LessThanOrEqual, ValueType.String, ValueType.String ) => ValueType.Boolean,
+            (BinaryOperation.LessThanOrEqual, ValueType.String, ValueType.String) => ValueType.Boolean,
             (BinaryOperation.GreaterThanOrEqual, ValueType.Number, ValueType.Number) => ValueType.Boolean,
-            (BinaryOperation.GreaterThanOrEqual, ValueType.String, ValueType.String ) => ValueType.Boolean,
+            (BinaryOperation.GreaterThanOrEqual, ValueType.String, ValueType.String) => ValueType.Boolean,
 
             _ => throw new TypeException(
                 $"Operator {op} cannot be applied to types {left} and {right}"
