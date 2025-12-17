@@ -129,7 +129,7 @@ public static class BuiltinFunctions
 
         if (arguments.Count == 2)
         {
-            // Вариант 1: substring(str, startIndex) - от startIndex до конца
+            // substring(str, startIndex) - от startIndex до конца
             try
             {
                 string result = str.Substring(startIndex);
@@ -142,12 +142,8 @@ public static class BuiltinFunctions
         }
         else
         {
-            // Вариант 2: substring(str, startIndex, length) - от startIndex заданной длины
+            // substring(str, startIndex, length) - от startIndex заданной длины
             RuntimeValue lengthArg = arguments[2];
-            //if (lengthArg.Type != RuntimeValue.ValueType.Number)
-            //{
-            //    throw new ArgumentException("Third argument of SUBSTRING (length) must be a number");
-            //}
 
             int length = (int)(decimal)lengthArg;
 
