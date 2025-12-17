@@ -9,6 +9,7 @@ public static class BuiltinFunctions
         { "pow", Pow },
         { "floor", Floor },
         { "length", Length },
+        { "substring", Substring },
     };
 
     public static bool IsBuiltin(string name)
@@ -105,5 +106,73 @@ public static class BuiltinFunctions
 
         string str = (string)arg;
         return RuntimeValue.Number(str.Length);
+    }
+
+    private static RuntimeValue Substring(List<RuntimeValue> arguments)
+    {
+        if (arguments.Count < 2 || arguments.Count > 3)
+        {
+            throw new ArgumentException("SUBSTRING function requires 2 or 3 arguments: string, startIndex [, length]");
+        }
+
+        RuntimeValue strArg = arguments[0];
+
+        RuntimeValue startArg = arguments[1];
+
+        string str = (string)strArg;
+        int startIndex = (int)(decimal)startArg;
+
+        if (startIndex < 0 || startIndex > str.Length)
+        {
+            throw new ArgumentException($"Start index {startIndex} is out of range. String length is {str.Length}");
+        }
+
+        if (arguments.Count == 2)
+        {
+            // Вариант 1: substring(str, startIndex) - от startIndex до конца
+            try
+            {
+                string result = str.Substring(startIndex);
+                return RuntimeValue.String(result);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                throw new ArgumentException($"Invalid arguments for SUBSTRING: {ex.Message}");
+            }
+        }
+        else
+        {
+            // Вариант 2: substring(str, startIndex, length) - от startIndex заданной длины
+            RuntimeValue lengthArg = arguments[2];
+            //if (lengthArg.Type != RuntimeValue.ValueType.Number)
+            //{
+            //    throw new ArgumentException("Third argument of SUBSTRING (length) must be a number");
+            //}
+
+            int length = (int)(decimal)lengthArg;
+
+            if (length < 0)
+            {
+                throw new ArgumentException($"Length {length} cannot be negative");
+            }
+
+            if (startIndex + length > str.Length)
+            {
+                throw new ArgumentException(
+                    $"Substring range [{startIndex}, {startIndex + length}) is out of range. " +
+                    $"String length is {str.Length}"
+                );
+            }
+
+            try
+            {
+                string result = str.Substring(startIndex, length);
+                return RuntimeValue.String(result);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                throw new ArgumentException($"Invalid arguments for SUBSTRING: {ex.Message}");
+            }
+        }
     }
 }

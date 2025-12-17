@@ -85,8 +85,6 @@ public class AstEvaluator : IAstVisitor
 
     public void Visit(VariableDeclaration d)
     {
-        // NOTE: Вычисляем инициализирующее выражение, и затем присваиваем его значение переменной,
-        //  сохраняя результат в стеке.
         RuntimeValue value = RuntimeValue.Undefined();
         if (d.Value != null)
         {

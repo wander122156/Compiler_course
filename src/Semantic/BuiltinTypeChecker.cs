@@ -8,7 +8,6 @@ public static class BuiltinTypeChecker
 
     private static readonly Dictionary<string, FunctionTypeInfo> TypeInfo = new()
     {
-        // ТОЛЬКО математические функции
         { "abs", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
         { "min", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }, minArguments: 1) },
         { "max", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number, ValueType.Number }, minArguments: 1) },
@@ -18,6 +17,7 @@ public static class BuiltinTypeChecker
         { "sin", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
         { "cos", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.Number }) },
         { "length", new FunctionTypeInfo(ValueType.Number, new List<ValueType> { ValueType.String }) },
+        { "substring", new FunctionTypeInfo(ValueType.String, new List<ValueType> { ValueType.String, ValueType.Number, ValueType.Number }, minArguments: 2) },
     };
 
     public static bool IsBuiltin(string name) => TypeInfo.ContainsKey(name);

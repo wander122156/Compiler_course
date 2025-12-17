@@ -16,7 +16,26 @@ public class TypesTests
         _environment = new FakeEnvironment();
     }
 
-    // Приведение типов к bool
+    [Fact]
+    public void Built_In_Substring_Func()
+    {
+        string code = """
+            string text = "Hello World";
+            string end = substring(text, 6);      
+            string part = substring(text, 0, 5);
+            write(end, part)
+            """;
+        List<RuntimeValue> expected = [
+            RuntimeValue.String("World"),
+            RuntimeValue.String("Hello"),
+        ];
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
     [Fact]
     public void If_String_Condition_Convert_to_bool_true()
     {

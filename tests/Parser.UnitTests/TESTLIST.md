@@ -316,7 +316,7 @@ write(findFirstEven());
  `if (10) {write(1)}`
  `if ("") {write(2)} else {write(1)}`
  `if (0) {write(2)} else {write(1)}`
- 
+
 - [x] Сравнение строк → [1, 2, 4, 5, 6]
  ```
  if ("apple" == "apple") { write(1) };
@@ -326,7 +326,6 @@ write(findFirstEven());
  if ("apples" >= "apple") { write(5) };
  if ("apple" <= "apples") { write(6) };
  ```
- 
 - [x] Вывод bool -> [true, false]
  `write(true); write(false)` 
 
@@ -336,7 +335,6 @@ write(findFirstEven());
  read(s);
  write(s);
  ```
-
  - [x] Конккатенация string -> ["abc", "abcfg"]
  ```
  string abc = "ab" + "c";
@@ -344,6 +342,12 @@ write(findFirstEven());
  string fg = "fg";
  string abcfg = abc + fg;
  write(abcfg);
+ ```
+ - [x] Декомпозиция string -> ["World", "Hello"]
+ ```
+string text = "Hello World";
+string end = substring(text, 6);      
+string part = substring(text, 0, 5);  
  ```
  
 - [x] Ошибка: сложение num и bool → TypeException

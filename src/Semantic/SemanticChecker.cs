@@ -425,7 +425,18 @@ public class SemanticChecker : IAstVisitor
             e.Arguments[i].Accept(this);
             ValueType argType = _types.Pop();
 
-            ValueType expectedType = typeInfo.parameterTypes[i % typeInfo.parameterTypes.Count];
+            ValueType expectedType;
+
+            if (typeInfo.minArguments > 0 && i >= typeInfo.parameterTypes.Count)
+            {
+                // Если передано больше аргументов чем в parameterTypes,
+                // используем тип последнего параметра
+                expectedType = typeInfo.parameterTypes[^1];
+            }
+            else
+            {
+                expectedType = typeInfo.parameterTypes[i];
+            }
 
             if (argType != expectedType)
             {
