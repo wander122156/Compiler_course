@@ -71,9 +71,9 @@ if_statement = "if", "(", condition, ")", statement_or_block, [ "else", statemen
 while_statement = "while", "(", condition, ")", compound_statement ;
 do_while_statement = "do", compound_statement, "while", "(", condition, ")" ;
 for_statement = "for", "(", for_initialization, ";", for_condition, ";", for_increment, ")", compound_statement ;
-    for_initialization = variable_declaration | assignment    
-    for_condition = expression    
-    for_increment = assignment;
+for_initialization = variable_declaration | assignment    
+for_condition = expression    
+for_increment = assignment;
 
 break_statement = "break" ;
 continue_statement = "continue" ;
