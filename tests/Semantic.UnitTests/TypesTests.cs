@@ -17,6 +17,28 @@ public class TypesTests
     }
 
     [Fact]
+    public void Logical_operations()
+    {
+        string code = """
+            if (true || false) {write(1)};
+            if (true && false) {write(1)} else {write(2)};
+            if (!false) {write(1)};
+            if ( !(!false && !true) ) {write(1)}
+            """;
+        List<RuntimeValue> expected = [
+            RuntimeValue.Number(1),
+            RuntimeValue.Number(2),
+            RuntimeValue.Number(1),
+            RuntimeValue.Number(1),
+        ];
+        BlangInterpreter blang = new(_environment);
+        blang.Execute(code);
+
+        IReadOnlyList<RuntimeValue> actual = _environment.Results;
+        AssertResults(expected, actual);
+    }
+
+    [Fact]
     public void Built_In_Substring_Func()
     {
         string code = """

@@ -155,6 +155,27 @@ public class Lexer(string code)
                 }
 
                 return new Token(TokenType.Not);
+
+            case '&':
+                _scanner.Advance();
+                if (_scanner.Peek() == '&')
+                {
+                    _scanner.Advance();
+                    return new Token(TokenType.And);
+                }
+
+                return new Token(TokenType.Error, new TokenValue(_scanner.Peek().ToString()));
+
+            case '|':
+                _scanner.Advance();
+                if (_scanner.Peek() == '|')
+                {
+                    _scanner.Advance();
+                    return new Token(TokenType.Or);
+                }
+
+                return new Token(TokenType.Error, new TokenValue(_scanner.Peek().ToString()));
+
             case '<':
                 _scanner.Advance();
                 if (_scanner.Peek() == '=')

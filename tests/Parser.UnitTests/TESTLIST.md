@@ -311,6 +311,12 @@ write(findFirstEven());
 ```
 
 ### Тесты типов
+
+- [ ] Логические операторыы && || ! → [1, 2, 1]
+ `if (true | false) {write(1)}
+ if (true & false) {write(1)} else {write(2)}
+ if (!false) {write(1)}`
+
 - [x] Привидение типов к bool → [1]
  `if ("hello") {write(1)}`
  `if (10) {write(1)}`
@@ -388,9 +394,9 @@ sqr("str")`
 ````
 program = statement, { ";", statement }, [ ";" ] ;
 
-(* ключевый слова *)
+(* Ключевые слова *)
 statement = variable_declaration
-          | const_defenition
+          | constant_definition
           | assignment
           | function_declaration
           | if_statement
@@ -404,50 +410,54 @@ statement = variable_declaration
           | compound_statement
           | return_statement
           | break_statement
-          | continue_statement
+          | continue_statement ;
 
 type = "num" | "string" | "bool" ;
 
 (* Объявления и переменные *)
-variable_declaration = type, identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] }
+variable_declaration = type, identifier, [ "=", expression ], { ",", identifier, [ "=", expression ] } ;
 constant_definition = "const", type, identifier, "=", expression ;
 assignment = identifier, "=", expression ;
 
 function_declaration = "func", type, identifier, "(", [ parameter_list ], ")", compound_statement ;
 parameter_list = type, identifier, { ",", type, identifier } ;
-return__statement = "return", expression ;
+return_statement = "return", expression ;
 
-(* Ввод-Вывод*)
-write_statement = "write", "( ", [ expression_list ], " )" ;
-writeln_statement = "writeln", "(" expression_list ")" ;
-read_statement = "read", "(", identifier, {"," ,identifier } ")" ;
-readln_statement = "readln", "(", identifier, {"," ,identifier } ")"
+(* Ввод-Вывод *)
+write_statement = "write", "(", expression_list, ")" ;
+writeln_statement = "writeln", "(", [ expression_list ], ")" ;
+read_statement = "read", "(", identifier, { ",", identifier }, ")" ;
+readln_statement = "readln", "(", identifier, { ",", identifier }, ")" ;
 
-(* Циклы и инструкции*)
-if_statement = "if", "(", condition, ")", statement_or_block, [ "else", statement_or_block ]
-    statement_or_block = compound_statement | statement
+(* Циклы и инструкции *)
+if_statement = "if", "(", expression, ")", statement_or_block, [ "else", statement_or_block ] ;
+statement_or_block = compound_statement | statement ;
 
-while_statement = "while", "(", condition, ")", compound_statement ;
-do_while_statement = "do", compound_statement, "while", "(", condition, ")" ;
-for_statement = "for", "(", for_initialization, ";", for_condition, ";", for_increment, ")", compound_statement
-    for_initialization = variable_declaration | assignment    
-    for_condition = expression    
-    for_increment = assignment;
+while_statement = "while", "(", expression, ")", compound_statement ;
+do_while_statement = "do", compound_statement, "while", "(", expression, ")" ;
+for_statement = "for", "(", for_initialization, ";", expression, ";", for_increment, ")", compound_statement ;
+for_initialization = variable_declaration | assignment ;
+for_increment = assignment ;
 
 break_statement = "break" ;
 continue_statement = "continue" ;
 
-compound_statement = "{", statement, { ";", statement }, [ ";" ], "}"
-
-(* Условия *)
-condition = expression, [ comparison_operator, expression ] ;
-comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
+compound_statement = "{", statement, { ";", statement }, [ ";" ], "}" ;
 
 (* Выражения *)
-expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression } ;  
-multiplicative_expression = unary_expression, { ("*" |  "/" | "%"), unary_expression } ;
+expression = logical_or_expression ;
+logical_or_expression = logical_and_expression, { "||", logical_and_expression } ;
+logical_and_expression = logical_not_expression, { "&&", logical_not_expression } ;
+logical_not_expression = "!", logical_not_expression
+                       | comparison_expression ;
+
+comparison_expression = additive_expression, [ comparison_operator, additive_expression ] ;
+comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
+
+additive_expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression } ;
+multiplicative_expression = unary_expression, { ("*" | "/" | "%"), unary_expression } ;
 unary_expression = ("+" | "-"), unary_expression
-                    | exponentiation_expression
+                 | exponentiation_expression ;
 exponentiation_expression = primary_expression, [ "^", exponentiation_expression ] ;
 primary_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression ;
 

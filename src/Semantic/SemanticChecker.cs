@@ -150,11 +150,23 @@ public class SemanticChecker : IAstVisitor
                 if (operandType != ValueType.Number)
                 {
                     throw new TypeException(
-                        $"Unary operator requires number, got {operandType}"
+                        $"Unary operator + or - requires number, got {operandType}"
                     );
                 }
 
                 _types.Push(ValueType.Number);
+                break;
+            case UnaryOperation.Not:
+                if (operandType != ValueType.Number &&
+                    operandType != ValueType.String &&
+                    operandType != ValueType.Boolean )
+                {
+                    throw new TypeException(
+                        $"Unary operator !(not) requires number, boolean or string got {operandType}"
+                    );
+                }
+
+                _types.Push(ValueType.Boolean);
                 break;
 
             default:
@@ -544,6 +556,14 @@ public class SemanticChecker : IAstVisitor
             (BinaryOperation.LessThanOrEqual, ValueType.String, ValueType.String) => ValueType.Boolean,
             (BinaryOperation.GreaterThanOrEqual, ValueType.Number, ValueType.Number) => ValueType.Boolean,
             (BinaryOperation.GreaterThanOrEqual, ValueType.String, ValueType.String) => ValueType.Boolean,
+
+            (BinaryOperation.And, ValueType.Boolean, ValueType.Boolean) => ValueType.Boolean,
+            (BinaryOperation.And, ValueType.Number, ValueType.Number) => ValueType.Boolean,
+            (BinaryOperation.And, ValueType.String, ValueType.String) => ValueType.Boolean,
+
+            (BinaryOperation.Or, ValueType.Boolean, ValueType.Boolean) => ValueType.Boolean,
+            (BinaryOperation.Or, ValueType.Number, ValueType.Number) => ValueType.Boolean,
+            (BinaryOperation.Or, ValueType.String, ValueType.String) => ValueType.Boolean,
 
             _ => throw new TypeException(
                 $"Operator {op} cannot be applied to types {left} and {right}"

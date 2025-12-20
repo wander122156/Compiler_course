@@ -10,4 +10,9 @@ public enum UnaryOperation
     /// Операция "унарный минус".
     /// </summary>
     Minus,
+
+    /// <summary>
+    /// Операция "not".
+    /// </summary>
+    Not,
 }

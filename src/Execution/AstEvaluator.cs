@@ -53,15 +53,19 @@ public class AstEvaluator : IAstVisitor
     public void Visit(UnaryOperationExpression e)
     {
         e.Operand.Accept(this);
-        decimal value = (decimal)_values.Pop();
+        RuntimeValue operand = _values.Pop();
 
         switch (e.Operation)
         {
             case UnaryOperation.Minus:
-                _values.Push(RuntimeValue.Number(-value));
+                _values.Push(RuntimeValue.Number(-(decimal)operand));
                 break;
             case UnaryOperation.Plus:
-                _values.Push(RuntimeValue.Number(value));
+                _values.Push(RuntimeValue.Number((decimal)operand));
+                break;
+            case UnaryOperation.Not:
+                bool boolValue = operand.ConvertToBoolean();
+                _values.Push(RuntimeValue.Boolean(!boolValue));
                 break;
             default:
                 throw new NotImplementedException($"Unknown unary operation {e.Operation}");

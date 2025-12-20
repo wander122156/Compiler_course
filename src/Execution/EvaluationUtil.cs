@@ -84,6 +84,14 @@ public static class EvaluationUtil
                 (i1, i2) => i1 >= i2,
                 (s1, s2) => string.CompareOrdinal(s1, s2) >= 0
             ),
+            BinaryOperation.Or => ApplyLogicalOr(
+                evaluateLeft,
+                evaluateRight
+            ),
+            BinaryOperation.And => ApplyLogicalAnd(
+                evaluateLeft,
+                evaluateRight
+            ),
             _ => throw new NotImplementedException($"Unknown binary operation {operation}"),
         };
     }
@@ -208,5 +216,49 @@ public static class EvaluationUtil
             _ => throw new InvalidOperationException(
                 $"Cannot compare values of type {left.Type}")
         };
+    }
+
+    /// <summary>
+    /// Вычисляет логическое "ИЛИ".
+    /// Реализует вычисление по короткой схеме (short-circuit evaluation).
+    /// </summary>
+    private static RuntimeValue ApplyLogicalOr(
+        Func<RuntimeValue> evaluateLeft,
+        Func<RuntimeValue> evaluateRight)
+    {
+        RuntimeValue left = evaluateLeft();
+        bool leftBool = left.ConvertToBoolean();
+
+        if (leftBool)
+        {
+            return RuntimeValue.Boolean(true);
+        }
+
+        RuntimeValue right = evaluateRight();
+        bool rightBool = right.ConvertToBoolean();
+
+        return RuntimeValue.Boolean(rightBool); // return (false || right) = return right
+    }
+
+    /// <summary>
+    /// Вычисляет логическое "И".
+    /// Реализует вычисление по короткой схеме (short-circuit evaluation).
+    /// </summary>
+    private static RuntimeValue ApplyLogicalAnd(
+        Func<RuntimeValue> evaluateLeft,
+        Func<RuntimeValue> evaluateRight)
+    {
+        RuntimeValue left = evaluateLeft();
+        bool leftBool = left.ConvertToBoolean();
+
+        if (!leftBool)
+        {
+            return RuntimeValue.Boolean(false);
+        }
+
+        RuntimeValue right = evaluateRight();
+        bool rightBool = right.ConvertToBoolean();
+
+        return RuntimeValue.Boolean(rightBool); // return (true && right) = return right
     }
 }

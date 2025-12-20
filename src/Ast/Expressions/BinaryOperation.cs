@@ -61,4 +61,14 @@ public enum BinaryOperation
     /// Операция сравнения "равно".
     /// </summary>
     LooseEquality,
+
+    /// <summary>
+    /// Логическая операция "и".
+    /// </summary>
+    And,
+
+    /// <summary>
+    /// Логическая операция "или".
+    /// </summary>
+    Or,
 }

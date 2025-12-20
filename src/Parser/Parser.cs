@@ -420,7 +420,7 @@ public class Parser
 
         Match(TokenType.Semicolon);
 
-        Expression condition = ParseCondition();
+        Expression condition = ParseExpression();
         Match(TokenType.Semicolon);
 
         AssignmentExpression increment = ParseAssignment();
@@ -448,7 +448,7 @@ public class Parser
         _tokens.Advance();
 
         Match(TokenType.OpenParenthesis);
-        Expression condition = ParseCondition();
+        Expression condition = ParseExpression();
         Match(TokenType.CloseParenthesis);
 
         _context.Enter(ParserContext.Loop);
@@ -478,7 +478,7 @@ public class Parser
             Match(TokenType.While);
 
             Match(TokenType.OpenParenthesis);
-            Expression condition = ParseCondition();
+            Expression condition = ParseExpression();
             Match(TokenType.CloseParenthesis);
 
             return new DoWhileLoopStatement(condition, body);
@@ -500,7 +500,7 @@ public class Parser
         _tokens.Advance();
 
         Match(TokenType.OpenParenthesis);
-        Expression condition = ParseCondition();
+        Expression condition = ParseExpression();
         Match(TokenType.CloseParenthesis);
 
         // Выполняем then
@@ -562,26 +562,6 @@ public class Parser
         return new CompoundStatement(statements);
     }
 
-    /// <summary>
-    /// Разбирает условие
-    ///     condition = expression, [ comparison_operator, expression ]
-    /// </summary>
-    private Expression ParseCondition()
-    {
-        Expression left = ParseExpression();
-
-        Token operationToken = _tokens.Peek();
-        if (IsComparisonOperator(operationToken.Type))
-        {
-            _tokens.Advance();
-            Expression right = ParseExpression();
-
-            return CreateComparisonExpression(left, operationToken.Type, right);
-        }
-
-        return left;
-    }
-
     private Expression CreateComparisonExpression(Expression left, TokenType operation, Expression right)
     {
         BinaryOperation binaryOp = operation switch
@@ -619,11 +599,96 @@ public class Parser
     }
 
     /// <summary>
-    /// Разбирает одно выражение.
-    /// Правила:
-    ///     expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression }
+    /// Разбирает выражение.
+    /// Правило:
+    ///     expression = logical_or_expression ;
     /// </summary>
     private Expression ParseExpression()
+    {
+        return ParseLogicalOrExpression();
+    }
+
+    /// <summary>
+    /// Разбирает логическое ИЛИ.
+    /// Правило:
+    ///     logical_or_expression = logical_and_expression, { "||", logical_and_expression } ;
+    /// </summary>
+    private Expression ParseLogicalOrExpression()
+    {
+        Expression left = ParseLogicalAndExpression();
+
+        while (_tokens.Peek().Type == TokenType.Or)
+        {
+            _tokens.Advance();
+            Expression right = ParseLogicalAndExpression();
+            left = new BinaryOperationExpression(left, BinaryOperation.Or, right);
+        }
+
+        return left;
+    }
+
+    /// <summary>
+    /// Разбирает логическое И.
+    /// Правило:
+    ///     logical_and_expression = logical_not_expression, { "&&", logical_not_expression } ;
+    /// </summary>
+    private Expression ParseLogicalAndExpression()
+    {
+        Expression left = ParseLogicalNotExpression();
+
+        while (_tokens.Peek().Type == TokenType.And)
+        {
+            _tokens.Advance();
+            Expression right = ParseLogicalNotExpression();
+            left = new BinaryOperationExpression(left, BinaryOperation.And, right);
+        }
+
+        return left;
+    }
+
+    /// <summary>
+    /// Разбирает логическое НЕ.
+    /// Правило:
+    ///     logical_not_expression = "!", logical_not_expression | comparison_expression ;
+    /// </summary>
+    private Expression ParseLogicalNotExpression()
+    {
+        if (_tokens.Peek().Type == TokenType.Not)
+        {
+            _tokens.Advance();
+            Expression operand = ParseLogicalNotExpression(); // рекурсивно для !!x
+            return new UnaryOperationExpression(UnaryOperation.Not, operand);
+        }
+
+        return ParseComparisonExpression();
+    }
+
+    /// <summary>
+    /// Разбирает операции сравнения.
+    /// Правило:
+    ///     comparison_expression = additive_expression, [ comparison_operator, additive_expression ] ;
+    /// </summary>
+    private Expression ParseComparisonExpression()
+    {
+        Expression left = ParseAdditiveExpression();
+
+        Token operationToken = _tokens.Peek();
+        if (IsComparisonOperator(operationToken.Type))
+        {
+            _tokens.Advance();
+            Expression right = ParseAdditiveExpression();
+            return CreateComparisonExpression(left, operationToken.Type, right);
+        }
+
+        return left;
+    }
+
+    /// <summary>
+    /// Разбирает один операнд сложения/вычитания.
+    /// Правила:
+    ///     additive_expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression }
+    /// </summary>
+    private Expression ParseAdditiveExpression()
     {
         Expression left = ParseMultiplicativeExpression();
         while (true)
@@ -653,7 +718,7 @@ public class Parser
     }
 
     /// <summary>
-    ///  Разбирает один операнд сложения/вычитания.
+    ///  Разбирает один операнд умножения/деления/деления по модулю.
     ///  Правила:
     ///     multiplicative_expression = unary_expression, { ("*" | "/" | "%"), unary_expression }
     /// </summary>
@@ -695,7 +760,7 @@ public class Parser
     }
 
     /// <summary>
-    ///  Разбирает один операнд умножения / деления.
+    ///  Разбирает один операнд унарного плюса/минуса.
     ///  Правило:
     ///     unary_expression = ("+" | "-"), unary_expression | exponentiation_expression
     private Expression ParseUnaryExpression()
