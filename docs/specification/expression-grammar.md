@@ -14,74 +14,65 @@
 
 **Арифметические операторы**
 
-| Символы | Операция                 |
-|---------|--------------------------|
-| +       | Сложение или унарный "+" |
-| -       | Разность или унарный "-" |
-| *       | Произведение             |
-| /       | Деление                  |
-| ^       | Возведение в степень     |
-| %       | Деление с остатком       |
+Описание операторов
 
-**Сравнительные операторы**
-
-| Символы | Значение         |
-|---------|------------------|
-| ==      | Равенство        |
-| !=      | Не равенство     |
-| ">"     | Больше           |
-| <       | Меньше           |
-| '>=     | Больше или равно |
-| <=      | Меньше или равно |
-
-## Ключевые слова
-
-Ключевыми словами являются константы:
-
-- Число "пи" - Pi. Равняется 3,14.
-- Число "Эйлера" - MathE. Равняется 2,7182.
+| Написание | Семантика                         | Особенности                  |
+|-----------|-----------------------------------|------------------------------|
+| \+        | Сложение чисел                    | Левая ассоциативность        |
+| \-        | Вычитание чисел или унарный минус | Левая ассоциативность        |
+| \*        | Умножение чисел                   | Левая ассоциативность        |
+| \/        | Деление чисел                     | Левая ассоциативность        |
+| \%         | Деление с остатком                | Левая ассоциативность        |
+| \^        | Возведение в степень              | Правая ассоциативность       |
+| \=\=      | Равно                             | Нет ассоциативности          |
+| \!\=      | Не равно                          | Нет ассоциативности          |
+| \>        | Больше                            | Нет ассоциативности          |
+| \<        | Меньше                            | Нет ассоциативности          |
+| \>\=      | Больше или равно                  | Нет ассоциативности          |
+| \<\=      | Меньше или равно                  | Нет ассоциативности          |
+| \& \&     | Логическое «И»                    | Вычисления по короткой схеме |
+| \|\|      | Логическое «ИЛИ»                  | Вычисления по короткой схеме |
+| \!        | Логическое «НЕ»                   | Унарный, применяется к одному операнду|
+| \=        | Присваивание                      | Не возвращает значения       |
 
 ## Приоритет операторов
 
-| Приоритет по убыванию | Оператор             |
-|-----------------------|----------------------|
-| 4                     | '^'                  |
-| 3                     | '*', '/', '%'        |
-| 2                     | '+', '-'             |
-| 1                     | '>', '<', '>=', '<=' |
-| 0                     | '==', '!='           |
+| Приоритет по убыванию | Операторы                        |
+|-----------------------|----------------------------------|
+| 8                     | `^`                              |
+| 7                     | унарные `+`, `-`                 |
+| 6                     | `*`, `/`, `%`                    |
+| 5                     | бинарные `+`, `-`                |
+| 4                     | `<`, `>`, `<=`, `>=`             |
+| 3                     | `==`, `!=`                       |
+| 2                     | `!`                              |
+| 1                     | `&&`                             |
+| 0                     | `||`                             |
 
-## Грамматика в нотации EBNF
+## Грамматика выражений в нотации EBNF
 
 ````
-program = statement, { ";", statement }, [ ";" ] ;
+(* Выражения *)
+expression = logical_or_expression ;
+logical_or_expression = logical_and_expression, { "||", logical_and_expression } ;
+logical_and_expression = logical_not_expression, { "&&", logical_not_expression } ;
+logical_not_expression = "!", logical_not_expression
+                       | comparison_expression ;
 
-(* ключевый слова *)
-statement =
-          | if_statement
-          | expression ;
-if_statement = "if", "(", condition, ")", compound_statement, [ "else", statement ] ;
-
-(* Условия *)
-compound_statement = "{", { statement, [ ";" ] }, "}" ;
-condition = expression, [ comparison_operator, expression ] ;
+comparison_expression = additive_expression, [ comparison_operator, additive_expression ] ;
 comparison_operator = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
 
-(* Выражения *)
-expression = term_expression, { ("+" | "-"), term_expression } ;  
-term_expression = factor_expression, { ("*" | "/" | "%"), factor_expression } ;
-factor_expression = [ "+" | "-" ], exponentiation_expression ;
-exponentiation_expression = simple_expression, { ("^"), exponentiation_expression } ;
-simple_expression = number | "(", expression, ") | const_expression;
-const_expression = "Pi" | "MathE";
-number = digit, {digit}, [".", {digit}];
-digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+additive_expression = multiplicative_expression, { ("+" | "-"), multiplicative_expression } ;
+multiplicative_expression = unary_expression, { ("*" | "/" | "%"), unary_expression } ;
+unary_expression = ("+" | "-"), unary_expression
+                 | exponentiation_expression ;
+exponentiation_expression = primary_expression, [ "^", exponentiation_expression ] ;
+primary_expression = number | string | identifier | function_call | "(", expression, ")" | const_expression ;
 
 function_call = identifier, "(", [ expression_list ], ")" ;
 expression_list = expression, { ",", expression } ;
 
-(* Список *)
-list_of_numbers = number, { ",", number };
+const_expression = "Pi" | "MathE" ;
 
 ````
 
