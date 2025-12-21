@@ -312,10 +312,11 @@ write(findFirstEven());
 
 ### Тесты типов
 
-- [ ] Логические операторыы && || ! → [1, 2, 1]
- `if (true | false) {write(1)}
- if (true & false) {write(1)} else {write(2)}
- if (!false) {write(1)}`
+- [x] Логические операторыы && || ! → [1, 2, 1]
+ `if (true || false) {write(1)};
+  if (true && false) {write(1)} else {write(2)};
+  if (!false) {write(1)};
+  if ( !(!false && !true) ) {write(1)}`
 
 - [x] Привидение типов к bool → [1]
  `if ("hello") {write(1)}`
